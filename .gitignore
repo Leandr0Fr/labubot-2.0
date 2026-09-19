@@ -1,0 +1,9 @@
+.env
+perfil.md
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+resultados/
+vistas.json

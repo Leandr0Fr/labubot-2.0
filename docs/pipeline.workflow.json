@@ -1,0 +1,260 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "LABUBOT 2.0 — Pipeline de una corrida",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "camino-feliz",
+        "label": "De la búsqueda al veredicto",
+        "focus": [
+          "buscar",
+          "depurar",
+          "filtrar",
+          "detalle",
+          "evaluar",
+          "resultados"
+        ],
+        "note": "El recorrido completo de una oferta que llega hasta el LLM."
+      },
+      {
+        "id": "ahorro",
+        "label": "Dónde se ahorra cuota",
+        "focus": [
+          "cache",
+          "depurar",
+          "filtrar",
+          "descartadas"
+        ],
+        "note": "Los dos cortes que evitan pagarle al LLM por ofertas que no sirven."
+      },
+      {
+        "id": "persistencia",
+        "label": "Qué queda en disco",
+        "focus": [
+          "perfil",
+          "cache",
+          "resultados"
+        ],
+        "note": "Lo que se lee al arrancar y lo que se escribe al terminar."
+      }
+    ]
+  },
+  "lanes": [
+    {
+      "id": "proceso",
+      "label": "main.py"
+    },
+    {
+      "id": "linkedin",
+      "label": "LinkedIn · jobs-guest"
+    },
+    {
+      "id": "llm",
+      "label": "Evaluación · Groq"
+    }
+  ],
+  "phases": [
+    {
+      "id": "recolectar",
+      "label": "Recolectar",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "recortar",
+      "label": "Recortar",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "juzgar",
+      "label": "Leer y juzgar",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "mainPath": [
+    "buscar",
+    "depurar",
+    "filtrar",
+    "detalle",
+    "evaluar",
+    "resultados"
+  ],
+  "nodes": [
+    {
+      "id": "cache",
+      "lane": "proceso",
+      "col": 0,
+      "type": "database",
+      "label": "vistas.json",
+      "sublabel": "ids ya evaluados",
+      "width": 140
+    },
+    {
+      "id": "buscar",
+      "lane": "linkedin",
+      "col": 0,
+      "type": "cloud",
+      "label": "search()",
+      "sublabel": "TERMS · 10 páginas",
+      "tag": "100 ofertas máx",
+      "width": 140
+    },
+    {
+      "id": "depurar",
+      "lane": "proceso",
+      "col": 1,
+      "type": "backend",
+      "label": "Deduplicar",
+      "sublabel": "por id · saltea vistas",
+      "width": 140
+    },
+    {
+      "id": "filtrar",
+      "lane": "proceso",
+      "col": 2,
+      "type": "security",
+      "label": "Palabras baneadas",
+      "sublabel": "título partido en palabras",
+      "tag": "gratis",
+      "width": 140
+    },
+    {
+      "id": "descartadas",
+      "lane": "proceso",
+      "col": 3,
+      "type": "security",
+      "label": "Descartadas",
+      "sublabel": "no se evalúan",
+      "width": 140
+    },
+    {
+      "id": "detalle",
+      "lane": "linkedin",
+      "col": 3,
+      "type": "cloud",
+      "label": "detail()",
+      "sublabel": "descripción completa",
+      "tag": "el Python escondido",
+      "width": 140
+    },
+    {
+      "id": "perfil",
+      "lane": "llm",
+      "col": 3,
+      "type": "database",
+      "label": "perfil.md",
+      "sublabel": "el CV en texto",
+      "width": 140
+    },
+    {
+      "id": "evaluar",
+      "lane": "llm",
+      "col": 4,
+      "type": "cloud",
+      "label": "Evaluar",
+      "sublabel": "perfil vs aviso",
+      "tag": "🟢 🟡 🔴",
+      "width": 140
+    },
+    {
+      "id": "resultados",
+      "lane": "proceso",
+      "col": 5,
+      "type": "database",
+      "label": "resultados/*.json",
+      "sublabel": "ordenado por color",
+      "width": 140
+    }
+  ],
+  "edges": [
+    {
+      "id": "buscar-a-depurar",
+      "from": "buscar",
+      "to": "depurar",
+      "label": "JobCard[]",
+      "variant": "emphasis"
+    },
+    {
+      "id": "cache-a-depurar",
+      "from": "cache",
+      "to": "depurar",
+      "label": "saltea lo visto",
+      "variant": "dashed"
+    },
+    {
+      "id": "depurar-a-filtrar",
+      "from": "depurar",
+      "to": "filtrar",
+      "label": "únicas",
+      "variant": "emphasis"
+    },
+    {
+      "id": "filtro-descarta",
+      "from": "filtrar",
+      "to": "descartadas",
+      "label": "sap · .net · ventas",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "filtrar-a-detalle",
+      "from": "filtrar",
+      "to": "detalle",
+      "label": "las que pasan",
+      "variant": "emphasis"
+    },
+    {
+      "id": "detalle-a-evaluar",
+      "from": "detalle",
+      "to": "evaluar",
+      "label": "descripción + criterios",
+      "variant": "emphasis"
+    },
+    {
+      "id": "perfil-a-evaluar",
+      "from": "perfil",
+      "to": "evaluar",
+      "label": "vara de medición"
+    },
+    {
+      "id": "evaluar-a-resultados",
+      "from": "evaluar",
+      "to": "resultados",
+      "label": "Job con veredicto",
+      "role": "return",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Dos cortes antes del LLM",
+      "items": [
+        "vistas.json evita re-evaluar lo de ayer",
+        "Cada descarte ahorra un request y una llamada"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Por qué se baja el detalle",
+      "items": [
+        "La tarjeta del listado no trae el cuerpo del aviso",
+        "Ahí aparece el Python de los avisos \"Developer\""
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Ritmo",
+      "items": [
+        "De a una: sin paralelismo ni async",
+        "8000 tokens/min de Groq: ~3 por minuto"
+      ]
+    }
+  ]
+}

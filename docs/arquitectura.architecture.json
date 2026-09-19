@@ -1,0 +1,328 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "LABUBOT 2.0 — Arquitectura",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1140,
+      580
+    ],
+    "views": [
+      {
+        "id": "camino-principal",
+        "label": "Camino principal",
+        "focus": [
+          "main",
+          "linkedin_drv",
+          "linkedin_api",
+          "evaluator",
+          "groq"
+        ],
+        "note": "De la búsqueda al veredicto: los dos drivers y sus servicios externos."
+      },
+      {
+        "id": "parsers",
+        "label": "Drivers y parsers",
+        "focus": [
+          "linkedin_drv",
+          "html_parser",
+          "evaluator",
+          "json_parser"
+        ],
+        "note": "Los drivers piden y devuelven crudo; interpretar es tarea de los parsers."
+      },
+      {
+        "id": "estado",
+        "label": "Configuración y estado",
+        "focus": [
+          "profile",
+          "search_cfg",
+          "cache",
+          "results",
+          "main"
+        ],
+        "note": "Lo que se edita a mano y lo que queda en disco entre corridas."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "profile",
+      "type": "database",
+      "label": "perfil.md",
+      "sublabel": "el CV en texto plano",
+      "tag": "vara de medición",
+      "pos": [
+        30,
+        150
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "search_cfg",
+      "type": "database",
+      "label": "config/search.py",
+      "sublabel": "TERMS · BLOCKED_TITLE_WORDS",
+      "pos": [
+        30,
+        250
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "cache",
+      "type": "database",
+      "label": "vistas.json",
+      "sublabel": "ids ya evaluados",
+      "pos": [
+        30,
+        360
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "main",
+      "type": "backend",
+      "label": "main.py",
+      "sublabel": "orquesta, de a una",
+      "tag": "Python 3.14 síncrono",
+      "pos": [
+        300,
+        205
+      ],
+      "size": [
+        180,
+        72
+      ]
+    },
+    {
+      "id": "results",
+      "type": "database",
+      "label": "resultados/*.json",
+      "sublabel": "ofertas con veredicto",
+      "pos": [
+        300,
+        360
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "filters",
+      "type": "security",
+      "label": "utils/filters.py",
+      "sublabel": "palabras baneadas del título",
+      "pos": [
+        560,
+        205
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "linkedin_drv",
+      "type": "backend",
+      "label": "driver/http.py",
+      "sublabel": "LinkedIn · httpx.Client",
+      "pos": [
+        560,
+        60
+      ],
+      "size": [
+        180,
+        72
+      ]
+    },
+    {
+      "id": "linkedin_api",
+      "type": "external",
+      "label": "LinkedIn jobs-guest",
+      "sublabel": "endpoint público",
+      "tag": "sin cookie ni sesión",
+      "pos": [
+        880,
+        60
+      ],
+      "size": [
+        190,
+        72
+      ]
+    },
+    {
+      "id": "html_parser",
+      "type": "backend",
+      "label": "parsers/html.py",
+      "sublabel": "selectolax · Lexbor",
+      "pos": [
+        880,
+        170
+      ],
+      "size": [
+        190,
+        60
+      ]
+    },
+    {
+      "id": "evaluator",
+      "type": "backend",
+      "label": "driver/llm.py",
+      "sublabel": "Evaluator · httpx.Client",
+      "pos": [
+        560,
+        350
+      ],
+      "size": [
+        180,
+        72
+      ]
+    },
+    {
+      "id": "groq",
+      "type": "cloud",
+      "label": "Groq",
+      "sublabel": "qwen/qwen3.8-27b",
+      "tag": "8000 tokens/min",
+      "pos": [
+        880,
+        350
+      ],
+      "size": [
+        190,
+        72
+      ]
+    },
+    {
+      "id": "json_parser",
+      "type": "backend",
+      "label": "parsers/json.py",
+      "sublabel": "respuesta → Verdict",
+      "pos": [
+        880,
+        460
+      ],
+      "size": [
+        190,
+        60
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "cv-a-main",
+      "from": "profile",
+      "to": "main",
+      "variant": "emphasis"
+    },
+    {
+      "id": "config-a-main",
+      "from": "search_cfg",
+      "to": "main"
+    },
+    {
+      "id": "cache-a-main",
+      "from": "cache",
+      "to": "main",
+      "variant": "dashed"
+    },
+    {
+      "id": "main-a-linkedin",
+      "from": "main",
+      "to": "linkedin_drv",
+      "label": "search() · detail()",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "linkedin-http",
+      "from": "linkedin_drv",
+      "to": "linkedin_api",
+      "label": "GET jobs-guest",
+      "variant": "emphasis"
+    },
+    {
+      "id": "html-crudo",
+      "from": "linkedin_drv",
+      "to": "html_parser",
+      "label": "HTML crudo",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "main-a-filtro",
+      "from": "main",
+      "to": "filters",
+      "label": "títulos"
+    },
+    {
+      "id": "filtro-a-eval",
+      "from": "filters",
+      "to": "evaluator",
+      "label": "las que pasan",
+      "variant": "emphasis",
+      "labelDy": 24
+    },
+    {
+      "id": "groq-http",
+      "from": "evaluator",
+      "to": "groq",
+      "label": "POST /chat/completions",
+      "variant": "emphasis"
+    },
+    {
+      "id": "json-crudo",
+      "from": "evaluator",
+      "to": "json_parser",
+      "label": "texto del modelo",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "main-a-resultados",
+      "from": "main",
+      "to": "results",
+      "label": "Job[] por color",
+      "labelDy": 24
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Sin sesión",
+      "items": [
+        "jobs-guest es lo que ve un visitante anónimo de LinkedIn",
+        "Sin cookie ni cuenta: el peor caso es un 429 pasajero"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Drivers y parsers",
+      "items": [
+        "Los drivers piden y devuelven crudo; no interpretan nada",
+        "Si cambia el DOM de LinkedIn o el modelo, se toca un solo archivo"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Estado en disco",
+      "items": [
+        "perfil.md es lo único que define si una oferta sirve",
+        "vistas.json saltea lo ya evaluado y ahorra cuota de LLM"
+      ]
+    }
+  ]
+}

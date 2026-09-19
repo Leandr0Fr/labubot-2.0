@@ -1,0 +1,240 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "LABUBOT 2.0 — Los dos 429",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1080,
+      600
+    ],
+    "views": [
+      {
+        "id": "linkedin",
+        "label": "LinkedIn · a ciegas",
+        "focus": [
+          "main",
+          "lnk_drv",
+          "lnk"
+        ],
+        "note": "El endpoint no avisa cuánto esperar, así que el backoff duplica: 20, 40, 80 s."
+      },
+      {
+        "id": "groq",
+        "label": "Groq · el header manda",
+        "focus": [
+          "main",
+          "evaluator",
+          "groq"
+        ],
+        "note": "La respuesta dice cuándo se repone el balde de tokens y se espera exactamente eso."
+      }
+    ]
+  },
+  "participants": [
+    {
+      "id": "main",
+      "type": "backend",
+      "label": "main.py",
+      "sublabel": "orquesta de a una"
+    },
+    {
+      "id": "lnk_drv",
+      "type": "backend",
+      "label": "driver/http.py",
+      "sublabel": "LinkedIn"
+    },
+    {
+      "id": "lnk",
+      "type": "external",
+      "label": "jobs-guest",
+      "sublabel": "sin sesión"
+    },
+    {
+      "id": "evaluator",
+      "type": "backend",
+      "label": "driver/llm.py",
+      "sublabel": "Evaluator"
+    },
+    {
+      "id": "groq",
+      "type": "cloud",
+      "label": "Groq",
+      "sublabel": "qwen3.8-27b"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 340,
+      "label": "LinkedIn: backoff a ciegas"
+    },
+    {
+      "from": 358,
+      "to": 522,
+      "label": "Groq: el header dice cuánto"
+    }
+  ],
+  "messages": [
+    {
+      "id": "buscar",
+      "from": "main",
+      "to": "lnk_drv",
+      "y": 160,
+      "label": "search('python')",
+      "variant": "emphasis"
+    },
+    {
+      "id": "pagina-uno",
+      "from": "lnk_drv",
+      "to": "lnk",
+      "y": 188,
+      "label": "GET start=0 · pausa 1,2-2,6 s",
+      "variant": "default",
+      "note": "La pausa va en un rango: un intervalo exacto es una firma."
+    },
+    {
+      "id": "tarjetas",
+      "from": "lnk",
+      "to": "lnk_drv",
+      "y": 216,
+      "label": "200 · 10 tarjetas",
+      "variant": "return"
+    },
+    {
+      "id": "pagina-once",
+      "from": "lnk_drv",
+      "to": "lnk",
+      "y": 244,
+      "label": "GET start=100",
+      "variant": "default"
+    },
+    {
+      "id": "limite-linkedin",
+      "from": "lnk",
+      "to": "lnk_drv",
+      "y": 272,
+      "label": "429 · sin decir cuánto esperar",
+      "variant": "security",
+      "note": "Techo de profundidad medido: 100 ofertas por término."
+    },
+    {
+      "id": "reintento-linkedin",
+      "from": "lnk_drv",
+      "to": "lnk",
+      "y": 300,
+      "label": "reintento tras 20 s · después 40 y 80",
+      "variant": "dashed"
+    },
+    {
+      "id": "corta",
+      "from": "lnk_drv",
+      "to": "main",
+      "y": 328,
+      "label": "lo que alcanzó a juntar",
+      "variant": "return"
+    },
+    {
+      "id": "evaluar",
+      "from": "main",
+      "to": "evaluator",
+      "y": 368,
+      "label": "evaluate(card, detail)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "post-groq",
+      "from": "evaluator",
+      "to": "groq",
+      "y": 396,
+      "label": "POST /chat/completions",
+      "variant": "emphasis"
+    },
+    {
+      "id": "limite-groq",
+      "from": "groq",
+      "to": "evaluator",
+      "y": 424,
+      "label": "429 · x-ratelimit-reset-tokens: 22s",
+      "variant": "security",
+      "note": "El límite que ata es el de tokens por minuto, no el de requests."
+    },
+    {
+      "id": "reintento-groq",
+      "from": "evaluator",
+      "to": "groq",
+      "y": 452,
+      "label": "reintento a los 23 s exactos",
+      "variant": "dashed"
+    },
+    {
+      "id": "respuesta-groq",
+      "from": "groq",
+      "to": "evaluator",
+      "y": 480,
+      "label": "200 · JSON del veredicto",
+      "variant": "return"
+    },
+    {
+      "id": "veredicto",
+      "from": "evaluator",
+      "to": "main",
+      "y": 508,
+      "label": "Verdict · verde, amarillo o rojo",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "lnk_drv",
+      "from": 183,
+      "to": 334,
+      "type": "backend"
+    },
+    {
+      "participant": "lnk",
+      "from": 211,
+      "to": 306,
+      "type": "external"
+    },
+    {
+      "participant": "evaluator",
+      "from": 363,
+      "to": 514,
+      "type": "backend"
+    },
+    {
+      "participant": "groq",
+      "from": 391,
+      "to": 490,
+      "type": "cloud"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Dos 429 distintos",
+      "items": [
+        "El de LinkedIn no dice cuánto esperar: se duplica a ciegas",
+        "El de Groq trae el reset exacto del balde de tokens"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Hacerle caso al header",
+      "items": [
+        "Si faltan 12 segundos, esperar 80 es tirar tiempo a la basura",
+        "Solo se adivina cuando la respuesta no trae el dato"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Sin cuenta que perder",
+      "items": [
+        "Ninguno de los dos caminos usa login ni cookie",
+        "Una corrida cortada por 429 conserva lo que ya juntó"
+      ]
+    }
+  ]
+}
