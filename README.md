@@ -37,8 +37,7 @@ buscar  →  filtrar palabras baneadas  →  bajar descripción  →  LLM  →  
 ```
 
 El filtro corre **antes** de bajar un solo detalle: cada descarte ahorra un
-request a LinkedIn y una llamada al LLM. En un free tier el cupo diario es el
-recurso escaso.
+request a LinkedIn y una llamada al LLM, que es lo único que se paga.
 
 ## Arquitectura
 
@@ -55,20 +54,20 @@ src/
   constants/
     http.py                 ritmo, backoff y user agent
     linkedin.py             URLs del jobs-guest y paginación
-    gemini.py               modelo, reasoning_effort y tamaño de lote
+    openai.py               modelo, reasoning effort y tamaño de lote
     prompt.py               ← el prompt de comparación
   driver/                   el único que toca httpx
     http.py                 Driver: get(), post_json(), ritmo y reintentos
   portals/                  qué pedirle a cada sitio y a quién parsearlo
     linkedin.py             LinkedIn(driver): search() y detail()
   classifier/               qué preguntarle al LLM y cómo lotearlo
-    gemini.py               Classifier(driver, perfil, system): classify()
+    openai.py               Classifier(perfil, system): classify()
   schemas/                  los tipos del dominio
     job.py                  JobCard, Criteria, JobDetail, Offer, Job
     verdict.py              Verdict
   parsers/                  interpretan; no piden nada
     html.py                 ← único archivo que sabe del DOM de LinkedIn
-    json.py                 respuesta del LLM → list[Verdict | None]
+    verdicts.py             respuesta del LLM → list[Verdict | None]
   enums/traffic_light.py    verde / amarillo / rojo
   exceptions/exceptions.py
   utils/
@@ -80,13 +79,15 @@ Una sola razón para cambiar por capa:
 
 - **`driver/`** es el único que toca httpx. `Driver` recibe una URL y devuelve lo
   que vuelve, con la pausa y los reintentos; no sabe con quién habla.
-- **`portals/`** y **`classifier/`** saben qué pedir: URLs, params, paginación,
-  el body de Gemini. Reciben el `Driver` inyectado y lo comparten.
+- **`portals/`** saben qué pedir: URLs, params, paginación. Reciben el `Driver`
+  inyectado y lo comparten.
+- **`classifier/`** sabe qué preguntarle al LLM y le habla por el SDK oficial de
+  OpenAI, no por el `Driver`.
 - **`parsers/`** convierte texto en tipos y no pide nada.
 - **`schemas/`** son los tipos, sin lógica.
 
 Si LinkedIn cambia el markup se toca `parsers/html.py`. Si cambia la query, solo
-`portals/linkedin.py`. Si Gemini cambia el formato de salida, `parsers/json.py`.
+`portals/linkedin.py`. Si OpenAI cambia el formato de salida, `parsers/verdicts.py`.
 Sumar un portal es un archivo nuevo en `portals/` y su parser: ni el `Driver` ni
 el `Classifier` se enteran.
 
@@ -100,45 +101,42 @@ enseñarlo. Contaba apariciones y había que recalibrarla a cada rato.
 Además un número del 0 al 100 finge una precisión que no existe: nadie sabe si un
 73 es mejor que un 68. Tres colores se leen de un vistazo.
 
-### El LLM: Gemini, sin SDK
+### El LLM: GPT-5.6 Luna, por el SDK oficial
 
-`gemini-3-flash-preview` con `reasoning_effort: "low"`. Se le pega al endpoint
-compatible con OpenAI (`generativelanguage.googleapis.com/v1beta/openai`), no al
-nativo: es el mismo `/chat/completions`, así que no entra una dependencia nueva
-para armar un POST.
+`gpt-5.6-luna` con `reasoning.effort: "high"`, por la Responses API del SDK
+`openai`. Luna es el modelo chico de la familia 5.6, el que OpenAI apunta a
+clasificación en volumen: U$S 0,20 por millón de tokens de entrada y 1,20 por
+millón de salida. Leer un aviso y cruzarlo contra un CV no necesita más modelo
+que eso; sí necesita que piense, y por eso el esfuerzo va en `high`.
 
-**Va de a 10 ofertas por request.** El free tier ata por requests por minuto (10
-RPM), no por tokens: 40 ofertas de a una son 4 minutos, en lotes de 10 son 4
-requests. Cada oferta viaja numerada y el modelo devuelve un `verdicts[]` con el
-mismo id; lo que no vuelve queda en `None` y se descarta, así una respuesta
-incompleta no inventa veredictos. Si un lote entero se cae se pierden esas 10 y
-no la corrida.
+**Va de a 10 ofertas por request.** El perfil y el system prompt viajan una vez
+por lote y no una vez por oferta: son la parte fija de cada llamada. Cada oferta
+viaja numerada y el modelo devuelve un `verdicts[]` con el mismo id; lo que no
+vuelve queda en `None` y se descarta, así una respuesta incompleta no inventa
+veredictos. Si un lote entero se cae se pierden esas 10 y no la corrida.
 
-Gemini 3 piensa antes de responder y esos tokens cuentan como salida. `low`
-minimiza latencia y costo sin apagar el razonamiento; el compat layer lo traduce
-solo a `thinking_level`. Por eso `max_tokens` va holgado (1200): el tope tiene que
-cubrir razonamiento + JSON, y si se queda corto el modelo gasta todo pensando y
-devuelve contenido vacío.
+Luna piensa antes de responder y esos tokens se cobran como salida aunque no se
+vean. Por eso `max_output_tokens` va holgado (25.000, el piso que OpenAI
+recomienda con razonamiento activado): tiene que cubrir razonamiento + JSON. Si
+se queda corto, la respuesta vuelve con status `incomplete` y el clasificador
+descarta el lote en vez de parsear un JSON a medias. Con razonamiento activado
+la API no acepta `temperature`, así que no hay.
 
-Lo que se pierde por no usar el SDK nativo — caché de contexto, safety settings
-finos, entradas multimodales — no se usa acá.
+La salida va en JSON mode (`text.format: json_object`): garantiza un objeto JSON
+válido, no que respete el esquema. El parser sigue validando cada campo, porque
+lo que viene de un LLM es texto hasta que se demuestre lo contrario.
 
-### Límites del free tier
+### Límites y costo
 
-```
-RPM   10      requests por minuto   <- el que ata
-TPM   250000  tokens por minuto
-RPD   1500    requests por día
-```
+No hay free tier: se paga por token y los límites dependen del tier de la
+cuenta. En Tier 1 Luna da 500 requests y 500.000 tokens por minuto, así que acá
+no ata el ritmo sino el gasto. Los límites de tu cuenta están en
+[platform.openai.com/settings/organization/limits](https://platform.openai.com/settings/organization/limits).
 
-Google dejó de publicar los números del free tier en la documentación: los reales
-de tu proyecto están en [aistudio.google.com/rate-limit](https://aistudio.google.com/rate-limit).
-
-Acá el cuello de botella se dio vuelta respecto de Groq: ata el RPM, no el balde
-de tokens (una evaluación gasta ~2.400 de los 250.000 disponibles por minuto). Son
-unas 10 evaluaciones por minuto, así que una corrida de 40 ofertas tarda ~4
-minutos. Ante un 429 el driver lee `retry-after` y, si no viene, el `retryDelay`
-que Gemini mete en el cuerpo del error, en vez de adivinar.
+Ante un 429 o un 5xx el SDK reintenta dos veces con backoff y respeta
+`retry-after`; si igual falla, el clasificador corta la corrida con
+`LabubotRateLimitError` en vez de seguir gastando. Ojo: sin créditos OpenAI
+también contesta 429 (`insufficient_quota`), y ese no se arregla esperando.
 
 ### Por qué selectolax y no regex
 
@@ -151,7 +149,7 @@ regex se rompe cuando cambia el orden de los atributos o aparece un tag anidado.
 
 ```bash
 poetry install
-cp .env.example .env     # y cargá LLM_API_KEY (aistudio.google.com/apikey)
+cp .env.example .env     # y cargá LLM_API_KEY (platform.openai.com/api-keys)
 ```
 
 Después escribí tu CV en `perfil.md`. Sin eso no arranca: es contra lo que se
@@ -164,7 +162,7 @@ python main.py                 # últimas 24 h
 python main.py --horas 72      # ventana más ancha
 python main.py --solo-verdes   # solo lo que encaja de verdad
 python main.py --todo          # ignora el cache de ya vistas
-python main.py --max 20        # tope de evaluaciones (cuida la cuota)
+python main.py --max 20        # tope de evaluaciones (cuida el gasto)
 ```
 
 `vistas.json` guarda los ids ya evaluados: la corrida del día siguiente solo gasta

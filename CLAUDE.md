@@ -25,12 +25,12 @@ evalúa contra `perfil.md` con un LLM.
   HTML) y `constants.py` (URLs, paginación, selectores). Sumar un portal es
   crear una carpeta, no tocar tres.
 - `src/classifier/` sabe qué preguntarle al LLM: arma el prompt, lotea y parsea.
-  Habla con Gemini por el SDK oficial (`google-genai`), no por el `Driver`.
+  Habla con OpenAI por el SDK oficial (`openai`), no por el `Driver`.
 - `src/parsers/` interpreta lo que no es de un portal: hoy solo el veredicto
   del LLM. El parser de un sitio vive con su portal.
 - `src/schemas/` los TypedDicts del dominio, sin lógica.
 - `src/constants/` lo configurable y lo medido que NO es de un portal
-  (`http.py` transporte, `gemini.py` ese modelo). Lo de cada portal va en su
+  (`http.py` transporte, `openai.py` ese modelo). Lo de cada portal va en su
   carpeta.
 
 **Solo HTTP.** Nada de Playwright, Selenium ni navegador headless.

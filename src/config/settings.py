@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     Variables de entorno:
     - LOCATION: Ubicación tal como la escribe LinkedIn ("Argentina").
     - HOURS: Ventana de publicación (24 = solo lo de hoy).
-    - LLM_API_KEY: Clave de Gemini (Google AI Studio).
+    - LLM_API_KEY: Clave de OpenAI (platform.openai.com/api-keys).
     """
 
     location: str = "Argentina"

@@ -16,7 +16,8 @@ class LabubotRateLimitError(LabubotError):
     El sitio devolvió 429 y se agotaron los reintentos.
 
     No es un error de código: es la señal de que hay que bajar el ritmo.
-    A diferencia de un ban, se cura solo esperando.
+    A diferencia de un ban, se cura solo esperando. La excepción es OpenAI sin
+    créditos (`insufficient_quota`): también llega como 429 y ese no se cura.
     """
 
 

@@ -1,15 +1,13 @@
-"""Clasificador: le pregunta a Gemini de qué color es cada oferta."""
+"""Clasificador: le pregunta a OpenAI de qué color es cada oferta."""
 
-from google import genai
-from google.genai import errors
+from openai import APIError, OpenAI, RateLimitError
 
 from src.config.settings import settings
-from src.constants.gemini import (
+from src.constants.openai import (
     BATCH_SIZE,
-    MAX_TOKENS,
+    MAX_OUTPUT_TOKENS,
     MODEL,
-    TEMPERATURE,
-    THINKING_LEVEL,
+    REASONING_EFFORT,
 )
 from src.constants.prompt import OFFER_BLOCK, TEMPLATE
 from src.exceptions.exceptions import LabubotLLMError, LabubotRateLimitError
@@ -28,7 +26,7 @@ class Classifier:
     """
 
     def __init__(self, profile: str, system: str) -> None:
-        self.client = genai.Client(api_key=settings.llm_api_key)
+        self.client = OpenAI(api_key=settings.llm_api_key)
         self.profile = profile
         self.system = system
 
@@ -63,36 +61,41 @@ class Classifier:
 
     def _complete(self, prompt: str) -> str:
         """
-        Una llamada a Gemini.
+        Una llamada a OpenAI.
         Args:
             prompt: Mensaje del usuario ya armado.
         Returns:
             str: El texto que devolvió el modelo, sin interpretar.
         Raises:
-            LabubotRateLimitError: Si se agotó la cuota del free tier.
-            LabubotLLMError: Si el proveedor falla o contesta vacío.
+            LabubotRateLimitError: Si el 429 sobrevivió a los reintentos del SDK.
+            LabubotLLMError: Si el proveedor falla, corta la respuesta o contesta
+            vacío.
         """
         try:
-            interaction = self.client.interactions.create(
+            response = self.client.responses.create(
                 model=MODEL,
+                instructions=self.system,
                 input=prompt,
-                system_instruction=self.system,
-                generation_config={
-                    "temperature": TEMPERATURE,
-                    "max_output_tokens": MAX_TOKENS,
-                    "thinking_level": THINKING_LEVEL,
-                    "response_mime_type": "application/json",
-                },
+                reasoning={"effort": REASONING_EFFORT},
+                text={"format": {"type": "json_object"}},
+                max_output_tokens=MAX_OUTPUT_TOKENS,
             )
-        except errors.APIError as e:
-            if getattr(e, "code", None) == 429:
-                raise LabubotRateLimitError("Gemini agotó la cuota") from e
-            raise LabubotLLMError(f"Gemini falló: {e}") from e
+        except RateLimitError as e:
+            raise LabubotRateLimitError(f"OpenAI devolvió 429: {e}") from e
+        except APIError as e:
+            raise LabubotLLMError(f"OpenAI falló: {e}") from e
 
-        if not interaction.output_text:
-            raise LabubotLLMError("Gemini contestó vacío")
+        # El razonamiento cuenta contra max_output_tokens: si se lo come todo, el
+        # JSON viene truncado o no viene.
+        if response.status == "incomplete":
+            details = response.incomplete_details
+            reason = details.reason if details and details.reason else "sin motivo"
+            raise LabubotLLMError(f"OpenAI cortó la respuesta: {reason}")
 
-        return interaction.output_text
+        if not response.output_text:
+            raise LabubotLLMError("OpenAI contestó vacío")
+
+        return response.output_text
 
     # -------------------------------------------- API ---------------------------------------------
 
@@ -100,9 +103,9 @@ class Classifier:
         """
         Un veredicto por oferta, en el mismo orden en que entraron.
 
-        Va de a BATCH_SIZE porque en el free tier ata el RPM, no los tokens. Si un
-        lote se cae, se pierde ese lote y no la corrida: sus ofertas quedan en
-        None y el caller las descarta.
+        Va de a BATCH_SIZE para que el perfil y el system prompt viajen una vez
+        por lote y no una vez por oferta. Si un lote se cae, se pierde ese lote y
+        no la corrida: sus ofertas quedan en None y el caller las descarta.
         Args:
             offers: Tarjeta y detalle de cada oferta a evaluar.
         Returns:

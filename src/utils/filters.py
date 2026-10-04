@@ -1,9 +1,8 @@
 """
 Filtro previo al LLM.
 
-Descarta lo obvio antes de gastar una llamada. En un free tier el cupo diario es
-el recurso escaso: cada oferta que se filtra acá es una que sí se puede evaluar
-más tarde.
+Descarta lo obvio antes de gastar una llamada. El LLM se paga por token: cada
+oferta que se filtra acá es una descripción que no viaja a evaluar.
 """
 
 import re
