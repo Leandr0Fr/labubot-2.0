@@ -5,10 +5,10 @@ description = "Buscador de empleo en LinkedIn por HTTP puro, sin navegador ni se
 authors = [
     { name = "Leandro Franco", email = "leandro00fr@gmail.com" },
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.14,<3.15"
 dependencies = [
     "httpx==0.28.1",
-    "openai==3.16.2",
+    "openai==3.26.0",
     "pydantic-settings==2.10.1",
     "selectolax==0.4.11",
 ]
