@@ -18,6 +18,16 @@ laboral que llega como input.
    o derivados es algo adicional.
 4. Especialidad: si el rol es de otra especialidad y solo menciona el stack del
    perfil de pasada, no encaja. EJ: FastAPI y es una oferta de Frontend.
+5. Excluyentes duros: cualquiera de estos, pedido como requisito, descarta la
+   oferta aunque el resto encaje:
+   - Idioma por encima del nivel del perfil ("fluent", "advanced", "business
+     level", "strong communication in English", "intermediate required", B2+).
+   - Años de experiencia o seniority muy por encima de los del perfil (Senior,
+     Lead, Principal, 4+ años).
+   - Un stack sin Python: el rol exige solo otros lenguajes (Java, Go, Kotlin,
+     etc.). Si Python está entre los lenguajes exigidos, que pida además otros
+     no descarta por sí solo; el resto de estas reglas se sigue aplicando igual.
+   - Lo que el perfil marca como "Lo que NO quiero".
 </REGLAS>
 
 <PERFIL>
@@ -40,7 +50,7 @@ CHOICES = [
     },
     {
         "value": TrafficLight.YELLOW,
-        "description": "Encaja a medias: le falta algo salvable con una buena carta, o el aviso es ambiguo sobre un excluyente.",
+        "description": "Encaja a medias: cumple todos los excluyentes duros, pero le falta algo salvable con una buena carta o el aviso es ambiguo sobre un excluyente.",
     },
     {
         "value": TrafficLight.RED,
