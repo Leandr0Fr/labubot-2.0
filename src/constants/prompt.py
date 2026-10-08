@@ -1,6 +1,5 @@
-"""
-Instructions que compara un lote de ofertas contra el CV.
-"""
+"""La pregunta que compara una oferta contra el CV."""
+
 from src.enums.traffic_light import TrafficLight
 
 INSTRUCTIONS = """\
@@ -35,7 +34,16 @@ Título: {title}
 """
 
 CHOICES = [
-    {"value": TrafficLight.GREEN,  "description": "Encaja de verdad: el stack coincide y cumple TODOS los excluyentes. Vale postularse ya."},
-    {"value": TrafficLight.YELLOW, "description": "Encaja a medias: le falta algo salvable con una buena carta, o el aviso es ambiguo sobre un excluyente."},
-    {"value": TrafficLight.RED,    "description": "No encaja: pide un excluyente que no tiene, o es de otra especialidad aunque mencione su stack al pasar."},
+    {
+        "value": TrafficLight.GREEN,
+        "description": "Encaja de verdad: el stack coincide y cumple TODOS los excluyentes. Vale postularse ya.",
+    },
+    {
+        "value": TrafficLight.YELLOW,
+        "description": "Encaja a medias: le falta algo salvable con una buena carta, o el aviso es ambiguo sobre un excluyente.",
+    },
+    {
+        "value": TrafficLight.RED,
+        "description": "No encaja: pide un excluyente que no tiene, o es de otra especialidad aunque mencione su stack al pasar.",
+    },
 ]

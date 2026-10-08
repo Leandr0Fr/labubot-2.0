@@ -3,44 +3,56 @@
 from openai import OpenAI
 
 from src.config.settings import settings
-from src.constants.openai import (
-    MODEL,
-)
-from src.constants.prompt import INSTRUCTIONS, CHOICES
-from src.schemas.job import Offer
+from src.constants.openai import MODEL
+from src.constants.prompt import CHOICES, INSTRUCTIONS, OFFER_BLOCK
 from src.enums.traffic_light import TrafficLight
+from src.schemas.job import Offer
+
 
 class Classifier:
-    """
-    Le pone color a cada oferta comparándola contra el perfil.
+    """Le pone color a cada oferta comparándola contra el CV, una por llamada."""
 
-    El perfil y el system prompt se inyectan una vez y viajan en cada lote: son
-    pocos tokens al lado de las descripciones, y mantenerlos afuera del historial
-    hace que cada lote sea independiente del anterior.
-    """
-
-    def __init__(self ) -> None:
+    def __init__(self, cv: str) -> None:
+        """
+        Arma las instructions una sola vez con el CV adentro.
+        Args:
+            cv: El perfil de la persona, tal como está en perfil.md.
+        """
         self.client = OpenAI(api_key=settings.llm_api_key)
+        self.instructions = INSTRUCTIONS.format(cv=cv)
 
     def classify(self, offers: list[Offer]) -> dict[str, TrafficLight]:
-        offers_analyzed = {}
+        """
+        Un color por oferta, indexado por url.
+        Args:
+            offers: Ofertas a evaluar.
+        Returns:
+            dict[str, TrafficLight]: url de la oferta → color que le dio el modelo.
+        """
+        offers_results: dict[str, TrafficLight] = {}
         for offer in offers:
-            answer = self.question(offer)
-            offers_analyzed[offer.url, answer]
-        return offers_analyzed
+            offers_results[offer["url"]] = self._decide(offer)
+        return offers_results
 
-    def question(self, offer):
+    def _decide(self, offer: Offer) -> TrafficLight:
+        """
+        Una llamada a Decisions para una oferta.
+        Args:
+            offer: Título, descripción y url de la oferta.
+        Returns:
+            TrafficLight: El color que eligió el modelo.
+        """
+        job = OFFER_BLOCK.format(title=offer["title"], description=offer["description"])
         decision = self.client.decisions.create(
             model=MODEL,
-            input=offer.description,
+            input= job,
             questions=[
                 {
                     "type": "choice",
-                    "name": "offer",
-                    "instructions": INSTRUCTIONS,
+                    "name": "light",
+                    "instructions": self.instructions,
                     "choices": CHOICES,
                 }
             ],
-            )
-        answer = decision.answers[0]
-        return answer
+        )
+        return TrafficLight(decision.answers[0].choice)

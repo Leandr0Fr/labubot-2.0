@@ -5,7 +5,7 @@ from enum import StrEnum
 
 class TrafficLight(StrEnum):
     """
-    Tres colores, sin 
+    Tres colores.
     GREEN: Oferta compatible
     YELLOW: Oferta para revisar manualmente
     RED: Oferta no compatible.
