@@ -6,7 +6,6 @@ cuando ya tenés el texto y lo necesitás en condiciones para comparar.
 """
 
 import re
-import unicodedata
 
 from selectolax.lexbor import LexborNode
 
@@ -28,34 +27,3 @@ def text(node: LexborNode | None) -> str:
     if node is None:
         return ""
     return _SPACES.sub(" ", node.text()).strip()
-
-
-def normalize(raw: str) -> str:
-    """
-    Minúsculas y sin acentos, para que "automatización" matchee "automatizacion".
-
-    Los avisos mezclan las dos formas sin criterio, a veces en la misma oración.
-    Args:
-        raw: Texto tal como vino.
-    Returns:
-        str: Texto normalizado, listo para buscar términos adentro.
-    """
-    decomposed = unicodedata.normalize("NFKD", raw.lower())
-    return "".join(c for c in decomposed if not unicodedata.combining(c))
-
-
-def first_int(raw: str) -> int | None:
-    """
-    Primer número del texto, ignorando separadores de miles.
-
-    Sirve para "33 solicitudes" y para "1.204 candidatos" por igual.
-    Args:
-        raw: Texto que contiene un número.
-    Returns:
-        int | None: El número, o None si no hay ninguno.
-    """
-    match = re.search(r"\d[\d.,]*", raw)
-    if match is None:
-        return None
-    clean = match.group(0).replace(".", "").replace(",", "")
-    return int(clean) if clean.isdigit() else None
