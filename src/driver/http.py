@@ -1,10 +1,13 @@
 """Driver HTTP: el único que toca httpx. Pide y devuelve crudo."""
 
+import time
+
 import httpx
 
 from src.constants.http import (
     ACCEPT_LANGUAGE,
     HTTP_TIMEOUT,
+    PAUSE,
     USER_AGENT,
 )
 from src.exceptions.exceptions import LabubotRateLimitError, LabubotRequestError
@@ -12,10 +15,9 @@ from src.exceptions.exceptions import LabubotRateLimitError, LabubotRequestError
 
 class Driver:
     """
-    Pide páginas y endpoints públicos, con ritmo y reintentos.
+    Pide páginas y endpoints públicos, de a uno y con pausa entre cada uno.
 
-    No sabe con quién habla: recibe una URL y devuelve lo que vuelve. Los
-    requests salen de a uno; en paralelo solo se adelanta el 429.
+    No sabe con quién habla: recibe una URL y devuelve lo que vuelve.
     """
 
     def __init__(self) -> None:
@@ -45,6 +47,8 @@ class Driver:
             LabubotRateLimitError: Si el sitio contestó 429.
             LabubotRequestError: Si la red falló.
         """
+        # Medido en LinkedIn: sin pausa, 429 a los ~10 requests seguidos.
+        time.sleep(PAUSE)
         try:
             response = self.http.send(request)
         except httpx.HTTPError as error:
