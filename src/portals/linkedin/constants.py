@@ -15,9 +15,10 @@ JOBS_PER_PAGE = 10
 # Medido: en start=100 devuelve 429, nunca una página vacía.
 MAX_PAGES = 10
 
-SEL_CARD = "div.base-card"
-SEL_TITLE = "h3.base-search-card__title"
-SEL_DESCRIPTION = "div.description__text"
+SEL_JOB_CARD = ".base-search-card"
+SEL_JOB_TITLE = ".base-search-card__title"
+SEL_JOB_LINK = ".base-card__full-link"
+
 SEL_DESCRIPTION_ALT = "section.show-more-less-html"
 
 URN_PREFIX = "urn:li:jobPosting:"

@@ -50,6 +50,7 @@ class Driver:
         # Medido en LinkedIn: sin pausa, 429 a los ~10 requests seguidos.
         time.sleep(PAUSE)
         try:
+            
             response = self.http.send(request)
         except httpx.HTTPError as error:
             raise LabubotRequestError(f"Falló la red al obtener {subject}") from error

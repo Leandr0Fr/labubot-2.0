@@ -1,15 +1,12 @@
 """LinkedIn: qué pedirle al endpoint `jobs-guest` y a quién parsearlo."""
-
 from src.config.settings import settings
 from src.driver.http import Driver
 from src.portals.linkedin.constants import (
-    DETAIL_URL,
-    JOB_URL,
     JOBS_PER_PAGE,
     MAX_PAGES,
     SEARCH_URL,
 )
-from src.portals.linkedin.parser import parse_cards, parse_description
+from src.portals.linkedin.html_extractor import extract_job_cards, extract_description
 from src.schemas.job import Offer
 
 
@@ -27,11 +24,9 @@ class LinkedIn:
         Returns:
             list[Offer]: Las ofertas del término, sin repetir dentro de él.
         """
-        # Por id: el propio portal repite ofertas entre páginas.
-        titles: dict[str, str] = {}
-
+        jobs = {}
         for page in range(MAX_PAGES):
-            html = self.driver.get(
+            list_offers_html = self.driver.get(
                 SEARCH_URL,
                 "el listado de ofertas",
                 {
@@ -41,23 +36,21 @@ class LinkedIn:
                     "start": str(page * JOBS_PER_PAGE),
                 },
             )
-            cards = parse_cards(html)
-            if not cards:
+            page_jobs = extract_job_cards(list_offers_html)
+            if not page_jobs:
                 break
-            titles.update(cards)
+            jobs.update(page_jobs)
 
         offers: list[Offer] = []
-        for job_id, title in titles.items():
-            html = self.driver.get(f"{DETAIL_URL}/{job_id}", "el detalle de la oferta")
-            # Vacío: la oferta se dio de baja entre el listado y el detalle.
-            if not html:
+        for url, title in jobs.items():
+            offer_html = self.driver.get(url, "el detalle de la oferta")
+            if not offer_html:
                 continue
             offers.append(
                 Offer(
                     title=title,
-                    description=parse_description(html),
-                    url=JOB_URL.format(job_id=job_id),
+                    description=extract_description(offer_html),
+                    url=url,
                 )
             )
-
         return offers
