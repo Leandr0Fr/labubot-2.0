@@ -1,13 +1,10 @@
 """Driver HTTP: el único que toca httpx. Pide y devuelve crudo."""
 
-import time
-
 import httpx
 
 from src.constants.http import (
     ACCEPT_LANGUAGE,
     HTTP_TIMEOUT,
-    PAUSE,
     USER_AGENT,
 )
 from src.exceptions.exceptions import LabubotRateLimitError, LabubotRequestError
@@ -15,7 +12,7 @@ from src.exceptions.exceptions import LabubotRateLimitError, LabubotRequestError
 
 class Driver:
     """
-    Pide páginas y endpoints públicos, de a uno y con pausa entre cada uno.
+    Pide páginas y endpoints públicos, de a uno.
 
     No sabe con quién habla: recibe una URL y devuelve lo que vuelve.
     """
@@ -47,10 +44,7 @@ class Driver:
             LabubotRateLimitError: Si el sitio contestó 429.
             LabubotRequestError: Si la red falló.
         """
-        # Medido en LinkedIn: sin pausa, 429 a los ~10 requests seguidos.
-        time.sleep(PAUSE)
         try:
-            
             response = self.http.send(request)
         except httpx.HTTPError as error:
             raise LabubotRequestError(f"Falló la red al obtener {subject}") from error
@@ -71,7 +65,7 @@ class Driver:
             str: El cuerpo crudo, que puede ser un fragmento y no una página
             entera. Vacío si el recurso ya no existe (404 o 410).
         Raises:
-            LabubotRateLimitError: Si el 429 sobrevive a todos los reintentos.
+            LabubotRateLimitError: Si el sitio contestó 429.
             LabubotRequestError: Si la red falla o el sitio contesta otra cosa.
         """
         request = self.http.build_request("GET", url, params=params)

@@ -1,9 +1,13 @@
 """LinkedIn: qué pedirle al endpoint `jobs-guest` y a quién parsearlo."""
+
+import time
+
 from src.config.settings import settings
 from src.driver.http import Driver
 from src.portals.linkedin.constants import (
     JOBS_PER_PAGE,
     MAX_PAGES,
+    PAUSE,
     SEARCH_URL,
 )
 from src.portals.linkedin.html_extractor import extract_job_cards, extract_description
@@ -26,6 +30,7 @@ class LinkedIn:
         """
         jobs = {}
         for page in range(MAX_PAGES):
+            time.sleep(PAUSE)
             list_offers_html = self.driver.get(
                 SEARCH_URL,
                 "el listado de ofertas",
@@ -43,6 +48,7 @@ class LinkedIn:
 
         offers: list[Offer] = []
         for url, title in jobs.items():
+            time.sleep(PAUSE)
             offer_html = self.driver.get(url, "el detalle de la oferta")
             if not offer_html:
                 continue

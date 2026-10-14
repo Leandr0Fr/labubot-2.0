@@ -45,7 +45,7 @@ class Classifier:
         job = OFFER_BLOCK.format(title=offer["title"], description=offer["description"])
         decision = self.client.decisions.create(
             model=MODEL,
-            input= job,
+            input=job,
             questions=[
                 {
                     "type": "choice",
