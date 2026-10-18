@@ -25,7 +25,7 @@ def extract_job_cards(html: str) -> dict[str, str]:
         link_node = card.select_one(SEL_JOB_LINK)
         if title_node and link_node:
             title = title_node.get_text(strip=True)
-            url = link_node.get("href")
+            url = link_node.get("href").split("?")[0]
             cards[url] = title
     return cards
 

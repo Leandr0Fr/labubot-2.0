@@ -5,7 +5,30 @@ Dos listas y nada más. El criterio de si una oferta sirve o no lo pone el LLM
 leyendo tu CV: acá no hay pesos, puntajes ni reglas.
 """
 
-TERMS: list[str] = ["python"]
+TERMS: list[str] = [
+    "python",
+    "fastapi",
+    "desarrollador python",
+    "python developer",
+    "backend",
+    "desarrollador backend",
+    "backend developer",
+    "desarrollador",
+    "programador",
+    "developer",
+    "software engineer",
+    "ingeniero de software",
+    "analista programador",
+    "desarrollador jr",
+    "desarrollador junior",
+    "programador jr",
+    "programador junior",
+    "junior developer",
+    "desarrollador semi senior",
+    "ssr developer",
+    "web scraping",
+    "integraciones",
+]
 
 BLOCKED_TITLE_WORDS: list[str] = [
     "sap",
@@ -24,4 +47,12 @@ BLOCKED_TITLE_WORDS: list[str] = [
     "marketing",
     "contable",
     "rrhh",
+    "frontend",
+    "front-end",
+    "front end",
+    "angular",
+    "vue",
+    "director",
+    "head of",
+    "manager",
 ]

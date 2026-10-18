@@ -7,7 +7,8 @@ SEARCH_URL = f"{_BASE}/jobs-guest/jobs/api/seeMoreJobPostings/search"
 
 JOBS_PER_PAGE = 10
 
-# Medido: con 3 s, ~10 % de los detalles da 429 y nunca más de 2 seguidos.
+# Espera antes de reintentar. Medido sin pausa entre pedidos: ~18 % da 429 y
+# nunca más de 3 seguidos.
 PAUSE = 3.0
 RETRIES = 10
 

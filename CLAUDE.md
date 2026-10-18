@@ -29,6 +29,7 @@ evalúa contra `perfil.md` con un LLM.
 - `src/parsers/` interpreta lo que no es de un portal: hoy solo el veredicto
   del LLM. El parser de un sitio vive con su portal.
 - `src/schemas/` los TypedDicts del dominio, sin lógica.
+- `src/db/` lo que se recuerda entre corridas: hoy, las urls ya leídas en un `.txt`.
 - `src/constants/` lo configurable y lo medido que NO es de un portal
   (`http.py` transporte, `openai.py` ese modelo). Lo de cada portal va en su
   carpeta.
