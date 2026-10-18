@@ -15,17 +15,14 @@ RESULTS_DIR = Path("resultados")
 
 def main() -> None:
     driver = Driver()
-    # Por id: los términos se pisan entre sí y el propio portal repite ofertas
-    # entre páginas.
+    # Por url: los términos se pisan entre sí.
     found: dict[str, dict[str, str]] = {}
 
     try:
         linkedin = LinkedIn(driver)
         for term in TERMS:
-            for card in linkedin.search(term):
-                found.setdefault(
-                    card["id"], {"title": card["title"], "url": card["url"]}
-                )
+            for offer in linkedin.search(term):
+                found.setdefault(offer["url"], offer)
             print(f"  {term}: {len(found)} ofertas")
     finally:
         driver.close()
