@@ -1,7 +1,7 @@
 # LABUBOT 2.0
 
-Buscás como buscarías a mano. Un LLM lee cada oferta contra tu CV y la pinta de
-🟢 🟡 🔴.
+Buscás como buscarías a mano, en 11 portales a la vez. Con Decisions de OpenAI analiza cada oferta
+contra tu CV y la pinta de 🟢 🟡 🔴.
 
 ## La idea
 
@@ -17,32 +17,63 @@ Sin filtro de nivel: entran junior, senior y todo lo del medio. El LLM decide.
 La v1 manejaba un Chrome real con Selenium sobre una cuenta logueada: apoyaba todo
 el proyecto sobre lo único que LinkedIn sí castiga.
 
-La v2 le habla al endpoint `jobs-guest`, que es lo que LinkedIn le sirve a
-cualquier visitante anónimo. **No hay cookie, no hay sesión, no hay cuenta.** El
-peor escenario dejó de ser una cuenta restringida y pasó a ser un `429` que se
-cura esperando.
+La v2 es **solo HTTP**: endpoints públicos, APIs de los propios sitios y HTML
+que cualquier visitante anónimo puede ver. **No hay cookie, no hay sesión, no hay
+cuenta.** El peor escenario dejó de ser una cuenta restringida y pasó a ser un
+`429` que se cura esperando.
 
-Verificado antes de escribir una línea: los ids que devuelve el endpoint son un
-subconjunto exacto de los que muestra `/jobs/search` deslogueado. Misma búsqueda.
+En LinkedIn se usa el endpoint `jobs-guest`, lo que ve un visitante deslogueado.
+Verificado antes de escribir una línea: los ids que devuelve son un subconjunto
+exacto de los que muestra `/jobs/search` deslogueado. Misma búsqueda.
 
 > No es una API oficial ni documentada, y el ToS de LinkedIn desalienta la
 > recolección automatizada aunque la página sea pública. Lo que cambia es que no
 > hay una cuenta tuya de por medio.
 
+## Portales
+
+| Portal | Cómo se le habla | Búsqueda |
+|---|---|---|
+| LinkedIn | HTML del endpoint `jobs-guest` | un término por vez |
+| Bumeran | API JSON de su front | un término por vez |
+| Computrabajo | HTML de ar.computrabajo.com | un término por vez |
+| Get on Board | API pública | un término por vez |
+| Himalayas | API pública | un término por vez |
+| Talent | HTML de ar.talent.com | un término por vez |
+| Indeed | API GraphQL de su app | todos juntos con `OR` |
+| Empleos IT | HTML de su buscador | todos juntos con `OR` |
+| Workable | API de jobs.workable.com | todos juntos con `OR` |
+| Jobicy | API pública | sin búsqueda: todo lo reciente |
+| We Work Remotely | RSS de back-end y full-stack | sin búsqueda: todo lo reciente |
+
+Los que no aceptan búsqueda traen todo lo publicado en la ventana y el filtro lo
+hace el LLM.
+
 ## Flujo
 
 ```
-buscar  →  filtrar palabras baneadas  →  bajar descripción  →  LLM  →  🟢🟡🔴
-             (gratis, ahorra cuota)                          (lo caro)
+buscar  →  filtrar títulos baneados  →  saltear ya vistas  →  bajar descripción  →  LLM  →  🟢🟡🔴
+             (gratis, ahorra cuota)                                                 (lo caro)
 ```
 
-El filtro corre **antes** de bajar un solo detalle: cada descarte ahorra un
-request a LinkedIn y una llamada al LLM, que es lo único que se paga.
+1. Cada portal devuelve `url → título` de lo publicado en las últimas `HOURS`.
+2. Los títulos con una palabra de `BLOCKED_TITLE_WORDS` se descartan sin leer.
+3. Las urls que ya están en `vistas.txt` se saltean: no se vuelve a pedir su
+   detalle ni a gastar tokens en ellas.
+4. Del resto se baja la descripción completa y se marca como vista.
+5. El `Classifier` le pone color a cada oferta contra `perfil.md`.
+6. Todo queda en `resultados/AAAA-MM-DD_HHMM.json`, con su color.
+7. Mediante un Bot de Telegram envía las ofertas 🟢🟡.
+
+El filtro y el chequeo de vistas corren **antes** de bajar un solo detalle: cada
+descarte ahorra un request al portal y una llamada al LLM, que es lo único que se
+paga. Aunque la corrida se corte a mitad, `vistas.txt` y el JSON se guardan con
+lo que se alcanzó a leer.
 
 ## Arquitectura
 
-Misma forma que `hitron-cgnv2`: drivers que traen datos y no saben nada más,
-utils puros que los interpretan.
+Drivers que traen datos y no saben nada más; cada portal sabe qué pedir y cómo
+leer lo que vuelve.
 
 ```
 main.py                     orquesta el flujo de arriba
@@ -52,98 +83,62 @@ src/
     settings.py             .env (pydantic-settings)
     search.py               ← términos y palabras baneadas
   constants/
-    http.py                 ritmo, backoff y user agent
-    linkedin.py             URLs del jobs-guest y paginación
-    openai.py               modelo, reasoning effort y tamaño de lote
-    prompt.py               ← el prompt de comparación
+    http.py                 timeout, idioma y user agent
+    openai.py               modelo
+    prompt.py               ← las instrucciones y los tres colores
   driver/                   el único que toca httpx
-    http.py                 Driver: get(), post_json(), ritmo y reintentos
-  portals/                  qué pedirle a cada sitio y a quién parsearlo
-    linkedin.py             LinkedIn(driver): search() y detail()
-  classifier/               qué preguntarle al LLM y cómo lotearlo
-    openai.py               Classifier(perfil, system): classify()
-  schemas/                  los tipos del dominio
-    job.py                  JobCard, Criteria, JobDetail, Offer, Job
-    verdict.py              Verdict
-  parsers/                  interpretan; no piden nada
-    html.py                 ← único archivo que sabe del DOM de LinkedIn
-    verdicts.py             respuesta del LLM → list[Verdict | None]
-  enums/traffic_light.py    verde / amarillo / rojo
+    http.py                 Driver: get() y post_json()
+  portals/                  una carpeta por portal
+    linkedin/
+      portal.py             LinkedIn(driver): search() y description()
+      html_extractor.py     ← lo único que sabe del DOM de LinkedIn
+      constants.py          URLs, paginación, pausa y reintentos
+    bumeran/ computrabajo/ empleosit/ getonbrd/ himalayas/
+    indeed/ jobicy/ talent/ weworkremotely/ workable/
+  classifier/
+    openai.py               Classifier(cv): classify()
+  db/
+    seen.py                 SeenUrls: las urls ya leídas, en vistas.txt
+  schemas/
+    job.py                  Offer
+  enums/traffic_light.py    green / yellow / red
   exceptions/exceptions.py
-  utils/
-    text.py                 normalizar, primer entero (compartidos)
-    filters.py              palabras baneadas
 ```
 
-Una sola razón para cambiar por capa:
+División por módulos:
 
 - **`driver/`** es el único que toca httpx. `Driver` recibe una URL y devuelve lo
-  que vuelve, con la pausa y los reintentos; no sabe con quién habla.
-- **`portals/`** saben qué pedir: URLs, params, paginación. Reciben el `Driver`
-  inyectado y lo comparten.
-- **`classifier/`** sabe qué preguntarle al LLM y le habla por el SDK oficial de
+  que vuelve; no sabe con quién habla. Un 404 o 410 vuelve vacío, un 429 levanta
+  `LabubotRateLimitError` y cualquier otra cosa `LabubotRequestError`.
+- **`portals/`** tiene todo lo de cada sitio: `portal.py` (qué pedir, recibe el
+  `Driver` inyectado), su extractor (`html_`, `json_` o `xml_extractor.py`) y
+  `constants.py`. Todos exponen `search()` y `description(url)`; los reintentos,
+  si el sitio los necesita, viven acá (LinkedIn reintenta 429 y timeouts sueltos).
+- **`classifier/`** mediante Decisions realiza la comparacion de ofertas y el CV. Y le habla por el SDK oficial de
   OpenAI, no por el `Driver`.
-- **`parsers/`** convierte texto en tipos y no pide nada.
+- **`db/`** lo que se recuerda entre corridas. Un simple .TXT. No es necesario hacer un overkill sobre algo tan sencillo.
 - **`schemas/`** son los tipos, sin lógica.
 
-Si LinkedIn cambia el markup se toca `parsers/html.py`. Si cambia la query, solo
-`portals/linkedin.py`. Si OpenAI cambia el formato de salida, `parsers/verdicts.py`.
-Sumar un portal es un archivo nuevo en `portals/` y su parser: ni el `Driver` ni
-el `Classifier` se enteran.
+Si LinkedIn cambia el markup se toca `portals/linkedin/html_extractor.py`; si
+cambia la query, `portals/linkedin/portal.py`. Sumar un portal es crear una
+carpeta en `portals/` y agregarlo al loop que corresponda en `main.py`: ni el
+`Driver` ni el `Classifier` se enteran.
 
-### Por qué no hay tabla de puntajes
+### El LLM: Luna, por la Decisions API
 
-Había una: ~470 líneas de pesos calibrados a mano (`python: 25`, `rag: 12`...).
-Se borró. Un keyword match no sabe que "5 años de experiencia" descalifica a
-alguien con 2, ni distingue un aviso que **pide** Django de uno que ofrece
-enseñarlo. Contaba apariciones y había que recalibrarla a cada rato.
+`gpt-6-luna` por la Decisions API del SDK `openai` (`client.decisions.create`).
+Va **una oferta por llamada**: el CV viaja en las instructions de una pregunta de
+tipo `choice` con tres opciones —verde, amarillo, rojo— y el modelo elige una.
+Como la respuesta es una de esas tres, no hay JSON que parsear ni veredictos a
+medias.
 
-Además un número del 0 al 100 finge una precisión que no existe: nadie sabe si un
-73 es mejor que un 68. Tres colores se leen de un vistazo.
+Las instructions (`constants/prompt.py`) fijan las reglas: usar solo el CV y el
+texto del aviso, no inventar requisitos, separar excluyente de deseable y
+descartar por excluyentes duros (idioma, seniority, stack sin Python).
 
-### El LLM: GPT-5.6 Luna, por el SDK oficial
-
-`gpt-5.6-luna` con `reasoning.effort: "high"`, por la Responses API del SDK
-`openai`. Luna es el modelo chico de la familia 5.6, el que OpenAI apunta a
-clasificación en volumen: U$S 0,20 por millón de tokens de entrada y 1,20 por
-millón de salida. Leer un aviso y cruzarlo contra un CV no necesita más modelo
-que eso; sí necesita que piense, y por eso el esfuerzo va en `high`.
-
-**Va de a 10 ofertas por request.** El perfil y el system prompt viajan una vez
-por lote y no una vez por oferta: son la parte fija de cada llamada. Cada oferta
-viaja numerada y el modelo devuelve un `verdicts[]` con el mismo id; lo que no
-vuelve queda en `None` y se descarta, así una respuesta incompleta no inventa
-veredictos. Si un lote entero se cae se pierden esas 10 y no la corrida.
-
-Luna piensa antes de responder y esos tokens se cobran como salida aunque no se
-vean. Por eso `max_output_tokens` va holgado (25.000, el piso que OpenAI
-recomienda con razonamiento activado): tiene que cubrir razonamiento + JSON. Si
-se queda corto, la respuesta vuelve con status `incomplete` y el clasificador
-descarta el lote en vez de parsear un JSON a medias. Con razonamiento activado
-la API no acepta `temperature`, así que no hay.
-
-La salida va en JSON mode (`text.format: json_object`): garantiza un objeto JSON
-válido, no que respete el esquema. El parser sigue validando cada campo, porque
-lo que viene de un LLM es texto hasta que se demuestre lo contrario.
-
-### Límites y costo
-
-No hay free tier: se paga por token y los límites dependen del tier de la
-cuenta. En Tier 1 Luna da 500 requests y 500.000 tokens por minuto, así que acá
-no ata el ritmo sino el gasto. Los límites de tu cuenta están en
+Sin créditos OpenAI contesta 429 (`insufficient_quota`), y ese no se arregla
+esperando. Los límites de tu cuenta están en
 [platform.openai.com/settings/organization/limits](https://platform.openai.com/settings/organization/limits).
-
-Ante un 429 o un 5xx el SDK reintenta dos veces con backoff y respeta
-`retry-after`; si igual falla, el clasificador corta la corrida con
-`LabubotRateLimitError` en vez de seguir gastando. Ojo: sin créditos OpenAI
-también contesta 429 (`insufficient_quota`), y ese no se arregla esperando.
-
-### Por qué selectolax y no regex
-
-En `hitron` regex es correcto: ahí se leen variables JavaScript dentro de páginas
-ASP, que no son estructura HTML. Acá LinkedIn devuelve DOM real con clases, y un
-regex se rompe cuando cambia el orden de los atributos o aparece un tag anidado.
-`selectolax` usa Lexbor (C), tiene wheel para cp314 y no arrastra dependencias.
 
 ## Instalación
 
@@ -152,48 +147,37 @@ poetry install
 cp .env.example .env     # y cargá LLM_API_KEY (platform.openai.com/api-keys)
 ```
 
-Después escribí tu CV en `perfil.md`. Sin eso no arranca: es contra lo que se
-compara cada oferta.
+Después escribí tu CV en `perfil.md`: es contra lo que se compara cada oferta.
 
 ## Uso
 
 ```bash
-python main.py                 # últimas 24 h
-python main.py --horas 72      # ventana más ancha
-python main.py --solo-verdes   # solo lo que encaja de verdad
-python main.py --todo          # ignora el cache de ya vistas
-python main.py --max 20        # tope de evaluaciones (cuida el gasto)
+python main.py
 ```
 
-`vistas.json` guarda los ids ya evaluados: la corrida del día siguiente solo gasta
-LLM en lo nuevo. Los resultados quedan en `resultados/` en JSON, listos para el
-bot de Telegram.
+Todo se configura en `.env`:
+
+| Variable | Qué hace |
+|---|---|
+| `LOCATION` | Ubicación tal como la escribe cada portal (`Argentina`) |
+| `HOURS` | Ventana de publicación (24 = solo lo de hoy) |
+| `LLM_API_KEY` | Clave de OpenAI |
+
+`vistas.txt` guarda una url por línea de lo ya leído: la corrida del día
+siguiente solo baja lo nuevo. Para empezar de cero, borralo.
 
 ## Configurar
 
 **`perfil.md`** — tu CV en texto plano. Cuanto más concreto (años reales por
 tecnología, nivel real de inglés), menos verdes falsos.
 
-**`src/config/busqueda.py`** — dos listas, nada más:
+**`src/config/search.py`** — dos listas, nada más:
 
 | Lista | Qué hace |
 |---|---|
-| `TERMINOS` | Lo que escribirías en el buscador |
-| `TITULOS_BANEADOS` | Si aparece en el título, se descarta sin leer |
+| `TERMS` | Lo que escribirías en el buscador |
+| `BLOCKED_TITLE_WORDS` | Si aparece en el título, se descarta sin leer |
 
 Las baneadas van contra el **título** y no contra la descripción porque media
 descripción menciona "SAP" o "Java" de pasada al listar el stack de la empresa, y
 eso no convierte al aviso en una oferta de SAP.
-
-### Un detalle que no es obvio
-
-El matcheo es por **palabra completa**, no por substring. Por substring `sap`
-matchea dentro de `Whatsapp`, `ios` dentro de `servicios`, `.net` dentro de
-cualquier dominio. Silenciosamente te esconderían ofertas buenas.
-
-## Pendiente
-
-- Clase `Scraper`: recorre todos los portales y junta las ofertas de cada uno.
-  Solo HTTP, nada de Playwright ni Selenium.
-- Más portales en `portals/`.
-- Bot de Telegram: los JSON de `resultados/` ya tienen todo lo necesario.

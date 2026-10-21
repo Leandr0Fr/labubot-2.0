@@ -1,6 +1,6 @@
 # labubot
 
-Buscador de ofertas laborales: scrapea portales de empleo por HTTP puro y las
+Buscador de ofertas laborales: "scrapea" portales de empleo por HTTP puro y las
 evalúa contra `perfil.md` con un LLM.
 
 ## Estilo
@@ -35,9 +35,6 @@ evalúa contra `perfil.md` con un LLM.
   carpeta.
 
 **Solo HTTP.** Nada de Playwright, Selenium ni navegador headless.
-
-Pendiente: una clase `Scraper` que recorra todos los portales y junte las
-ofertas. Todavía no existe, no la anticipes en el diseño.
 
 ## Comandos
 
