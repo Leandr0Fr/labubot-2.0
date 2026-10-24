@@ -55,4 +55,12 @@ BLOCKED_TITLE_WORDS: list[str] = [
     "director",
     "head of",
     "manager",
+    "lead",
+    "líder",
+    "lider",
+    "jefe",
+    "soporte",
+    "support",
+    "helpdesk",
+    "mesa de ayuda",
 ]
