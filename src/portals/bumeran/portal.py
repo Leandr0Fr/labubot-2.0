@@ -4,6 +4,7 @@ from itertools import count
 
 from src.config.settings import settings
 from src.driver.http import Driver
+from src.exceptions.exceptions import LabubotRequestError
 from src.portals.bumeran.constants import (
     DETAIL_URL,
     HEADERS,
@@ -39,13 +40,17 @@ class Bumeran:
 
         jobs: dict[str, str] = {}
         for page in count():
-            raw = self.driver.post_json(
-                SEARCH_URL,
-                "el listado de ofertas",
-                body,
-                {"pageSize": str(JOBS_PER_PAGE), "page": str(page), "sort": SORT},
-                HEADERS,
-            )
+            try:
+                raw = self.driver.post_json(
+                    SEARCH_URL,
+                    "el listado de ofertas",
+                    body,
+                    {"pageSize": str(JOBS_PER_PAGE), "page": str(page), "sort": SORT},
+                    HEADERS,
+                )
+            except LabubotRequestError as error:
+                print(f"  Bumeran {keywords}: {error}")
+                break
             page_jobs = extract_job_cards(raw)
             if not page_jobs:
                 break
@@ -58,12 +63,20 @@ class Bumeran:
         Args:
             url: URL de la oferta, tal como la devuelve `search()`.
         Returns:
-            str: La descripción en texto plano. Vacía si la oferta ya no existe.
+            str: La descripción en texto plano. Vacía si la oferta ya no existe
+            o Bumeran no la pudo servir.
         """
         job_id = url.rsplit("/", 1)[1].removesuffix(".html")
-        raw = self.driver.get(
-            DETAIL_URL.format(job_id=job_id), "el detalle de la oferta", headers=HEADERS
-        )
+        # Los avisos rotos tardan ~25 s y contestan 500.
+        try:
+            raw = self.driver.get(
+                DETAIL_URL.format(job_id=job_id),
+                "el detalle de la oferta",
+                headers=HEADERS,
+            )
+        except LabubotRequestError as error:
+            print(f"  Bumeran {job_id}: {error}")
+            return ""
         if not raw:
             return ""
         return extract_description(raw)
