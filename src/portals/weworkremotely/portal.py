@@ -1,11 +1,16 @@
 """We Work Remotely: qué feeds pedir y a quién parsearlos."""
 
+import logging
 import time
 
 from src.config.settings import settings
 from src.driver.http import Driver
+from src.exceptions.exceptions import LabubotError
 from src.portals.weworkremotely.constants import FEED_URLS
 from src.portals.weworkremotely.xml_extractor import extract_offers
+
+
+logger = logging.getLogger(__name__)
 
 
 class WeWorkRemotely:
@@ -26,7 +31,11 @@ class WeWorkRemotely:
         since = time.time() - settings.hours * 3600
         jobs: dict[str, str] = {}
         for feed_url in FEED_URLS:
-            raw = self.driver.get(feed_url, "el feed de ofertas")
+            try:
+                raw = self.driver.get(feed_url, "el feed de ofertas")
+            except LabubotError as error:
+                logger.warning(f"Feed {feed_url} salteado: {error}")
+                continue
             for offer in extract_offers(raw, since):
                 jobs[offer["url"]] = offer["title"]
                 self.descriptions[offer["url"]] = offer["description"]

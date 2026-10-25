@@ -1,11 +1,16 @@
 """Jobicy: qué pedirle a su API pública y a quién parsearlo."""
 
+import logging
 from datetime import UTC, datetime, timedelta
 
 from src.config.settings import settings
 from src.driver.http import Driver
+from src.exceptions.exceptions import LabubotError
 from src.portals.jobicy.constants import GEO, JOBS_PER_PAGE, SEARCH_URL
 from src.portals.jobicy.json_extractor import extract_next_cursor, extract_offers
+
+
+logger = logging.getLogger(__name__)
 
 
 class Jobicy:
@@ -28,7 +33,11 @@ class Jobicy:
         params = {"count": str(JOBS_PER_PAGE), "geo": GEO}
         jobs: dict[str, str] = {}
         while True:
-            raw = self.driver.get(SEARCH_URL, "el listado de ofertas", params)
+            try:
+                raw = self.driver.get(SEARCH_URL, "el listado de ofertas", params)
+            except LabubotError as error:
+                logger.warning(f"Búsqueda cortada: {error}")
+                break
             for offer in extract_offers(raw, since):
                 jobs[offer["url"]] = offer["title"]
                 self.descriptions[offer["url"]] = offer["description"]

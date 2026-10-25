@@ -1,10 +1,11 @@
 """Bumeran: qué pedirle a la API de su front y a quién parsearlo."""
 
+import logging
 from itertools import count
 
 from src.config.settings import settings
 from src.driver.http import Driver
-from src.exceptions.exceptions import LabubotRequestError
+from src.exceptions.exceptions import LabubotError
 from src.portals.bumeran.constants import (
     DETAIL_URL,
     HEADERS,
@@ -15,6 +16,9 @@ from src.portals.bumeran.constants import (
     SORT,
 )
 from src.portals.bumeran.json_extractor import extract_description, extract_job_cards
+
+
+logger = logging.getLogger(__name__)
 
 
 class Bumeran:
@@ -48,8 +52,8 @@ class Bumeran:
                     {"pageSize": str(JOBS_PER_PAGE), "page": str(page), "sort": SORT},
                     HEADERS,
                 )
-            except LabubotRequestError as error:
-                print(f"  Bumeran {keywords}: {error}")
+            except LabubotError as error:
+                logger.warning(f"Búsqueda '{keywords}' cortada: {error}")
                 break
             page_jobs = extract_job_cards(raw)
             if not page_jobs:
@@ -74,8 +78,8 @@ class Bumeran:
                 "el detalle de la oferta",
                 headers=HEADERS,
             )
-        except LabubotRequestError as error:
-            print(f"  Bumeran {job_id}: {error}")
+        except LabubotError as error:
+            logger.warning(f"Sin descripción del aviso {job_id}: {error}")
             return ""
         if not raw:
             return ""

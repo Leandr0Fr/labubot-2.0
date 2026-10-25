@@ -1,14 +1,19 @@
 """Computrabajo: qué páginas pedirle al sitio de Argentina y a quién parsearlas."""
 
+import logging
 from itertools import count
 
 from src.config.settings import settings
 from src.driver.http import Driver
+from src.exceptions.exceptions import LabubotError
 from src.portals.computrabajo.constants import RECENCY_BUCKETS, SEARCH_URL
 from src.portals.computrabajo.html_extractor import (
     extract_description,
     extract_job_cards,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class Computrabajo:
@@ -37,7 +42,11 @@ class Computrabajo:
         jobs: dict[str, str] = {}
         for page in count(1):
             params["p"] = str(page)
-            list_offers_html = self.driver.get(url, "el listado de ofertas", params)
+            try:
+                list_offers_html = self.driver.get(url, "el listado de ofertas", params)
+            except LabubotError as error:
+                logger.warning(f"Búsqueda '{keywords}' cortada: {error}")
+                break
             page_jobs = extract_job_cards(list_offers_html)
             # Pasada la última, el sitio devuelve una página sin ofertas.
             new_jobs = page_jobs.keys() - jobs.keys()
@@ -52,9 +61,14 @@ class Computrabajo:
         Args:
             url: URL de la oferta, tal como la devuelve `search()`.
         Returns:
-            str: La descripción en texto plano. Vacía si la oferta ya no existe.
+            str: La descripción en texto plano. Vacía si la oferta ya no existe
+            o Computrabajo no la pudo servir.
         """
-        offer_html = self.driver.get(url, "el detalle de la oferta")
+        try:
+            offer_html = self.driver.get(url, "el detalle de la oferta")
+        except LabubotError as error:
+            logger.warning(f"Sin descripción de {url}: {error}")
+            return ""
         if not offer_html:
             return ""
         return extract_description(offer_html)

@@ -1,9 +1,11 @@
 """Indeed: qué pedirle a la API GraphQL de su app y a quién parsearlo."""
 
 import json
+import logging
 
 from src.config.settings import settings
 from src.driver.http import Driver
+from src.exceptions.exceptions import LabubotError
 from src.portals.indeed.constants import (
     GRAPHQL_URL,
     HEADERS,
@@ -12,6 +14,9 @@ from src.portals.indeed.constants import (
     RADIUS,
 )
 from src.portals.indeed.json_extractor import extract_next_cursor, extract_offers
+
+
+logger = logging.getLogger(__name__)
 
 
 class Indeed:
@@ -44,10 +49,18 @@ class Indeed:
                 cursor=cursor_arg,
                 hours=settings.hours,
             )
-            raw = self.driver.post_json(
-                GRAPHQL_URL, "el listado de ofertas", {"query": query}, headers=HEADERS
-            )
-            for offer in extract_offers(raw):
+            try:
+                raw = self.driver.post_json(
+                    GRAPHQL_URL,
+                    "el listado de ofertas",
+                    {"query": query},
+                    headers=HEADERS,
+                )
+                offers = extract_offers(raw)
+            except LabubotError as error:
+                logger.warning(f"Búsqueda cortada: {error}")
+                break
+            for offer in offers:
                 jobs[offer["url"]] = offer["title"]
                 self.descriptions[offer["url"]] = offer["description"]
             cursor = extract_next_cursor(raw)

@@ -1,15 +1,20 @@
 """Workable: qué pedirle a su API JSON y a quién parsearlo."""
 
+import logging
 import math
 from datetime import UTC, datetime, timedelta
 
 from src.config.settings import settings
 from src.driver.http import Driver
+from src.exceptions.exceptions import LabubotError
 from src.portals.workable.constants import SEARCH_URL
 from src.portals.workable.json_extractor import (
     extract_next_page_token,
     extract_offers,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class Workable:
@@ -39,7 +44,11 @@ class Workable:
         }
         jobs: dict[str, str] = {}
         while True:
-            raw = self.driver.get(SEARCH_URL, "el listado de ofertas", params)
+            try:
+                raw = self.driver.get(SEARCH_URL, "el listado de ofertas", params)
+            except LabubotError as error:
+                logger.warning(f"Búsqueda cortada: {error}")
+                break
             for offer in extract_offers(raw, since):
                 jobs[offer["url"]] = offer["title"]
                 self.descriptions[offer["url"]] = offer["description"]

@@ -1,12 +1,17 @@
 """Himalayas: qué pedirle a su API pública y a quién parsearlo."""
 
+import logging
 import time
 from itertools import count
 
 from src.config.settings import settings
 from src.driver.http import Driver
+from src.exceptions.exceptions import LabubotError
 from src.portals.himalayas.constants import SEARCH_URL, SORT
 from src.portals.himalayas.json_extractor import extract_offers
+
+
+logger = logging.getLogger(__name__)
 
 
 class Himalayas:
@@ -27,16 +32,20 @@ class Himalayas:
         since = time.time() - settings.hours * 3600
         jobs: dict[str, str] = {}
         for page in count(1):
-            raw = self.driver.get(
-                SEARCH_URL,
-                "el listado de ofertas",
-                {
-                    "q": keywords,
-                    "country": settings.location,
-                    "sort": SORT,
-                    "page": str(page),
-                },
-            )
+            try:
+                raw = self.driver.get(
+                    SEARCH_URL,
+                    "el listado de ofertas",
+                    {
+                        "q": keywords,
+                        "country": settings.location,
+                        "sort": SORT,
+                        "page": str(page),
+                    },
+                )
+            except LabubotError as error:
+                logger.warning(f"Búsqueda '{keywords}' cortada: {error}")
+                break
             offers = extract_offers(raw, since)
             if not offers:
                 break

@@ -1,12 +1,17 @@
 """Get on Board: qué pedirle a su API pública y a quién parsearlo."""
 
+import logging
 import time
 from itertools import count
 
 from src.config.settings import settings
 from src.driver.http import Driver
+from src.exceptions.exceptions import LabubotError
 from src.portals.getonbrd.constants import JOBS_PER_PAGE, LOCATIONS, SEARCH_URL
 from src.portals.getonbrd.json_extractor import extract_offers
+
+
+logger = logging.getLogger(__name__)
 
 
 class GetOnBoard:
@@ -28,16 +33,20 @@ class GetOnBoard:
         jobs: dict[str, str] = {}
         for location in LOCATIONS:
             for page in count(1):
-                raw = self.driver.get(
-                    SEARCH_URL,
-                    "el listado de ofertas",
-                    {
-                        "query": keywords,
-                        **location,
-                        "per_page": str(JOBS_PER_PAGE),
-                        "page": str(page),
-                    },
-                )
+                try:
+                    raw = self.driver.get(
+                        SEARCH_URL,
+                        "el listado de ofertas",
+                        {
+                            "query": keywords,
+                            **location,
+                            "per_page": str(JOBS_PER_PAGE),
+                            "page": str(page),
+                        },
+                    )
+                except LabubotError as error:
+                    logger.warning(f"Búsqueda '{keywords}' cortada: {error}")
+                    break
                 offers = extract_offers(raw, since)
                 if offers is None:
                     break

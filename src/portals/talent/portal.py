@@ -1,12 +1,17 @@
 """Talent.com: qué pedirle al listado /jobs y a quién parsearlo."""
 
+import logging
 import math
 from itertools import count
 
 from src.config.settings import settings
 from src.driver.http import Driver
+from src.exceptions.exceptions import LabubotError
 from src.portals.talent.constants import SEARCH_URL
 from src.portals.talent.html_extractor import extract_description, extract_job_cards
+
+
+logger = logging.getLogger(__name__)
 
 
 class Talent:
@@ -26,16 +31,20 @@ class Talent:
         days = math.ceil(settings.hours / 24)
         jobs: dict[str, str] = {}
         for page in count(1):
-            list_offers_html = self.driver.get(
-                SEARCH_URL,
-                "el listado de ofertas",
-                {
-                    "k": keywords,
-                    "l": settings.location,
-                    "date": str(days),
-                    "p": str(page),
-                },
-            )
+            try:
+                list_offers_html = self.driver.get(
+                    SEARCH_URL,
+                    "el listado de ofertas",
+                    {
+                        "k": keywords,
+                        "l": settings.location,
+                        "date": str(days),
+                        "p": str(page),
+                    },
+                )
+            except LabubotError as error:
+                logger.warning(f"Búsqueda '{keywords}' cortada: {error}")
+                break
             page_jobs = extract_job_cards(list_offers_html)
             new_jobs = page_jobs.keys() - jobs.keys()
             if not new_jobs:
@@ -49,9 +58,14 @@ class Talent:
         Args:
             url: URL de la oferta, tal como la devuelve `search()`.
         Returns:
-            str: La descripción en texto plano. Vacía si la oferta ya no existe.
+            str: La descripción en texto plano. Vacía si la oferta ya no existe
+            o Talent no la pudo servir.
         """
-        offer_html = self.driver.get(url, "el detalle de la oferta")
+        try:
+            offer_html = self.driver.get(url, "el detalle de la oferta")
+        except LabubotError as error:
+            logger.warning(f"Sin descripción de {url}: {error}")
+            return ""
         if not offer_html:
             return ""
         return extract_description(offer_html)

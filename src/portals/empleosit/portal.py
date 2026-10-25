@@ -1,11 +1,13 @@
 """Empleos IT: qué pedirle al buscador de SmartJobBoard y a quién parsearlo."""
 
+import logging
 import math
 import time
 from itertools import count
 
 from src.config.settings import settings
 from src.driver.http import Driver
+from src.exceptions.exceptions import LabubotError
 from src.portals.empleosit.constants import (
     CRAWL_DELAY,
     JOBS_PER_PAGE,
@@ -14,6 +16,9 @@ from src.portals.empleosit.constants import (
     SORTING_ORDER,
 )
 from src.portals.empleosit.html_extractor import extract_description, extract_job_cards
+
+
+logger = logging.getLogger(__name__)
 
 
 class EmpleosIT:
@@ -33,18 +38,22 @@ class EmpleosIT:
         days = math.ceil(settings.hours / 24)
         jobs: dict[str, str] = {}
         for page in count(1):
-            list_offers_html = self._get(
-                SEARCH_URL,
-                "el listado de ofertas",
-                {
-                    "keywords[boolean]": keywords,
-                    "PostedWithin[multi_like][]": str(days),
-                    "listings_per_page": str(JOBS_PER_PAGE),
-                    "sorting_field": SORTING_FIELD,
-                    "sorting_order": SORTING_ORDER,
-                    "page": str(page),
-                },
-            )
+            try:
+                list_offers_html = self._get(
+                    SEARCH_URL,
+                    "el listado de ofertas",
+                    {
+                        "keywords[boolean]": keywords,
+                        "PostedWithin[multi_like][]": str(days),
+                        "listings_per_page": str(JOBS_PER_PAGE),
+                        "sorting_field": SORTING_FIELD,
+                        "sorting_order": SORTING_ORDER,
+                        "page": str(page),
+                    },
+                )
+            except LabubotError as error:
+                logger.warning(f"Búsqueda cortada: {error}")
+                break
             page_jobs = extract_job_cards(list_offers_html)
             # Una página fuera de rango repite la última en vez de venir vacía.
             new_jobs = page_jobs.keys() - jobs.keys()
@@ -59,9 +68,14 @@ class EmpleosIT:
         Args:
             url: URL de la oferta, tal como la devuelve `search()`.
         Returns:
-            str: La descripción en texto plano. Vacía si la oferta ya no existe.
+            str: La descripción en texto plano. Vacía si la oferta ya no existe
+            o Empleos IT no la pudo servir.
         """
-        offer_html = self._get(url, "el detalle de la oferta")
+        try:
+            offer_html = self._get(url, "el detalle de la oferta")
+        except LabubotError as error:
+            logger.warning(f"Sin descripción de {url}: {error}")
+            return ""
         if not offer_html:
             return ""
         return extract_description(offer_html)

@@ -4,8 +4,8 @@ BASE_URL = "https://ar.computrabajo.com"
 
 SEARCH_URL = f"{BASE_URL}/trabajo-de-{{slug}}"
 
+# Sin "1": es "Hoy", desde la medianoche, y no cubre una ventana de 24 h.
 RECENCY_BUCKETS = {
-    24: "1",
     72: "3",
     168: "7",
     360: "15",

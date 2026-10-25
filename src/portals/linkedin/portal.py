@@ -1,11 +1,12 @@
 """LinkedIn: qué pedirle al endpoint `jobs-guest` y a quién parsearlo."""
 
+import logging
 import time
 from itertools import count
 
 from src.config.settings import settings
 from src.driver.http import Driver
-from src.exceptions.exceptions import LabubotRateLimitError, LabubotRequestError
+from src.exceptions.exceptions import LabubotError
 from src.portals.linkedin.constants import (
     JOBS_PER_PAGE,
     PAUSE,
@@ -13,6 +14,9 @@ from src.portals.linkedin.constants import (
     SEARCH_URL,
 )
 from src.portals.linkedin.html_extractor import extract_job_cards, extract_description
+
+
+logger = logging.getLogger(__name__)
 
 
 class LinkedIn:
@@ -31,16 +35,20 @@ class LinkedIn:
         """
         jobs = {}
         for start in count(0, JOBS_PER_PAGE):
-            list_offers_html = self._get(
-                SEARCH_URL,
-                "el listado de ofertas",
-                {
-                    "keywords": keywords,
-                    "location": settings.location,
-                    "f_TPR": f"r{settings.hours * 3600}",
-                    "start": str(start),
-                },
-            )
+            try:
+                list_offers_html = self._get(
+                    SEARCH_URL,
+                    "el listado de ofertas",
+                    {
+                        "keywords": keywords,
+                        "location": settings.location,
+                        "f_TPR": f"r{settings.hours * 3600}",
+                        "start": str(start),
+                    },
+                )
+            except LabubotError as error:
+                logger.warning(f"Búsqueda '{keywords}' cortada: {error}")
+                break
             page_jobs = extract_job_cards(list_offers_html)
             if not page_jobs:
                 break
@@ -53,9 +61,14 @@ class LinkedIn:
         Args:
             url: URL de la oferta, tal como la devuelve `search()`.
         Returns:
-            str: La descripción en texto plano. Vacía si la oferta ya no existe.
+            str: La descripción en texto plano. Vacía si la oferta ya no existe
+            o LinkedIn no la pudo servir.
         """
-        offer_html = self._get(url, "el detalle de la oferta")
+        try:
+            offer_html = self._get(url, "el detalle de la oferta")
+        except LabubotError as error:
+            logger.warning(f"Sin descripción de {url}: {error}")
+            return ""
         if not offer_html:
             return ""
         return extract_description(offer_html)
@@ -77,6 +90,7 @@ class LinkedIn:
         for _ in range(RETRIES - 1):
             try:
                 return self.driver.get(url, subject, params)
-            except (LabubotRateLimitError, LabubotRequestError):
+            except LabubotError as error:
+                logger.debug(f"Reintento tras: {error}")
                 time.sleep(PAUSE)
         return self.driver.get(url, subject, params)
