@@ -60,15 +60,18 @@ buscar  →  filtrar títulos baneados  →  saltear ya vistas  →  bajar descr
 2. Los títulos con una palabra de `BLOCKED_TITLE_WORDS` se descartan sin leer.
 3. Las urls que ya están en `vistas.txt` se saltean: no se vuelve a pedir su
    detalle ni a gastar tokens en ellas.
-4. Del resto se baja la descripción completa y se marca como vista.
+4. Del resto se baja la descripción completa.
 5. El `Classifier` le pone color a cada oferta contra `perfil.md`.
-6. Todo queda en `resultados/AAAA-MM-DD_HHMM.json`, con su color.
-7. Mediante un Bot de Telegram envía las ofertas 🟢🟡.
+6. Las ofertas quedan en `resultados/AAAA-MM-DD_HHMM.json` y su color en el
+   `.csv` del mismo nombre.
+7. Un bot de Telegram manda las 🟢 y 🟡, una por mensaje.
+8. Recién ahí se guarda `vistas.txt`.
 
 El filtro y el chequeo de vistas corren **antes** de bajar un solo detalle: cada
 descarte ahorra un request al portal y una llamada al LLM, que es lo único que se
-paga. Aunque la corrida se corte a mitad, `vistas.txt` y el JSON se guardan con
-lo que se alcanzó a leer.
+paga. `vistas.txt` se escribe al final, con todo clasificado y enviado: si la
+corrida se corta a mitad (OpenAI sin cuota, Telegram caído), la próxima vuelve a
+leer esas ofertas en vez de perderlas.
 
 ## Arquitectura
 
@@ -77,15 +80,17 @@ leer lo que vuelve.
 
 ```
 main.py                     orquesta el flujo de arriba
+daemon.py                   corre main() al arrancar y después cada hora
 perfil.md                   ← tu CV. La vara con la que se mide todo
 src/
   config/
-    settings.py             .env (pydantic-settings)
+    settings.py             .env (pydantic-settings) y el log en logs/app.log
     search.py               ← términos y palabras baneadas
   constants/
     http.py                 timeout, idioma y user agent
     openai.py               modelo
     prompt.py               ← las instrucciones y los tres colores
+    telegram.py             Bot API, pausa entre mensajes y emojis
   driver/                   el único que toca httpx
     http.py                 Driver: get() y post_json()
   portals/                  una carpeta por portal
@@ -97,6 +102,8 @@ src/
     indeed/ jobicy/ talent/ weworkremotely/ workable/
   classifier/
     openai.py               Classifier(cv): classify()
+  notifier/
+    telegram.py             Telegram(driver): send()
   db/
     seen.py                 SeenUrls: las urls ya leídas, en vistas.txt
   schemas/
@@ -114,8 +121,12 @@ División por módulos:
   `Driver` inyectado), su extractor (`html_`, `json_` o `xml_extractor.py`) y
   `constants.py`. Todos exponen `search()` y `description(url)`; los reintentos,
   si el sitio los necesita, viven acá (LinkedIn reintenta 429 y timeouts sueltos).
+  Un error que no se cura reintentando corta solo esa búsqueda con lo que alcanzó
+  a traer, o deja vacía esa descripción: el resto de la corrida sigue.
 - **`classifier/`** mediante Decisions realiza la comparacion de ofertas y el CV. Y le habla por el SDK oficial de
   OpenAI, no por el `Driver`.
+- **`notifier/`** manda las 🟢🟡 a Telegram por `Driver.post_json()`: la Bot API
+  es un POST más.
 - **`db/`** lo que se recuerda entre corridas. Un simple .TXT. No es necesario hacer un overkill sobre algo tan sencillo.
 - **`schemas/`** son los tipos, sin lógica.
 
@@ -149,10 +160,42 @@ cp .env.example .env     # y cargá LLM_API_KEY (platform.openai.com/api-keys)
 
 Después escribí tu CV en `perfil.md`: es contra lo que se compara cada oferta.
 
+Para Telegram:
+
+1. Hablale a [@BotFather](https://t.me/BotFather), `/newbot`, y el token que te
+   da va en `TELEGRAM_TOKEN`.
+2. Mandale cualquier mensaje a tu bot.
+3. Abrí `https://api.telegram.org/bot<token>/getUpdates`: el `chat.id` que
+   aparece va en `TELEGRAM_CHAT_ID`.
+
 ## Uso
 
 ```bash
-python main.py
+python main.py      # una corrida
+python daemon.py    # una al arrancar y después una por hora
+```
+
+Si una corrida falla, el daemon deja el error en el log y vuelve a intentar a la
+hora siguiente. Se corre desde la raíz del repo: `perfil.md`, `vistas.txt`,
+`resultados/` y `logs/` van por ruta relativa.
+
+### Logs
+
+No hay `print`: todo va a `logs/app.log`. `src/config/settings.py` lo configura
+una vez con `logging.basicConfig` y cada módulo hace
+`logger = logging.getLogger(__name__)`.
+
+```
+2026-10-25 15:06:30,770 - src.portals.computrabajo.portal - WARNING - portal.py:48 - Búsqueda 'python' cortada: Respondió 429 al obtener el listado de ofertas
+```
+
+En `INFO` queda una línea por portal y el resumen de la corrida (colores y
+envíos). Con `LOG_LEVEL=DEBUG` se suma cada término, cada título
+bloqueado, cada oferta clasificada y cada reintento de LinkedIn. Para seguirlo en
+vivo:
+
+```powershell
+Get-Content logs\app.log -Wait -Tail 20
 ```
 
 Todo se configura en `.env`:
@@ -162,6 +205,9 @@ Todo se configura en `.env`:
 | `LOCATION` | Ubicación tal como la escribe cada portal (`Argentina`) |
 | `HOURS` | Ventana de publicación (24 = solo lo de hoy) |
 | `LLM_API_KEY` | Clave de OpenAI |
+| `TELEGRAM_TOKEN` | Token del bot, el que da @BotFather |
+| `TELEGRAM_CHAT_ID` | Chat al que se mandan las ofertas |
+| `LOG_LEVEL` | Nivel mínimo del log: `INFO` (por defecto) o `DEBUG` |
 
 `vistas.txt` guarda una url por línea de lo ya leído: la corrida del día
 siguiente solo baja lo nuevo. Para empezar de cero, borralo.

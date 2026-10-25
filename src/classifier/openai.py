@@ -1,5 +1,7 @@
 """Clasificador: le pregunta a OpenAI de qué color es cada oferta."""
 
+import logging
+
 from openai import OpenAI
 
 from src.config.settings import settings
@@ -7,6 +9,9 @@ from src.constants.openai import MODEL
 from src.constants.prompt import CHOICES, INSTRUCTIONS, OFFER_BLOCK
 from src.enums.traffic_light import TrafficLight
 from src.schemas.job import Offer
+
+
+logger = logging.getLogger(__name__)
 
 
 class Classifier:
@@ -55,4 +60,6 @@ class Classifier:
                 }
             ],
         )
-        return TrafficLight(decision.answers[0].choice)
+        light = TrafficLight(decision.answers[0].choice)
+        logger.debug(f"{light}: {offer['title']}")
+        return light

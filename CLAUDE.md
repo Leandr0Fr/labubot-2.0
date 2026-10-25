@@ -14,6 +14,10 @@ evalúa contra `perfil.md` con un LLM.
   identificadores y claves JSON.
 - Sin sobreingeniería: nada de random, heurísticas de evasión ni capas de
   abstracción para casos que todavía no existen. Que funcione primero.
+- Textos con f-strings (`f"hola {test}"`), también en los logs. `.format()` solo
+  para plantillas que viven en `constants`.
+- Nada de `print`: cada módulo hace `logger = logging.getLogger(__name__)`.
+  `src/config/settings.py` configura el log (`logs/app.log`) con `basicConfig`.
 
 ## Arquitectura
 
@@ -28,6 +32,7 @@ evalúa contra `perfil.md` con un LLM.
   Habla con OpenAI por el SDK oficial (`openai`), no por el `Driver`.
 - `src/parsers/` interpreta lo que no es de un portal: hoy solo el veredicto
   del LLM. El parser de un sitio vive con su portal.
+- `src/notifier/` manda las ofertas a Telegram, por `Driver.post_json()`.
 - `src/schemas/` los TypedDicts del dominio, sin lógica.
 - `src/db/` lo que se recuerda entre corridas: hoy, las urls ya leídas en un `.txt`.
 - `src/constants/` lo configurable y lo medido que NO es de un portal
