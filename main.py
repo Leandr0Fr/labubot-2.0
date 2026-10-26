@@ -2,13 +2,19 @@
 LABUBOT 2.0
 """
 
+import csv
 import json
+import logging
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-from src.config.search import TERMS
+from src.classifier.openai import Classifier
+from src.config.search import BLOCKED_TITLE_WORDS, TERMS
 from src.db.seen import SeenUrls
 from src.driver.http import Driver
+from src.enums.traffic_light import TrafficLight
+from src.notifier.telegram import Telegram
 from src.portals.bumeran import Bumeran
 from src.portals.computrabajo import Computrabajo
 from src.portals.empleosit import EmpleosIT
@@ -24,6 +30,9 @@ from src.schemas.job import Offer
 
 RESULTS_DIR = Path("resultados")
 SEEN_PATH = Path("vistas.txt")
+PROFILE_PATH = Path("perfil.md")
+
+logger = logging.getLogger(__name__)
 
 
 def main() -> None:
@@ -44,8 +53,12 @@ def main() -> None:
             # Por url: los términos se pisan entre sí.
             jobs: dict[str, str] = {}
             for term in TERMS:
-                jobs.update(portal.search(term))
-                print(f"  {type(portal).__name__} {term}: {len(jobs)} ofertas")
+                term_jobs = portal.search(term)
+                jobs.update(term_jobs)
+                logger.debug(
+                    f"{type(portal).__name__} '{term}': {len(term_jobs)} ofertas"
+                )
+            logger.info(f"{type(portal).__name__}: {len(jobs)} ofertas")
             found.append((portal, jobs))
 
         # Entienden OR: una sola búsqueda con todos los términos.
@@ -58,34 +71,74 @@ def main() -> None:
         any_term = " OR ".join(quoted_terms)
         for portal in (Indeed(driver), EmpleosIT(driver), Workable(driver)):
             jobs = portal.search(any_term)
-            print(f"  {type(portal).__name__}: {len(jobs)} ofertas")
+            logger.info(f"{type(portal).__name__}: {len(jobs)} ofertas")
             found.append((portal, jobs))
 
         # Sin búsqueda: traen todo lo reciente y filtra el LLM.
         for portal in (Jobicy(driver), WeWorkRemotely(driver)):
             jobs = portal.search()
-            print(f"  {type(portal).__name__}: {len(jobs)} ofertas")
+            logger.info(f"{type(portal).__name__}: {len(jobs)} ofertas")
             found.append((portal, jobs))
 
+        already_seen = blocked = empty = 0
         for portal, jobs in found:
             for url, title in jobs.items():
                 if seen.exists(url):
+                    already_seen += 1
+                    continue
+                word = None
+                for banned in BLOCKED_TITLE_WORDS:
+                    if banned in title.lower():
+                        word = banned
+                        break
+                if word:
+                    logger.debug(f"Título bloqueado por '{word}': {title}")
+                    blocked += 1
                     continue
                 description = portal.description(url)
                 seen.add(url)
                 if not description:
+                    empty += 1
                     continue
                 offers.append(Offer(title=title, description=description, url=url))
-    finally:
-        driver.close()
-        # Aunque corte a mitad: lo leído se guarda junto con sus ofertas.
-        seen.save()
+        logger.info(
+            f"{len(offers)} ofertas nuevas; salteadas: {already_seen} ya vistas, "
+            f"{blocked} por título, {empty} sin descripción"
+        )
+
         RESULTS_DIR.mkdir(exist_ok=True)
         path = RESULTS_DIR / f"{datetime.now():%Y-%m-%d_%H%M}.json"
         path.write_text(
             json.dumps(offers, ensure_ascii=False, indent=2), encoding="utf-8"
         )
-    print(f"{len(offers)} ofertas nuevas en {path}")
+
+        lights = Classifier(PROFILE_PATH.read_text(encoding="utf-8")).classify(offers)
+        csv_path = path.with_suffix(".csv")
+        with csv_path.open("w", encoding="utf-8", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["light", "title", "url"])
+            for offer in offers:
+                writer.writerow([lights[offer["url"]], offer["title"], offer["url"]])
+        colors = Counter(lights.values())
+        logger.info(
+            f"Clasificadas: {colors[TrafficLight.GREEN]} verdes, "
+            f"{colors[TrafficLight.YELLOW]} amarillas, "
+            f"{colors[TrafficLight.RED]} rojas (en {csv_path})"
+        )
+
+        telegram = Telegram(driver)
+        sent = 0
+        for offer in offers:
+            light = lights[offer["url"]]
+            if light == TrafficLight.RED:
+                continue
+            telegram.send(offer, light)
+            sent += 1
+        logger.info(f"{sent} enviadas a Telegram")
+    finally:
+        driver.close()
+    # Recién acá: si algo falló, la próxima corrida vuelve a leer esas ofertas.
+    seen.save()
 
 
 if __name__ == "__main__":
