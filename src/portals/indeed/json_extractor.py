@@ -33,18 +33,22 @@ def extract_offers(raw: str) -> list[Offer]:
     Args:
         raw: JSON devuelto por la API GraphQL.
     Returns:
-        list[Offer]: Una por oferta; vacía si la página no traía ninguna.
+        list[Offer]: Una por oferta, con la ubicación en la primera línea de la
+        descripción; vacía si la página no traía ninguna.
     Raises:
         LabubotRequestError: Si GraphQL devolvió errores.
     """
     offers: list[Offer] = []
     for result in _search(raw)["results"]:
         job = result["job"]
+        # Las remotas vienen como "Desde casa".
+        location = job["location"]["formatted"]["long"]
         description = BeautifulSoup(job["description"]["html"], "html.parser")
+        text = description.get_text(separator="\n", strip=True)
         offers.append(
             Offer(
                 title=html.unescape(job["title"]).strip(),
-                description=description.get_text(separator="\n", strip=True),
+                description=f"Ubicación: {location}\n{text}",
                 url=JOB_URL.format(job_id=job["key"]),
             )
         )

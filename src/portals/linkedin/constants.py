@@ -15,3 +15,6 @@ RETRIES = 10
 SEL_JOB_CARD = ".base-search-card"
 SEL_JOB_TITLE = ".base-search-card__title"
 SEL_JOB_LINK = ".base-card__full-link"
+
+# El primero es la ubicación; el segundo, la cantidad de postulantes.
+SEL_DETAIL_LOCATION = ".topcard__flavor--bullet"

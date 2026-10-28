@@ -24,7 +24,7 @@ class Computrabajo:
 
     def search(self, keywords: str) -> dict[str, str]:
         """
-        Trae url y título de las ofertas del término, sin pedir su detalle.
+        Trae url y título de las ofertas remotas o de AMBA del término, sin su detalle.
         Args:
             keywords: Término de búsqueda, tal como lo escribirías en el portal.
         Returns:
@@ -49,8 +49,7 @@ class Computrabajo:
                 break
             page_jobs = extract_job_cards(list_offers_html)
             # Pasada la última, el sitio devuelve una página sin ofertas.
-            new_jobs = page_jobs.keys() - jobs.keys()
-            if not new_jobs:
+            if page_jobs is None:
                 break
             jobs.update(page_jobs)
         return jobs

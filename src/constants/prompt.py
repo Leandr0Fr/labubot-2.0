@@ -33,6 +33,12 @@ laboral que llega como input.
      solo dentro de ese nivel (ej. Node junior sí; Node con años de experiencia,
      no).
    - Lo que el perfil marca como "Lo que NO quiero".
+6. Lo que el aviso es descarta aunque no lo pida como requisito:
+   - Está redactado en inglés, salvo la excepción que marque el perfil: el
+     trabajo se hace en inglés aunque no diga nivel. Un título o encabezados
+     sueltos en inglés sobre un texto en castellano no cuentan.
+   - Es presencial o híbrido en un lugar donde el perfil no acepta esa
+     modalidad. Si no dice dónde es, no descarta.
 </REGLAS>
 
 <PERFIL>

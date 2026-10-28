@@ -29,7 +29,7 @@ class Bumeran:
 
     def search(self, keywords: str) -> dict[str, str]:
         """
-        Trae url y título de las ofertas del término, sin pedir su detalle.
+        Trae url y título de las ofertas remotas o de AMBA del término, sin su detalle.
         Args:
             keywords: Término de búsqueda; el endpoint busca solo en el título.
         Returns:
@@ -56,7 +56,7 @@ class Bumeran:
                 logger.warning(f"Búsqueda '{keywords}' cortada: {error}")
                 break
             page_jobs = extract_job_cards(raw)
-            if not page_jobs:
+            if page_jobs is None:
                 break
             jobs.update(page_jobs)
         return jobs

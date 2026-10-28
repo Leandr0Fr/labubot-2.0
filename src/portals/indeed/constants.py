@@ -31,7 +31,7 @@ query {{
     filters: [{{ date: {{ field: "dateOnIndeed", start: "{hours}h" }} }}]
   ) {{
     pageInfo {{ nextCursor }}
-    results {{ job {{ key title description {{ html }} }} }}
+    results {{ job {{ key title location {{ formatted {{ long }} }} description {{ html }} }} }}
   }}
 }}
 """

@@ -3,6 +3,7 @@
 from bs4 import BeautifulSoup
 
 from src.portals.linkedin.constants import (
+    SEL_DETAIL_LOCATION,
     SEL_JOB_CARD,
     SEL_JOB_TITLE,
     SEL_JOB_LINK,
@@ -32,12 +33,14 @@ def extract_job_cards(html: str) -> dict[str, str]:
 
 def extract_description(html: str) -> str:
     """
-    Extrae la descripción de la página de una oferta.
+    Extrae la ubicación y la descripción de la página de una oferta.
     Args:
         html: HTML devuelto por jobPosting/{id}.
     Returns:
-        str: Descripción en texto plano.
+        str: Ubicación en la primera línea y descripción, en texto plano.
     """
     soup = BeautifulSoup(html, "html.parser")
+    location = soup.select_one(SEL_DETAIL_LOCATION).get_text(strip=True)
     description_container = soup.find("div", class_="show-more-less-html__markup")
-    return description_container.get_text(separator="\n", strip=True)
+    description = description_container.get_text(separator="\n", strip=True)
+    return f"Ubicación: {location}\n{description}"

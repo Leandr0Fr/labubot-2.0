@@ -10,6 +10,11 @@ JOB_URL = f"{_BASE}/empleos/{{job_id}}.html"
 ZONAJOBS_JOB_URL = "https://www.zonajobs.com.ar/empleos/{job_id}.html"
 ZONAJOBS_PORTAL = "zonajobs"
 
+REMOTE = "Remoto"
+# `localizacion` es "Localidad, Provincia"; CABA es "Capital Federal, Buenos Aires".
+# La provincia suma el interior bonaerense: ese lo descarta el LLM.
+AMBA_PROVINCE = "Buenos Aires"
+
 HEADERS = {
     "x-site-id": "BMAR",
     "Referer": f"{_BASE}/",

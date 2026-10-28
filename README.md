@@ -49,6 +49,21 @@ exacto de los que muestra `/jobs/search` deslogueado. Misma búsqueda.
 Los que no aceptan búsqueda traen todo lo publicado en la ventana y el filtro lo
 hace el LLM.
 
+### Ubicación
+
+Se busca en todo el país: el remoto vale desde cualquier provincia, y lo
+presencial o híbrido solo en AMBA. Ningún portal sabe pedir "remoto o AMBA" en
+un solo request, así que se resuelve después de buscar:
+
+- **Bumeran y Computrabajo** traen modalidad y provincia en el listado: lo
+  presencial o híbrido de otra provincia se descarta ahí, antes de bajar el
+  detalle. La provincia de Buenos Aires pasa entera; el interior bonaerense lo
+  descarta el LLM.
+- **LinkedIn, Indeed, Talent y Computrabajo** dan la ubicación pero no la
+  modalidad (el listado guest de LinkedIn ignora `f_WT`). La anteponen a la
+  descripción como `Ubicación: …` y decide el LLM con la regla de `perfil.md`:
+  una ciudad del interior puede ser un remoto.
+
 ## Flujo
 
 ```
