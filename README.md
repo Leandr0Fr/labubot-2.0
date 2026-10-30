@@ -35,19 +35,20 @@ exacto de los que muestra `/jobs/search` deslogueado. Misma búsqueda.
 | Portal | Cómo se le habla | Búsqueda |
 |---|---|---|
 | LinkedIn | HTML del endpoint `jobs-guest` | un término por vez |
-| Bumeran | API JSON de su front | un término por vez |
 | Computrabajo | HTML de ar.computrabajo.com | un término por vez |
 | Get on Board | API pública | un término por vez |
 | Himalayas | API pública | un término por vez |
 | Talent | HTML de ar.talent.com | un término por vez |
 | Indeed | API GraphQL de su app | todos juntos con `OR` |
-| Empleos IT | HTML de su buscador | todos juntos con `OR` |
 | Workable | API de jobs.workable.com | todos juntos con `OR` |
+| Bumeran | API JSON de su front | sin búsqueda: el área de sistemas |
+| Empleos IT | HTML de su buscador | sin búsqueda: todo lo reciente |
 | Jobicy | API pública | sin búsqueda: todo lo reciente |
 | We Work Remotely | RSS de back-end y full-stack | sin búsqueda: todo lo reciente |
 
-Los que no aceptan búsqueda traen todo lo publicado en la ventana y el filtro lo
-hace el LLM.
+Los que van sin búsqueda traen todo lo publicado en la ventana y el filtro lo
+hace el LLM. Bumeran y Empleos IT sí buscan, pero publican tan poco de sistemas
+que por término traían de 1 a 3 ofertas por corrida.
 
 ### Ubicación
 
