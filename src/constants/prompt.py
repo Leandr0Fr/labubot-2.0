@@ -39,6 +39,8 @@ laboral que llega como input.
      sueltos en inglés sobre un texto en castellano no cuentan.
    - Es presencial o híbrido en un lugar donde el perfil no acepta esa
      modalidad. Si no dice dónde es, no descarta.
+   - No describe un puesto: está vacío, es texto de relleno o es un aviso de
+     prueba.
 </REGLAS>
 
 <PERFIL>
