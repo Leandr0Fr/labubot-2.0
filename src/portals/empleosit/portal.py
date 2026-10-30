@@ -27,11 +27,12 @@ class EmpleosIT:
     def __init__(self, driver: Driver) -> None:
         self.driver = driver
 
-    def search(self, keywords: str) -> dict[str, str]:
+    def search(self) -> dict[str, str]:
         """
-        Trae url y título de las ofertas de la búsqueda, sin pedir su detalle.
-        Args:
-            keywords: Términos unidos con OR; los de varias palabras, entre comillas.
+        Trae url y título de todas las ofertas recientes, sin pedir su detalle.
+
+        Sin término: el sitio es solo de sistemas y publica pocas por día.
+        Filtra el LLM.
         Returns:
             dict[str, str]: url : título, sin repetir.
         """
@@ -43,7 +44,6 @@ class EmpleosIT:
                     SEARCH_URL,
                     "el listado de ofertas",
                     {
-                        "keywords[boolean]": keywords,
                         "PostedWithin[multi_like][]": str(days),
                         "listings_per_page": str(JOBS_PER_PAGE),
                         "sorting_field": SORTING_FIELD,
