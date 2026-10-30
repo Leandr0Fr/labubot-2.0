@@ -44,7 +44,6 @@ def main() -> None:
         found = []
         for portal in (
             LinkedIn(driver),
-            Bumeran(driver),
             Computrabajo(driver),
             GetOnBoard(driver),
             Himalayas(driver),
@@ -69,13 +68,18 @@ def main() -> None:
                 quoted = f'"{term}"'
             quoted_terms.append(quoted)
         any_term = " OR ".join(quoted_terms)
-        for portal in (Indeed(driver), EmpleosIT(driver), Workable(driver)):
+        for portal in (Indeed(driver), Workable(driver)):
             jobs = portal.search(any_term)
             logger.info(f"{type(portal).__name__}: {len(jobs)} ofertas")
             found.append((portal, jobs))
 
         # Sin búsqueda: traen todo lo reciente y filtra el LLM.
-        for portal in (Jobicy(driver), WeWorkRemotely(driver)):
+        for portal in (
+            Bumeran(driver),
+            EmpleosIT(driver),
+            Jobicy(driver),
+            WeWorkRemotely(driver),
+        ):
             jobs = portal.search()
             logger.info(f"{type(portal).__name__}: {len(jobs)} ofertas")
             found.append((portal, jobs))
