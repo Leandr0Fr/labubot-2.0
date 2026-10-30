@@ -24,6 +24,9 @@ JOBS_PER_PAGE = 100
 
 SORT = "RECIENTES"
 
+AREA_FILTER = "area"
+AREA = "tecnologia-sistemas-y-telecomunicaciones"
+
 RECENCY_FILTER = "dias_fecha_publicacion"
 
 RECENCY_BUCKETS = {
