@@ -23,6 +23,7 @@ from src.portals.himalayas import Himalayas
 from src.portals.indeed import Indeed
 from src.portals.jobicy import Jobicy
 from src.portals.linkedin import LinkedIn
+from src.portals.sutrabajo import SuTrabajo
 from src.portals.talent import Talent
 from src.portals.weworkremotely import WeWorkRemotely
 from src.portals.workable import Workable
@@ -78,6 +79,7 @@ def main() -> None:
             Bumeran(driver),
             EmpleosIT(driver),
             Jobicy(driver),
+            SuTrabajo(driver),
             WeWorkRemotely(driver),
         ):
             jobs = portal.search()

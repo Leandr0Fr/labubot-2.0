@@ -1,6 +1,6 @@
 # LABUBOT 2.0
 
-Buscás como buscarías a mano, en 11 portales a la vez. Con Decisions de OpenAI analiza cada oferta
+Buscás como buscarías a mano, en 12 portales a la vez. Con Decisions de OpenAI analiza cada oferta
 contra tu CV y la pinta de 🟢 🟡 🔴.
 
 ## La idea
@@ -44,11 +44,17 @@ exacto de los que muestra `/jobs/search` deslogueado. Misma búsqueda.
 | Bumeran | API JSON de su front | sin búsqueda: el área de sistemas |
 | Empleos IT | HTML de su buscador | sin búsqueda: todo lo reciente |
 | Jobicy | API pública | sin búsqueda: todo lo reciente |
+| SuTrabajo | REST de su WordPress | sin búsqueda: lo reciente de Argentina y de remoto |
 | We Work Remotely | RSS de back-end y full-stack | sin búsqueda: todo lo reciente |
 
 Los que van sin búsqueda traen todo lo publicado en la ventana y el filtro lo
 hace el LLM. Bumeran y Empleos IT sí buscan, pero publican tan poco de sistemas
 que por término traían de 1 a 3 ofertas por corrida.
+
+SuTrabajo es un hub: republica avisos de LinkedIn, Computrabajo, Jooble, Talent y
+otros sitios, con el título y la descripción reescritos en español. Se guarda la
+url del aviso original, así que lo que ya trajo LinkedIn no se repite, y suma
+avisos de LinkedIn que `jobs-guest` no devuelve.
 
 ### Ubicación
 
@@ -64,6 +70,8 @@ un solo request, así que se resuelve después de buscar:
   modalidad (el listado guest de LinkedIn ignora `f_WT`). La anteponen a la
   descripción como `Ubicación: …` y decide el LLM con la regla de `perfil.md`:
   una ciudad del interior puede ser un remoto.
+- **SuTrabajo** se pide por sección, `/argentina/` y `/remoto/`, y la ubicación
+  ya viene dentro de su descripción.
 
 ## Flujo
 
@@ -115,7 +123,7 @@ src/
       html_extractor.py     ← lo único que sabe del DOM de LinkedIn
       constants.py          URLs, paginación, pausa y reintentos
     bumeran/ computrabajo/ empleosit/ getonbrd/ himalayas/
-    indeed/ jobicy/ talent/ weworkremotely/ workable/
+    indeed/ jobicy/ sutrabajo/ talent/ weworkremotely/ workable/
   classifier/
     openai.py               Classifier(cv): classify()
   notifier/
