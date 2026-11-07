@@ -16,7 +16,10 @@ class Settings(BaseSettings):
     - HOURS: Ventana de publicación (24 = solo lo de hoy).
     - LLM_API_KEY: Clave de OpenAI (platform.openai.com/api-keys).
     - TELEGRAM_TOKEN: Token del bot, el que da @BotFather.
-    - TELEGRAM_CHAT_ID: Chat al que el bot manda las ofertas.
+    - ADMIN_CHAT_ID: Chat del admin: aprueba las altas y ve /usuarios.
+    - WEBHOOK_URL: URL pública a la que Telegram manda los updates.
+    - WEBHOOK_SECRET: Secreto que Telegram manda en cada update; vacío = rechaza todo.
+    - DB_PATH: Archivo SQLite que comparten la api y el worker.
     - LOG_LEVEL: Nivel mínimo que se loguea (DEBUG suma cada término y oferta).
     """
 
@@ -24,7 +27,10 @@ class Settings(BaseSettings):
     hours: int = 24
     llm_api_key: str = ""
     telegram_token: str = ""
-    telegram_chat_id: str = ""
+    admin_chat_id: int = 0
+    webhook_url: str = ""
+    webhook_secret: str = ""
+    db_path: str = "labubot.db"
     log_level: str = "INFO"
 
     model_config = SettingsConfigDict(env_file=".env")
