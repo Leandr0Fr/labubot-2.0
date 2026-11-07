@@ -6,10 +6,7 @@ contra tu CV, la pinta de 🟢 🟡 🔴 y te manda por Telegram las que valen l
 Es un bot interno, para hasta 5 personas. Cada una tiene su CV, sus palabras clave y sus palabras
 bloqueadas, y lo configura todo desde el chat con el bot.
 
-> **Estado.** Este README describe la versión multiusuario. Está diseñada en
-> [`docs/telegram/`](docs/telegram/README.md) y se implementa por fases
-> ([`tareas.md`](docs/telegram/tareas.md)). Mientras tanto, el código que corre es el de un solo
-> chat: ver [Uso hoy](#uso-hoy-versión-de-un-chat).
+<p align="center"><img src="docs/telegram/logo/labubot-512.png" alt="Logo de labubot" width="160"></p>
 
 ## La idea
 
@@ -103,6 +100,7 @@ llegan ofertas.
 | `/start` | Pide acceso, o reactiva el bot si lo había bloqueado |
 | `/settings` | Panel con sus palabras clave, sus bloqueadas, su perfil y la pausa |
 | `/perfil` | Carga o reemplaza su CV |
+| `/template` | Manda una plantilla en Markdown para armar el CV, con las secciones que más pesan al clasificar |
 | `/pausa` · `/reanudar` | Deja de recibir ofertas, o vuelve a recibirlas |
 | `/ayuda` | Qué hace el bot y cómo usarlo |
 | `/usuarios` | Solo el admin: todos los usuarios, con su estado y su `chat_id` |
@@ -110,8 +108,8 @@ llegan ofertas.
 **El panel `/settings`** es un solo mensaje con botones, que se edita al navegar
 en vez de mandar mensajes nuevos: 🔎 Términos, 🚫 Bloqueadas, 📄 Perfil y
 ⏸ Pausar. En cada lista, ➕ Agregar y ➖ Quitar piden las palabras separadas por
-coma. Los usuarios nuevos arrancan con las listas por defecto de
-`src/config/search.py`.
+coma. Los usuarios nuevos arrancan con las dos listas vacías: el mensaje de
+aprobación les pide cargarlas.
 
 **Qué llega en cada corrida.** Un bloque por cada palabra clave, en orden
 alfabético. Si encontró algo, un encabezado y después cada oferta en su propio
@@ -221,13 +219,12 @@ leer lo que vuelve.
 main.py                     la corrida: usuario por usuario
 daemon.py                   worker: corre main() al arrancar y después cada hora
 api.py                      FastAPI: monta el webhook de Telegram
-migrate.py                  una vez: crea labubot.db desde perfil.md, vistas.txt y las listas por defecto
+migrate.py                  una vez: crea labubot.db desde la versión de un chat (perfil.md, vistas.txt y sus listas)
 set_webhook.py              una vez por deploy: registra el webhook y el menú de comandos
-deploy/                     Caddyfile y las unidades de systemd de api y worker
+deploy/                     unidades de systemd (api, worker y túnel ngrok), ngrok.yml, Caddyfile y logrotate
 src/
   config/
     settings.py             .env (pydantic-settings) y el log en logs/app.log
-    search.py               ← palabras clave y bloqueadas por defecto (las de cada usuario nuevo)
   constants/
     http.py                 timeout, idioma y user agent
     openai.py               modelo
@@ -281,8 +278,9 @@ División por módulos:
 
 Si LinkedIn cambia el markup se toca `portals/linkedin/html_extractor.py`; si
 cambia la query, `portals/linkedin/portal.py`. Sumar un portal es crear una
-carpeta en `portals/` y agregarlo al loop que corresponda en `main.py`: ni el
-`Driver` ni el `Classifier` se enteran.
+carpeta en `portals/` y agregarlo a la lista de portales de `main.py` (y a
+`WITHOUT_SEARCH` si no busca por palabra): ni el `Driver` ni el `Classifier` se
+enteran.
 
 ### El LLM: Luna, por la Decisions API
 
@@ -304,15 +302,19 @@ esperando. Los límites de tu cuenta están en
 
 Corre en **un VPS Linux, de un proveedor todavía a definir**. Pide poco: dos
 procesos que esperan la red casi todo el tiempo y un SQLite. Con 1 a 2 GB de RAM
-alcanza.
+alcanza. El paso a paso está en
+[`docs/telegram/despliegue.md`](docs/telegram/despliegue.md).
 
-- **Un dominio** apuntando al VPS: Telegram solo llama a un webhook por HTTPS.
-- **Caddy** delante, con HTTPS automático, pasándole todo a uvicorn en
-  `127.0.0.1:8000`. uvicorn nunca queda expuesto.
-- **systemd** levanta `labubot-api` y `labubot-worker` y los reinicia si se caen.
-- **Python 3.14**, como hoy (en Ubuntu, con `uv python install 3.14`).
+- **Un túnel de ngrok** con el dominio fijo y gratis de la cuenta
+  (`<nombre>.ngrok-free.dev`): Telegram solo llama a un webhook por HTTPS, y así
+  no hace falta comprar un dominio ni abrir puertos. uvicorn escucha solo en
+  `127.0.0.1:8000`. Con dominio propio, la alternativa es Caddy con HTTPS
+  automático (`deploy/Caddyfile`).
+- **systemd** levanta `labubot-api`, `labubot-worker` y `labubot-ngrok` y los
+  reinicia si se caen.
+- **Python 3.14**, como en la PC (en Ubuntu, con `uv python install 3.14`).
 - **Backups**: un `sqlite3 labubot.db ".backup …"` diario, copiado fuera del VPS.
-- **Firewall**: solo 22, 80 y 443, y SSH solo con clave.
+- **Firewall**: solo SSH, con clave.
 
 **Antes de elegir proveedor, probar la IP.** Hoy se busca desde una IP
 residencial. Cualquier VPS da una IP de datacenter, y LinkedIn (más del 60 % de
@@ -323,9 +325,9 @@ sin plazo para hacerla. El plan está en
 [`docs/telegram/vps.md`](docs/telegram/vps.md) (§7) y vale para cualquier
 proveedor.
 
-**Si la IP no pasa**, se corre en una PC de casa con un túnel de `cloudflared`
-apuntando a uvicorn: IP residencial y el mismo código. El túnel es también la
-forma de desarrollar en Windows.
+**Si la IP no pasa**, se corre en una PC de casa con el mismo túnel apuntando a
+uvicorn: IP residencial y el mismo código. Un túnel es también la forma de
+desarrollar en Windows (ver [Desarrollo en la PC](#desarrollo-en-la-pc)).
 
 ## Instalación
 
@@ -341,10 +343,15 @@ Para el bot:
 1. Hablale a [@BotFather](https://t.me/BotFather), `/newbot`, y el token que te
    da va en `TELEGRAM_TOKEN`. Con `/setuserpic` le cargás el logo
    (`docs/telegram/logo/labubot-640.png`).
-2. Tu `chat_id` va en `ADMIN_CHAT_ID`: sos quien aprueba las altas. Es el mismo
-   valor que hoy está en `TELEGRAM_CHAT_ID`.
-3. `WEBHOOK_URL` es `https://<tu dominio>/telegram/webhook` y `WEBHOOK_SECRET`
-   un valor al azar: `python -c "import secrets; print(secrets.token_hex(32))"`.
+2. Tu `chat_id` va en `ADMIN_CHAT_ID`: sos quien aprueba las altas. Mandale un
+   mensaje al bot y buscalo en `https://api.telegram.org/bot<token>/getUpdates`
+   (con el webhook apagado; si no, Telegram contesta 409).
+3. `WEBHOOK_URL` es `https://<dominio del túnel>/telegram/webhook` y
+   `WEBHOOK_SECRET` un valor al azar:
+   `python -c "import secrets; print(secrets.token_hex(32))"`.
+
+`migrate.py` se corre una sola vez: vuelve a pisar el perfil del admin y le
+devuelve las listas que haya quitado si se corre con el bot ya en uso.
 
 ## Uso
 
@@ -358,16 +365,21 @@ En el VPS los dos primeros los levanta systemd. Si una corrida falla, el daemon
 deja el error en el log y vuelve a intentar a la hora siguiente. Se corre desde
 la raíz del repo: `labubot.db`, `resultados/` y `logs/` van por ruta relativa.
 
-### Uso hoy (versión de un chat)
+### Desarrollo en la PC
 
-Hasta terminar la fase F2 corre la versión anterior: un solo chat, configurado en
-`.env` con `TELEGRAM_CHAT_ID`, con el CV en `perfil.md` y lo ya visto en
-`vistas.txt`.
+Mismo código, con un **bot de prueba** (otro token de @BotFather): un bot tiene
+un solo webhook, y el del bot real apunta al VPS.
 
-```bash
-python main.py      # una corrida
-python daemon.py    # una al arrancar y después una por hora
-```
+1. `.env` de la PC: `TELEGRAM_TOKEN` del bot de prueba, tu `ADMIN_CHAT_ID`,
+   `DB_PATH=prueba.db` y cualquier `WEBHOOK_SECRET`.
+2. Terminal 1: `.venv/Scripts/python.exe -m uvicorn api:app --port 8000 --reload`.
+3. Terminal 2, un túnel: `ngrok http 8000` (con tu cuenta, usa el dominio fijo) o
+   `cloudflared tunnel --url http://localhost:8000` (sin cuenta; la URL
+   `https://<algo>.trycloudflare.com` cambia cada vez que se levanta).
+4. `WEBHOOK_URL=https://<dominio del túnel>/telegram/webhook` en el `.env` y
+   `.venv/Scripts/python.exe set_webhook.py`.
+5. El worker, a mano: `.venv/Scripts/python.exe main.py` hace una corrida.
+6. Al terminar, `https://api.telegram.org/bot<TOKEN>/deleteWebhook` en el navegador.
 
 ### Logs
 
@@ -379,9 +391,11 @@ una vez con `logging.basicConfig` y cada módulo hace
 2026-10-25 15:06:30,770 - src.portals.computrabajo.portal - WARNING - portal.py:48 - Búsqueda 'python' cortada: Respondió 429 al obtener el listado de ofertas
 ```
 
-En `INFO` queda una línea por portal y el resumen de la corrida (colores y
-envíos). Con `LOG_LEVEL=DEBUG` se suma cada término, cada título
-bloqueado, cada oferta clasificada y cada reintento de LinkedIn. Para seguirlo en
+En `INFO` quedan, por usuario, cuántas ofertas nuevas y salteadas hubo, los
+colores y cuántas se mandaron, y la duración de la corrida. Con
+`LOG_LEVEL=DEBUG` se suma cada búsqueda pedida de verdad (las que salen de la
+caché no), cada título bloqueado, cada oferta clasificada y cada reintento de
+LinkedIn. Para seguirlo en
 vivo:
 
 ```powershell
@@ -396,8 +410,8 @@ Todo se configura en `.env`:
 | `HOURS` | Ventana de publicación (24 = solo lo de hoy) |
 | `LLM_API_KEY` | Clave de OpenAI |
 | `TELEGRAM_TOKEN` | Token del bot, el que da @BotFather |
-| `ADMIN_CHAT_ID` | Tu chat: aprueba las altas y ve `/usuarios` (reemplaza a `TELEGRAM_CHAT_ID`) |
-| `WEBHOOK_URL` | La URL pública que llama Telegram: tu dominio, o el túnel en la PC |
+| `ADMIN_CHAT_ID` | Tu chat: aprueba las altas y ve `/usuarios` |
+| `WEBHOOK_URL` | La URL pública que llama Telegram: la del túnel (o tu dominio), con `/telegram/webhook` |
 | `WEBHOOK_SECRET` | El secreto que viaja en cada update; vacío, el webhook rechaza todo |
 | `DB_PATH` | El SQLite (`labubot.db` por defecto) |
 | `LOG_LEVEL` | Nivel mínimo del log: `INFO` (por defecto) o `DEBUG` |
@@ -406,16 +420,15 @@ Todo se configura en `.env`:
 
 **El perfil** — cada usuario carga el suyo con `/perfil`. Cuanto más concreto
 (años reales por tecnología, nivel real de inglés), menos verdes falsos.
-`perfil.md` queda como el perfil del admin que importa `migrate.py`.
+`perfil.md` es el perfil del admin que importa `migrate.py`; después de migrar
+no se lee más. Las reglas del prompt nombran secciones como las de ese archivo
+(seniority, idiomas, modalidad, "Lo que NO quiero"): un CV con esas secciones
+clasifica mejor.
 
-**Palabras clave y bloqueadas** — cada usuario edita las suyas desde `/settings`.
-`src/config/search.py` tiene las listas por defecto, con las que arranca cada
-usuario nuevo:
-
-| Lista | Qué hace |
-|---|---|
-| `DEFAULT_TERMS` | Lo que escribirías en el buscador |
-| `DEFAULT_BLOCKED_TITLE_WORDS` | Si aparece en el título, se descarta sin leer |
+**Palabras clave y bloqueadas** — son de cada usuario: las carga y las edita
+desde `/settings`, y arranca con las dos listas vacías. No hay listas en el
+código. Las palabras clave son lo que escribirías en el buscador; una palabra
+bloqueada que aparece en el título descarta la oferta sin gastar LLM.
 
 Las bloqueadas van contra el **título** y no contra la descripción porque media
 descripción menciona "SAP" o "Java" de pasada al listar el stack de la empresa, y
@@ -427,6 +440,5 @@ Todo lo de la versión multiusuario está en [`docs/telegram/`](docs/telegram/RE
 decisiones, diagramas (base de datos, conexiones, ciclo del usuario, casos de
 uso, secuencias), capturas, el diseño del código módulo por módulo
 ([`diseno.md`](docs/telegram/diseno.md)) y las tareas por fase
-([`tareas.md`](docs/telegram/tareas.md)). El resumen para leer de corrido, con
-tiempos estimados y por dónde arrancar, está en
-[`plan.pdf`](docs/telegram/plan.pdf).
+([`tareas.md`](docs/telegram/tareas.md)). El despliegue paso a paso está en
+[`despliegue.md`](docs/telegram/despliegue.md).

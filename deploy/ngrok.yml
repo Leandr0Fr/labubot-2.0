@@ -1,0 +1,10 @@
+# Va a /home/labubot/.config/ngrok/ngrok.yml, con chmod 600.
+# El authtoken y el dominio fijo (<nombre>.ngrok-free.dev) salen del dashboard de ngrok.
+version: 3
+agent:
+  authtoken: <AUTHTOKEN>
+endpoints:
+  - name: labubot
+    url: https://<nombre>.ngrok-free.dev
+    upstream:
+      url: http://127.0.0.1:8000

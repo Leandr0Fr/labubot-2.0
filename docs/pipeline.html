@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.17.0-dev.1">
-  <title>LABUBOT 2.0 — Pipeline de una corrida Diagram</title>
+  <title>LABUBOT 2.0 — Corrida horaria Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -5081,11 +5081,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
            data-preset-badge-blueprint="BLUEPRINT / REV 01"
            data-preset-badge-editorial="EDITORIAL / FIELD NOTE">
         <div class="pulse-dot"></div>
-        <h1>LABUBOT 2.0 — Pipeline de una corrida</h1>
+        <h1>LABUBOT 2.0 — Corrida horaria</h1>
       </div>
     </div>
 
-    <script id="archify-guided-views-data" type="application/json">[{"id":"camino-feliz","label":"De la búsqueda al veredicto","focus":["buscar","depurar","filtrar","detalle","evaluar","resultados"],"note":"El recorrido completo de una oferta que llega hasta el LLM."},{"id":"ahorro","label":"Dónde se ahorra cuota","focus":["cache","depurar","filtrar","descartadas"],"note":"Los dos cortes que evitan pagarle al LLM por ofertas que no sirven."},{"id":"persistencia","label":"Qué queda en disco","focus":["perfil","cache","resultados"],"note":"Lo que se lee al arrancar y lo que se escribe al terminar."}]</script>
+    <script id="archify-guided-views-data" type="application/json">[{"id":"una-oferta","label":"Una oferta, de punta a punta","focus":["activos","buscar","vista","bloqueada","descripcion","clasificar","anotar"],"note":"De las palabras del usuario al color anotado en deliveries, con su perfil en el prompt."},{"id":"ahorro","label":"Dónde se ahorra","focus":["buscar","vista","bloqueada","descripcion"],"note":"La caché de búsquedas, deliveries, las bloqueadas y offers cortan antes de pagarle al LLM."},{"id":"envio","label":"El envío por palabra","focus":["anotar","enviar","resumen","bloqueo"],"note":"Un bloque por palabra y el resumen silencioso; un 403 deja al usuario en blocked."},{"id":"corrida","label":"La corrida entera","focus":["activos","buscar","resumen","guardar"],"note":"Los activos, uno tras otro; al final, resultados/*.csv con chat_id, term, light, title, url."}]</script>
 
     <script id="archify-i18n-data" type="application/json">{"locale":"en","messages":{"viewer.kind.frontend":"Frontend","viewer.kind.backend":"Backend","viewer.kind.database":"Database","viewer.kind.cloud":"Cloud","viewer.kind.security":"Security","viewer.kind.messagebus":"Message bus","viewer.kind.external":"External","viewer.kind.neutral":"Neutral","viewer.kind.node":"Node","viewer.kind.start":"Start","viewer.kind.active":"Active","viewer.kind.waiting":"Waiting","viewer.kind.decision":"Decision","viewer.kind.success":"Success","viewer.kind.failure":"Failure","viewer.toolbar.actions":"Diagram actions","viewer.theme.toggle.title":"Toggle theme (T)","viewer.theme.toggle":"Toggle color theme","viewer.theme.dark":"Dark","viewer.theme.light":"Light","viewer.preset.choose.title":"Choose visual style (S cycles)","viewer.preset.choose":"Choose visual style","viewer.preset.style":"Style","viewer.preset.menu":"Visual style","viewer.preset.identity":"Visual identity","viewer.preset.cycles":"S cycles","viewer.preset.classic":"Classic","viewer.preset.classic.short":"Classic","viewer.preset.classic.hint":"Stable technical default","viewer.preset.flow":"Signal Flow","viewer.preset.flow.short":"Flow","viewer.preset.flow.hint":"Motion-forward presentation","viewer.preset.blueprint":"Blueprint","viewer.preset.blueprint.hint":"Engineering review","viewer.preset.editorial":"Editorial","viewer.preset.editorial.hint":"Publication and launch notes","viewer.preset.badge.signalFlow":"SIGNAL FLOW","viewer.preset.badge.blueprint":"BLUEPRINT / REV 01","viewer.preset.badge.editorial":"EDITORIAL / FIELD NOTE","viewer.preset.badge.editorialPlate":"ARCHIFY / PLATE 04","viewer.preset.current":"Visual style: {style}. Choose visual style","viewer.motion.live":"Live","viewer.motion.still":"Still","viewer.motion.pause":"Pause motion","viewer.motion.resume":"Resume motion","viewer.motion.reduced":"Motion paused by reduced-motion preference","viewer.motion.hidden":"Motion paused while this page is hidden","viewer.motion.yielding":"Pause motion; currently yielding to {owner}","viewer.motion.yielding.title":"Live preview enabled · yielding to {owner}","viewer.owner.story":"the guided story","viewer.owner.chapter":"the active chapter","viewer.owner.chapterPreview":"the chapter delta preview","viewer.owner.handoff":"the chapter handoff","viewer.owner.route":"Route Probe","viewer.owner.lens":"Semantic Lens","viewer.owner.relationship":"Relationship Preview","viewer.owner.intent":"Intent Trace","viewer.owner.focus":"semantic focus","viewer.owner.legend":"legend preview","viewer.owner.reader":"reader interaction","viewer.present.enter":"Enter presentation stage","viewer.present.enter.title":"Presentation stage (F)","viewer.present.exit":"Exit presentation stage","viewer.present.exit.title":"Exit presentation stage (F or Escape)","viewer.present.present":"Present","viewer.present.exit.label":"Exit","viewer.export.button":"Export","viewer.export.button.title":"Export diagram (E)","viewer.export.diagram":"Export diagram","viewer.export.menu":"Export","viewer.export.subtitle":"Portable, clean outputs","viewer.export.share":"Share","viewer.export.shareCard":"Share Card","viewer.export.routeShareCard":"Route Share Card","viewer.export.reachShareCard":"Reach Share Card","viewer.export.copyShareCard":"Copy Share Card","viewer.export.copyDiagram":"Copy diagram","viewer.export.clipboardPng":"PNG to clipboard","viewer.export.raster":"Raster images","viewer.export.image":"Image","viewer.export.lossless":"Lossless image","viewer.export.compact":"Compact image","viewer.export.modern":"Modern image","viewer.export.vectorMotion":"Vector and motion","viewer.export.vectorMotion.heading":"Vector \u0026 motion","viewer.export.editable":"Editable vector","viewer.export.motion6s":"6s motion","viewer.export.unsupported":"Not supported by this browser","viewer.export.clipboardUnsupported":"Clipboard image write not supported by this browser","viewer.export.clipboardUnsupported.period":"Clipboard image write not supported by this browser.","viewer.export.clipboardUnsupported.short":"Clipboard image write not supported in this browser.","viewer.export.motionUnavailable":"Motion capture unavailable in this browser","viewer.export.webmUnavailable":"WebM unavailable in this browser","viewer.export.failed":"Export failed: {message}","viewer.export.unknownVariant":"Unknown Share Card variant: {variant}","viewer.export.routeRequired":"Trace a route before exporting a Route Share Card","viewer.export.reachRequired":"Trace authored reach before exporting a Reach Share Card","viewer.export.unknown":"unknown","viewer.export.routeFailed":"Route Share Card export failed: {message}","viewer.export.reachFailed":"Reach Share Card export failed: {message}","viewer.export.copyFailed":"Copy failed: {message}","viewer.export.copiedPng":"Copied PNG to clipboard","viewer.export.copiedShare":"Copied Share Card","viewer.export.downloadedShare":"Downloaded Share Card","viewer.export.downloadedRoute":"Downloaded Route Share Card","viewer.export.downloadedReach":"Downloaded Reach Share Card","viewer.export.downloadedWebm":"Downloaded WebM","viewer.export.recording":"Recording 6 seconds of motion…","viewer.export.card.routeSummary.one":"Route: {source} → {target} · {count} directed hop","viewer.export.card.routeSummary.other":"Route: {source} → {target} · {count} directed hops","viewer.export.card.reachSummary":"Authored {direction} from {origin} · {nodes} · {links} · max {hops}","viewer.export.card.node.one":"{count} node","viewer.export.card.node.other":"{count} nodes","viewer.export.card.link.one":"{count} link","viewer.export.card.link.other":"{count} links","viewer.export.card.hop.one":"{count} hop","viewer.export.card.hop.other":"{count} hops","viewer.export.card.routeBadge":"ARCHIFY · ROUTE · {hops}","viewer.export.card.reachBadge":"ARCHIFY · {direction} REACH","viewer.export.card.defaultBadge":"ARCHIFY · {preset} · {theme}","viewer.export.direction.upstream":"Upstream","viewer.export.direction.downstream":"Downstream","viewer.export.error.canvasUnavailable":"Canvas unavailable for {label}","viewer.export.error.contextUnavailable":"2D canvas context unavailable for {label}","viewer.export.error.toBlobUnavailable":"canvas.toBlob unavailable for {label}","viewer.export.error.toBlobNull":"canvas.toBlob returned no data for {label}","viewer.export.error.variantsCombined":"Share Card variants cannot be combined","viewer.export.error.viewerState":"Share Card export could not remove temporary viewer state","viewer.export.error.routeState":"Route Card export could not preserve the resolved route safely","viewer.export.error.reachState":"Reach Card export could not preserve authored reach safely","viewer.export.error.webmRequirements":"WebM motion export requires a trace animation and browser MediaRecorder support","viewer.export.error.mediaRecorder":"MediaRecorder failed","viewer.export.error.emptyWebm":"MediaRecorder produced an empty WebM","viewer.export.error.webmBackground":"SVG background could not be loaded for WebM export","viewer.guided.region":"Guided diagram views","viewer.guided.previous":"Previous guided view","viewer.guided.previous.title":"Previous guided view ([)","viewer.guided.next":"Next guided view","viewer.guided.next.title":"Next guided view (])","viewer.guided.views":"Guided views","viewer.guided.explore":"Explore this system","viewer.guided.intro":"Step through curated paths without changing the source diagram.","viewer.guided.trail":"Story trail","viewer.guided.beat":"Beat","viewer.guided.nextBeat":"Next","viewer.guided.play":"Play guided story","viewer.guided.play.title":"Play guided story (P)","viewer.guided.pause":"Pause guided story","viewer.guided.pause.title":"Pause guided story (P)","viewer.guided.replay":"Replay guided story","viewer.guided.replay.title":"Replay guided story (P)","viewer.guided.playStory":"Play story","viewer.guided.pauseStory":"Pause","viewer.guided.replayStory":"Replay story","viewer.guided.motionUnavailable":"Story playback unavailable while motion is Still","viewer.guided.enableMotion":"Switch motion to Live to play the guided story","viewer.guided.selectBeatLink":"Select a Story Beat to copy its exact link","viewer.guided.copyMoment":"Copy moment","viewer.guided.momentCopied":"Moment link copied","viewer.guided.momentCopyFailed":"Could not copy story moment link","viewer.guided.copied":"Copied","viewer.guided.copyFailed":"Copy failed","viewer.guided.showAll":"Show all","viewer.guided.showAll.aria":"Show entire diagram","viewer.guided.chapters":"Story chapters","viewer.guided.storyTrail":"Story trail for {label}: {count} beats","viewer.guided.chapter.open":"Open chapter {index} of {total}: {label}, {count} stops","viewer.guided.chapter.current":"Current chapter {index} of {total}: {label}, {count} stops","viewer.guided.chapter.selectedNodes":"{count} selected nodes","viewer.guided.chapter.stops":"{count} stops","viewer.guided.chapter.stop.one":"{count} stop","viewer.guided.chapter.stop.other":"{count} stops","viewer.guided.chapter.current.title":"{label} — current chapter, {count} stops","viewer.guided.chapter.delta.expanded":"{stay} stay, {enter} enter, {leave} leave","viewer.guided.chapter.delta.aria":"Open chapter {index} of {total}: {label}. Chapter focus delta: {delta}","viewer.guided.chapter.delta.title":"{label} — {delta} chapter focus","viewer.guided.handoff":"{from} → {to} · via {label}","viewer.guided.share.chapter":"Chapter {index} / {total}","viewer.guided.share.initial":"Chapter 01 / 01","viewer.guided.share.default":"Guided chapter","viewer.guided.state.ready":"Ready","viewer.guided.state.playing":"Playing","viewer.guided.state.settled":"Settled","viewer.guided.state.paused":"Paused","viewer.guided.state.pinned":"Pinned","viewer.guided.state.still":"Still","viewer.guided.share.step":"Step {index} / {total} · {label}","viewer.guided.share.staticMoment":"{step} · Static moment","viewer.guided.share.complete":"{count} steps complete · {note}","viewer.guided.share.settled":"Path settled for reading.","viewer.guided.share.staticPath":"{count} steps · Static path","viewer.guided.share.ready":"{count} steps · Ready","viewer.guided.share.aria":"{state} chapter {index} of {total}: {label}. {beat}. {route}","viewer.guided.beat.start":"Beat {index} / {total} · {label} · starting point","viewer.guided.beat.forward":"Beat {index} / {total} · {from} → {to}","viewer.guided.beat.reverse":"Beat {index} / {total} · {from} → {to} · reverse authored link","viewer.guided.beat.multiple":"Beat {index} / {total} · {from} ⇄ {to} · {count} authored links","viewer.guided.beat.group":"Beat {index} / {total} · {from} · {to} · grouped · no direct link","viewer.guided.beat.aria.prefix":"Story beat {index} of {total}: {label}. ","viewer.guided.beat.aria.start":"Starting point.","viewer.guided.beat.aria.forward":"From {from} through one authored forward relationship.","viewer.guided.beat.aria.reverse":"From {from}; the authored relationship points from {to} to {from}.","viewer.guided.beat.aria.multiple":"From {from} through {count} authored relationships; shown without arbitrary motion.","viewer.guided.beat.aria.group":"Grouped from {from} with no direct authored relationship.","viewer.guided.caption.start":"Starting point","viewer.guided.caption.grouped":"Grouped transition · no direct authored link","viewer.guided.caption.more":" +{count} more","viewer.guided.caption.reverse":"Reverse authored relationship","viewer.guided.caption.relationships":"{count} authored relationships","viewer.guided.caption.relationship":"Authored relationship","viewer.guided.caption.direction":"authored direction: {from} → {to}","viewer.guided.caption.starting":"Authored starting point","viewer.guided.beatLink":"Copy link to current story moment: Beat {index} of {total}: {label}","viewer.guided.noStory":"This diagram has no authored guided story.","viewer.guide.eyebrow":"Diagram guide","viewer.guide.close":"Close diagram guide","viewer.guide.inspecting":"Inspecting compiled semantics","viewer.guide.actions":"Diagram exploration actions","viewer.guide.find":"Find any node","viewer.guide.find.hint":"Search labels, responsibilities, kinds, and stable IDs.","viewer.guide.route":"Trace a route","viewer.guide.route.aria":"Trace a directed route","viewer.guide.route.hint":"Ask how two semantic nodes connect in authored direction.","viewer.guide.map":"See the whole system","viewer.guide.map.hint":"Open Semantic Radar with a live viewport and stable nodes.","viewer.guide.lens":"Compare semantic kinds","viewer.guide.lens.hint":"Count roles, reveal their traffic, and compare direct authored links.","viewer.guide.story":"Play the guided story","viewer.guide.story.hint":"Walk the authored chapters and real relationships.","viewer.guide.present":"Enter Presentation Stage","viewer.guide.present.hint":"Give the live diagram the viewport without changing export.","viewer.guide.shortcuts":"Additional keyboard shortcuts","viewer.guide.shortcut.export":"Export","viewer.guide.shortcut.theme":"Theme","viewer.guide.shortcut.style":"Style","viewer.guide.shortcut.reset":"Reset","viewer.guide.shortcut.zoomIn":"Zoom in","viewer.guide.shortcut.zoomOut":"Zoom out","viewer.guide.shortcut.close":"Close","viewer.guide.facts":"{nodes} · {relationships} · {views}","viewer.guide.fact.node.one":"{count} semantic node","viewer.guide.fact.node.other":"{count} semantic nodes","viewer.guide.fact.relationship.one":"{count} relationship","viewer.guide.fact.relationship.other":"{count} relationships","viewer.guide.fact.view.one":"{count} guided view","viewer.guide.fact.view.other":"{count} guided views","viewer.guide.story.available.one":"Walk {count} authored chapter and its real relationships.","viewer.guide.story.available.other":"Walk {count} authored chapters and their real relationships.","viewer.guide.story.unavailable":"No authored guided story in this diagram.","viewer.guide.open":"Open diagram guide","viewer.guide.noStory":"This diagram has no authored guided story.","viewer.finder.title":"Find a node","viewer.finder.close":"Close node finder","viewer.finder.placeholder":"Search labels or IDs","viewer.finder.search":"Search diagram nodes","viewer.finder.results":"Diagram nodes","viewer.finder.empty":"No matching nodes","viewer.finder.result.focus":"Focus {label}","viewer.finder.result.routeStart":"Choose {label} as route start","viewer.finder.result.routeTarget":"Choose {label} as route destination, {links}","viewer.finder.status.empty":"No matching nodes","viewer.finder.status.count.one":"{count} matching node","viewer.finder.status.count.other":"{count} matching nodes","viewer.finder.noun.nodes":"nodes","viewer.finder.link.one":"{count} link","viewer.finder.link.other":"{count} links","viewer.finder.result.focus.one":"Focus {label}, {count} related connection","viewer.finder.result.focus.other":"Focus {label}, {count} related connections","viewer.finder.status.filtered":"{visible} of {available} {noun}","viewer.finder.status.all":"{available} {noun}","viewer.passport.eyebrow":"Semantic passport","viewer.passport.metadata":"Node metadata","viewer.passport.evidence":"Verified source evidence","viewer.passport.verified":"Verified source","viewer.passport.verificationScope":"Verified against local Git at the pinned revision. Remote access has not been checked.","viewer.passport.reach":"Authored reach","viewer.passport.reach.trace":"Trace authored reachability","viewer.passport.upstream":"Upstream","viewer.passport.downstream":"Downstream","viewer.passport.upstream.trace":"Trace upstream authored reachability","viewer.passport.downstream.trace":"Trace downstream authored reachability","viewer.passport.close":"Close semantic passport","viewer.passport.copy":"Copy link","viewer.passport.copy.focus":"Copy link to focused node","viewer.passport.relations":"Relations","viewer.passport.relations.show":"Show connected relationships","viewer.passport.relations.hide":"Hide connected relationships","viewer.passport.relations.list":"Connected relationships","viewer.passport.copyRelation":"Copy relation","viewer.passport.copyNode":"Copy node","viewer.passport.copyPinned":"Copy link to pinned relationship","viewer.passport.copySource":"Copy link to source node","viewer.passport.copy.focused.success":"Focused node link copied","viewer.passport.copy.pinned.success":"Pinned relationship link copied","viewer.passport.copy.focused.failed":"Could not copy focused node link","viewer.passport.copy.pinned.failed":"Could not copy pinned relationship link","viewer.passport.relationship.none":"No connected relationships","viewer.passport.relationship.count.one":"{count} relation","viewer.passport.relationship.count.other":"{count} relations","viewer.passport.relationship.show.one":"Show {count} connected relationship","viewer.passport.relationship.show.other":"Show {count} connected relationships","viewer.passport.relationship.summary":"{out} outgoing · {in} incoming{loops}","viewer.passport.relationship.loops":" · {count} loop","viewer.passport.relationship.explorer":"Direct relationship explorer","viewer.passport.relationship.help":"Use arrow keys to explore relationships. Press Enter or Space to pin details; Escape clears.","viewer.passport.relationship.loopsBack":"loops back","viewer.passport.relationship.connectsTo":"connects to","viewer.passport.relationship.connectsFrom":"connects from","viewer.passport.relationship.pinned":"Pinned relationship · {from} → {to} · {label}","viewer.passport.relationship.inspect":"Inspect relationship {index} of {total}: {from} to {to}, {label}. Press Enter for details.","viewer.passport.relationship.group.out":"Outgoing","viewer.passport.relationship.group.in":"Incoming","viewer.passport.relationship.group.loop":"Self loops","viewer.passport.relationship.row":"{group}: {relationship}, {neighbor}","viewer.passport.relationship.direction.out":"OUT →","viewer.passport.relationship.direction.in":"← IN","viewer.passport.relationship.direction.loop":"LOOP","viewer.passport.sourceCount.one":"{count} verified source reference","viewer.passport.sourceCount.other":"{count} verified source references","viewer.passport.sourceMarker":"SRC","viewer.passport.beacon.one":"{count} verified source; focus this node to inspect","viewer.passport.beacon.other":"{count} verified sources; focus this node to inspect","viewer.passport.repository.open":"Open verified repository revision {revision}","viewer.passport.source.open":"Open verified source {path} at revision {revision}","viewer.passport.source.openLink":"Open ↗","viewer.passport.reach.upstream.one":"Trace {count} upstream authored node","viewer.passport.reach.upstream.other":"Trace {count} upstream authored nodes","viewer.passport.reach.downstream.one":"Trace {count} downstream authored node","viewer.passport.reach.downstream.other":"Trace {count} downstream authored nodes","viewer.passport.reach.noUpstream":"No upstream authored nodes","viewer.passport.reach.noDownstream":"No downstream authored nodes","viewer.passport.reach.status":"{direction} · {nodes} nodes · {links} links · max {hops} hops","viewer.route.eyebrow":"Route probe","viewer.route.start":"Choose a start node","viewer.route.start.find":"Find start","viewer.route.start.find.aria":"Find a route start","viewer.route.copy":"Copy link","viewer.route.copy.aria":"Copy link to traced route","viewer.route.clear":"Clear","viewer.route.clear.aria":"Clear route probe","viewer.route.traced":"Traced route","viewer.route.pickTwo":"Pick two semantic nodes on the diagram","viewer.route.pickOne":"Pick a semantic node on the diagram","viewer.route.controls":"Route journey controls","viewer.route.previous":"Previous route position","viewer.route.play":"Play route journey","viewer.route.pause":"Pause route journey","viewer.route.replay":"Replay route journey","viewer.route.next":"Next route position","viewer.route.journey":"Journey","viewer.route.pause.label":"Pause","viewer.route.replay.label":"Replay","viewer.route.overview":"Overview","viewer.route.overview.aria":"Show complete route overview","viewer.route.instructions":"Choose the source, then the destination. Direction matters.","viewer.route.destination":"Choose a destination from {label}","viewer.route.destination.find":"Find target","viewer.route.destination.find.aria":"Find a reachable route destination","viewer.route.differentDestination":"Choose a different destination","viewer.route.distinct":"A route needs two distinct semantic nodes.","viewer.route.unreachable":"No directed route to {label}","viewer.route.unreachable.detail":"{target} is not reachable from {source}. Pick a highlighted destination.","viewer.route.start.instructions":"Select the source. The next step will reveal only directed destinations.","viewer.route.copy.success":"Traced route link copied","viewer.route.copy.failed":"Could not copy traced route link","viewer.route.position":"Route position {index} of {total}: {label}","viewer.route.step":"Step {index} of {total} · {phase} · {label}","viewer.route.motionRequired":"Automatic journey requires Live motion","viewer.route.trigger.clear":"Clear traced route","viewer.route.overview.status":"{nodes} · {hops} · shortest authored route","viewer.route.overview.node.one":"{count} node","viewer.route.overview.node.other":"{count} nodes","viewer.route.overview.hop.one":"{count} directed hop","viewer.route.overview.hop.other":"{count} directed hops","viewer.route.phase.playing":"Playing","viewer.route.phase.complete":"Complete","viewer.route.phase.inspecting":"Inspecting","viewer.route.destination.count.one":"{count} directed destination available. Pick a highlighted node.","viewer.route.destination.count.other":"{count} directed destinations available. Pick a highlighted node.","viewer.route.noOutgoing":"No outgoing route starts here. Clear and choose another source.","viewer.route.result.title":"{source} to {target}","viewer.route.finder.source.title":"Choose route start","viewer.route.finder.source.placeholder":"Search route sources","viewer.route.finder.source.empty":"No matching route sources","viewer.route.finder.source.results":"Nodes that can start a route","viewer.route.finder.source.noun":"route sources","viewer.route.finder.source.badge":"start","viewer.route.finder.target.title":"Destination from {label}","viewer.route.finder.target.placeholder":"Search reachable destinations","viewer.route.finder.target.empty":"No matching reachable destinations","viewer.route.finder.target.results":"Reachable route destinations","viewer.route.finder.target.noun":"reachable destinations","viewer.route.hop.one":"{count} hop","viewer.route.hop.other":"{count} hops","viewer.lens.eyebrow":"Semantic lens","viewer.lens.title":"Compare system roles","viewer.lens.close":"Close semantic lens","viewer.lens.instruction":"Choose up to two semantic kinds. One reveals its real traffic; two compare only direct authored relationships.","viewer.lens.kinds":"Semantic kinds","viewer.lens.choose":"Choose a kind to inspect its nodes and touching relationships.","viewer.lens.copy":"Copy link to semantic lens","viewer.lens.clear":"Clear semantic lens","viewer.lens.open":"Open semantic lens","viewer.lens.openActive":"Open active semantic lens","viewer.lens.legend":"Semantic legend","viewer.lens.legend.inspect.one":"Inspect {label}, {count} node","viewer.lens.legend.inspect.other":"Inspect {label}, {count} nodes","viewer.lens.kind.count.one":"{label}, {count} node","viewer.lens.kind.count.other":"{label}, {count} nodes","viewer.lens.compare.one":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationship","viewer.lens.compare.other":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationships","viewer.lens.single":"{nodes} · {relationships} · connected peers remain visible","viewer.lens.node.one":"{count} {label} node","viewer.lens.node.other":"{count} {label} nodes","viewer.lens.relationship.one":"{count} touching relationship","viewer.lens.relationship.other":"{count} touching relationships","viewer.radar.title":"Semantic radar","viewer.radar.building":"Building overview","viewer.radar.openFull":"Open full semantic radar","viewer.radar.open":"Open radar","viewer.radar.close":"Close semantic radar","viewer.radar.surface":"Diagram overview. Click a node to focus it, or use arrow keys to pan.","viewer.radar.click":"Click node","viewer.radar.drag":"Drag to pan","viewer.radar.space":"Semantic radar needs more MAP space.","viewer.radar.nodes":"Semantic diagram radar nodes","viewer.radar.focus":"Focus {label} from Semantic Radar","viewer.radar.status":"{count} nodes · {viewport}","viewer.radar.fullMap":"{count} nodes · full map","viewer.radar.compacted":"Radar compacted to avoid covering the Semantic Passport or MAP controls.","viewer.radar.cancelWaiting":"Cancel semantic radar waiting for more MAP space","viewer.radar.needsSpace":"Semantic radar needs more visible MAP space","viewer.radar.viewport.full":"full map","viewer.radar.viewport.width":"{percent}% width","viewer.radar.viewport.scale":"{percent}% viewport","viewer.nav.controls":"Diagram view controls","viewer.nav.route":"Trace a directed route","viewer.nav.route.title":"Trace route (R)","viewer.nav.route.short":"PATH","viewer.nav.radar":"Open semantic radar","viewer.nav.radar.title":"Semantic radar (M)","viewer.nav.radar.short":"MAP","viewer.nav.lens":"Open semantic lens","viewer.nav.lens.title":"Semantic lens (L)","viewer.nav.lens.short":"LENS","viewer.nav.find":"Find a node","viewer.nav.find.title":"Find a node (/)","viewer.nav.guide":"Open diagram guide","viewer.nav.guide.title":"Diagram guide (?)","viewer.nav.zoomOut":"Zoom out","viewer.nav.zoomOut.title":"Zoom out (-)","viewer.nav.reset":"Reset diagram view","viewer.nav.reset.title":"Reset view (0)","viewer.nav.read":"READ","viewer.nav.zoomIn":"Zoom in","viewer.nav.zoomIn.title":"Zoom in (+)","viewer.nav.camera":"{hint}. Reset diagram view","viewer.nav.camera.title":"{semantic}{hint} · reset view (0)","viewer.nav.camera.semantic":"Semantic camera active · ","viewer.nav.level.map":"MAP","viewer.nav.level.read":"READ","viewer.nav.level.full":"FULL","viewer.nav.level.auto":"AUTO","viewer.nav.detail.map":"Zoom in to reveal relationship labels and node context","viewer.nav.detail.read":"Zoom in again to reveal tags and annotations","viewer.nav.detail.full":"Full diagram detail","viewer.intent.summary":"{label}. {out} outgoing, {in} incoming{loops}. {total} connections. Press Enter for details.","viewer.intent.loops":", {count} self loop","viewer.common.copied":"Copied","viewer.common.copyFailed":"Copy failed","viewer.common.copyLink":"Copy link","viewer.common.clear":"Clear","viewer.common.close":"Close"}}</script>
     <div class="guided-views no-print" id="guided-views" hidden aria-label="Guided diagram views">
@@ -5130,8 +5130,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read"
          data-preset-badge-editorial-plate="ARCHIFY / PLATE 04">
-      <svg viewBox="0 0 1233 534" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
-        <title id="archify-diagram-title">LABUBOT 2.0 — Pipeline de una corrida</title>
+      <svg viewBox="0 0 1079 652" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
+        <title id="archify-diagram-title">LABUBOT 2.0 — Corrida horaria</title>
         <desc id="archify-diagram-description">A workflow diagram generated by Archify.</desc>
         <!-- Definitions -->
         <defs>
@@ -5156,200 +5156,246 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Swimlanes -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-0" x="40" y="52" width="1177" height="106" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="74" class="t-dim" font-size="10" font-weight="600">01 / main.py</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-0" x="40" y="52" width="1023" height="104" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="54" y="74" class="t-dim" font-size="10" font-weight="600">01 / _run_user · buscar y recortar</text>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-1" x="40" y="178" width="1177" height="106" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="200" class="t-dim" font-size="10" font-weight="600">02 / LinkedIn · jobs-guest</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-1" x="40" y="176" width="1023" height="104" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="54" y="198" class="t-dim" font-size="10" font-weight="600">02 / _run_user · clasificar y anotar</text>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-2" x="40" y="304" width="1177" height="106" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="326" class="t-dim" font-size="10" font-weight="600">03 / Evaluación · Groq</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-2" x="40" y="300" width="1023" height="104" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="54" y="322" class="t-dim" font-size="10" font-weight="600">03 / _run_user · enviar a Telegram</text>
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-3" x="40" y="424" width="1023" height="104" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="54" y="446" class="t-dim" font-size="10" font-weight="600">04 / La corrida · un usuario tras otro</text>
 
         <!-- Phase headers -->
-        <line x1="72" y1="35" x2="394" y2="35" class="a-default" stroke-width="1.1"/>
-        <rect x="72" y="27" width="322" height="16" rx="4" class="c-mask"/>
-        <text x="233" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">Recolectar</text>
-        <line x1="488.79999999999995" y1="35" x2="830" y2="35" class="a-emphasis" stroke-width="1.1"/>
-        <rect x="488.79999999999995" y="27" width="341.20000000000005" height="16" rx="4" class="c-mask"/>
-        <text x="659.4" y="39" class="t-backend" font-size="8" font-weight="600" text-anchor="middle">Recortar</text>
-        <line x1="972.8" y1="35" x2="1184.8" y2="35" class="a-dashed" stroke-width="1.1"/>
-        <rect x="972.8" y="27" width="212" height="16" rx="4" class="c-mask"/>
-        <text x="1078.8" y="39" class="t-messagebus" font-size="8" font-weight="600" text-anchor="middle">Leer y juzgar</text>
+        <line x1="66" y1="35" x2="158" y2="35" class="a-default" stroke-width="1.1"/>
+        <rect x="66" y="27" width="92" height="16" rx="4" class="c-mask"/>
+        <text x="112" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">Buscar</text>
+        <line x1="235.99999999999997" y1="35" x2="502.79999999999995" y2="35" class="a-emphasis" stroke-width="1.1"/>
+        <rect x="235.99999999999997" y="27" width="266.8" height="16" rx="4" class="c-mask"/>
+        <text x="369.4" y="39" class="t-backend" font-size="8" font-weight="600" text-anchor="middle">Recortar</text>
+        <line x1="580.8" y1="35" x2="672.8" y2="35" class="a-dashed" stroke-width="1.1"/>
+        <rect x="580.8" y="27" width="92" height="16" rx="4" class="c-mask"/>
+        <text x="626.8" y="39" class="t-messagebus" font-size="8" font-weight="600" text-anchor="middle">Clasificar</text>
+        <line x1="755.5999999999999" y1="35" x2="1036.8" y2="35" class="a-default" stroke-width="1.1"/>
+        <rect x="755.5999999999999" y="27" width="281.20000000000005" height="16" rx="4" class="c-mask"/>
+        <text x="896.1999999999999" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">Anotar y enviar</text>
 
         <!-- Workflow groups -->
-
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="group" data-composition-frame-id="group-0" x="214" y="90" width="310.79999999999995" height="62" rx="9" class="c-security-group" stroke-width="1"/>
+        <text x="224" y="88" class="t-security" font-size="7" font-weight="600">Dos cortes antes del LLM</text>
 
         <!-- Edge paths -->
-        <path data-edge-from="buscar" data-edge-to="depurar" data-edge-label="JobCard[]" data-edge-key="0" data-edge-id="buscar-a-depurar" data-composition-points="188,246;348,246;348,146" d="M 188 246 L 348 246 L 348 146" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="cache" data-edge-to="depurar" data-edge-label="saltea lo visto" data-edge-key="1" data-edge-id="cache-a-depurar" data-composition-points="188,120;278,120" d="M 188 120 L 278 120" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="depurar" data-edge-to="filtrar" data-edge-label="únicas" data-edge-key="2" data-edge-id="depurar-a-filtrar" data-composition-points="418,120;464.79999999999995,120" d="M 418 120 L 464.79999999999995 120" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="detalle" data-edge-to="evaluar" data-edge-label="descripción + criterios" data-edge-key="3" data-edge-id="detalle-a-evaluar" data-composition-points="854,246;1011.8,246;1011.8,338" d="M 854 246 L 1011.8 246 L 1011.8 338" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="evaluar" data-edge-to="resultados" data-edge-label="Job con veredicto" data-edge-key="4" data-edge-id="evaluar-a-resultados" data-composition-points="1018.8,338;1018.8,231;1138.8,231;1138.8,146" d="M 1018.8 338 L 1018.8 231 L 1138.8 231 L 1138.8 146" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="filtrar" data-edge-to="detalle" data-edge-label="las que pasan" data-edge-key="5" data-edge-id="filtrar-a-detalle" data-composition-points="534.8,154;534.8,246;714,246" d="M 534.8 154 L 534.8 246 L 714 246" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="filtrar" data-edge-to="descartadas" data-edge-label="sap · .net · ventas" data-edge-key="6" data-edge-id="filtro-descarta" data-composition-points="604.8,120;714,120" d="M 604.8 120 L 714 120" class="a-security" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
-        <path data-edge-from="perfil" data-edge-to="evaluar" data-edge-label="vara de medición" data-edge-key="7" data-edge-id="perfil-a-evaluar" data-composition-points="854,372;948.8,372" d="M 854 372 L 948.8 372" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="activos" data-edge-to="buscar" data-edge-key="0" data-edge-id="activos-a-buscar" data-composition-points="48,491;32,491;32,119;48,119" d="M 48 491 L 32 491 L 32 119 L 48 119" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="anotar" data-edge-to="enviar" data-edge-key="1" data-edge-id="anotar-a-enviar" data-composition-points="801.5999999999999,269;801.5999999999999,341" d="M 801.5999999999999 269 L 801.5999999999999 341" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="bloqueada" data-edge-to="descripcion" data-edge-key="2" data-edge-id="bloqueada-a-descripcion" data-composition-points="456.8,145;456.8,217" d="M 456.8 145 L 456.8 217" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="buscar" data-edge-to="vista" data-edge-label="Found" data-edge-key="3" data-edge-id="buscar-a-vista" data-composition-points="176,119;218,119" d="M 176 119 L 218 119" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="clasificar" data-edge-to="anotar" data-edge-label="🟢🟡🔴" data-edge-key="4" data-edge-id="clasificar-a-anotar" data-composition-points="690.8,243;737.5999999999999,243" d="M 690.8 243 L 737.5999999999999 243" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="descripcion" data-edge-to="clasificar" data-edge-label="Offer" data-edge-key="5" data-edge-id="descripcion-a-clasificar" data-composition-points="520.8,243;562.8,243" d="M 520.8 243 L 562.8 243" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="enviar" data-edge-to="bloqueo" data-edge-label="403" data-edge-key="6" data-edge-id="enviar-403" data-composition-points="801.5999999999999,393;801.5999999999999,414;881.5999999999999,414;881.5999999999999,491;865.5999999999999,491" d="M 801.5999999999999 393 L 801.5999999999999 414 L 881.5999999999999 414 L 881.5999999999999 491 L 865.5999999999999 491" class="a-security" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="enviar" data-edge-to="resumen" data-edge-label="y después" data-edge-key="7" data-edge-id="enviar-a-resumen" data-composition-points="865.5999999999999,360;926.8,360" d="M 865.5999999999999 360 L 926.8 360" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="resumen" data-edge-to="bloqueo" data-edge-label="403" data-edge-key="8" data-edge-id="resumen-403" data-composition-points="990.8,393;990.8,414;881.5999999999999,414;881.5999999999999,491;865.5999999999999,491" d="M 990.8 393 L 990.8 414 L 881.5999999999999 414 L 881.5999999999999 491 L 865.5999999999999 491" class="a-security" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="resumen" data-edge-to="guardar" data-edge-key="9" data-edge-id="resumen-a-guardar" data-composition-points="990.8,393;990.8,465" d="M 990.8 393 L 990.8 465" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path data-edge-from="vista" data-edge-to="bloqueada" data-edge-label="nuevas" data-edge-key="10" data-edge-id="vista-a-bloqueada" data-composition-points="346,119;392.8,119" d="M 346 119 L 392.8 119" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
 
         <!-- Nodes -->
-        <g id="node-cache" data-node-id="cache" data-node-label="vistas.json" tabindex="0" role="button" aria-label="Focus vistas.json, ids ya evaluados, main.py › Recolectar" aria-pressed="false" data-node-kind="database" data-node-sublabel="ids ya evaluados" data-node-context="main.py › Recolectar">
-          <title>vistas.json · ids ya evaluados · main.py › Recolectar</title>
-          <rect x="48" y="94" width="140" height="52" rx="6" class="c-mask"/>
-          <rect x="48" y="94" width="140" height="52" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(54 100) scale(0.6875)">
+        <g id="node-buscar" data-node-id="buscar" data-node-label="_search_user" tabindex="0" role="button" aria-label="Focus _search_user, caché (portal, palabra), _run_user · buscar y recortar › Buscar" aria-pressed="false" data-node-kind="external" data-node-sublabel="caché (portal, palabra)" data-node-context="_run_user · buscar y recortar › Buscar">
+          <title>_search_user · caché (portal, palabra) · _run_user · buscar y recortar › Buscar</title>
+          <rect x="48" y="93" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="48" y="93" width="128" height="52" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(54 99) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="112" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">_search_user</text>
+          <text data-detail="context" x="112" y="131" class="t-muted" font-size="8" text-anchor="middle">caché (portal, palabra)</text>
+        </g>
+
+        <g id="node-vista" data-node-id="vista" data-node-label="¿Ya evaluada?" tabindex="0" role="button" aria-label="Focus ¿Ya evaluada?, su url en deliveries, _run_user · buscar y recortar › Dos cortes antes del LLM › Recortar" aria-pressed="false" data-node-kind="database" data-node-sublabel="su url en deliveries" data-node-context="_run_user · buscar y recortar › Dos cortes antes del LLM › Recortar">
+          <title>¿Ya evaluada? · su url en deliveries · _run_user · buscar y recortar › Dos cortes antes del LLM › Recortar</title>
+          <rect x="218" y="93" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="218" y="93" width="128" height="52" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(224 99) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="118" y="115" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">vistas.json</text>
-          <text data-detail="context" x="118" y="132" class="t-muted" font-size="8" text-anchor="middle">ids ya evaluados</text>
+          <text data-node-label="" data-detail-anchor="" x="282" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">¿Ya evaluada?</text>
+          <text data-detail="context" x="282" y="131" class="t-muted" font-size="8" text-anchor="middle">su url en deliveries</text>
         </g>
 
-        <g id="node-depurar" data-node-id="depurar" data-node-label="Deduplicar" tabindex="0" role="button" aria-label="Focus Deduplicar, por id · saltea vistas, main.py › Recolectar" aria-pressed="false" data-node-kind="backend" data-node-sublabel="por id · saltea vistas" data-node-context="main.py › Recolectar">
-          <title>Deduplicar · por id · saltea vistas · main.py › Recolectar</title>
-          <rect x="278" y="94" width="140" height="52" rx="6" class="c-mask"/>
-          <rect x="278" y="94" width="140" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(284 100) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="348" y="115" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Deduplicar</text>
-          <text data-detail="context" x="348" y="132" class="t-muted" font-size="8" text-anchor="middle">por id · saltea vistas</text>
-        </g>
-
-        <g id="node-filtrar" data-node-id="filtrar" data-node-label="Palabras baneadas" tabindex="0" role="button" aria-label="Focus Palabras baneadas, título partido en palabras, main.py › Recortar" aria-pressed="false" data-node-kind="security" data-node-sublabel="título partido en palabras" data-node-tag="gratis" data-node-context="main.py › Recortar">
-          <title>Palabras baneadas · título partido en palabras · main.py › Recortar · gratis</title>
-          <rect x="464.79999999999995" y="86" width="140" height="68" rx="6" class="c-mask"/>
-          <rect x="464.79999999999995" y="86" width="140" height="68" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(470.79999999999995 92) scale(0.6875)">
+        <g id="node-bloqueada" data-node-id="bloqueada" data-node-label="¿Bloqueada?" tabindex="0" role="button" aria-label="Focus ¿Bloqueada?, palabra suya en el título, _run_user · buscar y recortar › Dos cortes antes del LLM › Recortar" aria-pressed="false" data-node-kind="security" data-node-sublabel="palabra suya en el título" data-node-context="_run_user · buscar y recortar › Dos cortes antes del LLM › Recortar">
+          <title>¿Bloqueada? · palabra suya en el título · _run_user · buscar y recortar › Dos cortes antes del LLM › Recortar</title>
+          <rect x="392.8" y="93" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="392.8" y="93" width="128" height="52" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(398.8 99) scale(0.6875)">
             <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
             <path d="m5.8 8 1.5 1.5 3-3"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="534.8" y="107" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Palabras baneadas</text>
-          <text data-detail="context" x="534.8" y="124" class="t-muted" font-size="8" text-anchor="middle">título partido en palabras</text>
-        <text data-detail="fine" x="534.8" y="142" class="t-security" font-size="7" text-anchor="middle">gratis</text>
+          <text data-node-label="" data-detail-anchor="" x="456.8" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">¿Bloqueada?</text>
+          <text data-detail="context" x="456.8" y="131" class="t-muted" font-size="8" text-anchor="middle">palabra suya en el título</text>
         </g>
 
-        <g id="node-descartadas" data-node-id="descartadas" data-node-label="Descartadas" tabindex="0" role="button" aria-label="Focus Descartadas, no se evalúan, main.py › Recortar" aria-pressed="false" data-node-kind="security" data-node-sublabel="no se evalúan" data-node-context="main.py › Recortar">
-          <title>Descartadas · no se evalúan · main.py › Recortar</title>
-          <rect x="714" y="94" width="140" height="52" rx="6" class="c-mask"/>
-          <rect x="714" y="94" width="140" height="52" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(720 100) scale(0.6875)">
+        <g id="node-descripcion" data-node-id="descripcion" data-node-label="Descripción" tabindex="0" role="button" aria-label="Focus Descripción, offers, o se baja una vez, _run_user · clasificar y anotar › Recortar" aria-pressed="false" data-node-kind="external" data-node-sublabel="offers, o se baja una vez" data-node-context="_run_user · clasificar y anotar › Recortar">
+          <title>Descripción · offers, o se baja una vez · _run_user · clasificar y anotar › Recortar</title>
+          <rect x="392.8" y="217" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="392.8" y="217" width="128" height="52" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(398.8 223) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="456.8" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Descripción</text>
+          <text data-detail="context" x="456.8" y="255" class="t-muted" font-size="8" text-anchor="middle">offers, o se baja una vez</text>
+        </g>
+
+        <g id="node-clasificar" data-node-id="clasificar" data-node-label="Classifier" tabindex="0" role="button" aria-label="Focus Classifier, su perfil · gpt-6-luna, _run_user · clasificar y anotar › Clasificar, OpenAI" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="su perfil · gpt-6-luna" data-node-context="_run_user · clasificar y anotar › Clasificar" data-node-brand="OpenAI" data-node-brand-id="openai" data-node-brand-status="preset" data-node-brand-source="https://openai.com/brand/">
+          <title>Classifier · su perfil · gpt-6-luna · _run_user · clasificar y anotar › Clasificar · OpenAI</title>
+          <rect x="562.8" y="217" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="562.8" y="217" width="128" height="52" rx="6" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(568.8 223) scale(0.6875)">
+            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
+          </g>
+          <g aria-hidden="true" data-brand-mark="openai" data-brand-title="OpenAI" data-brand-status="preset" data-brand-source="https://openai.com/brand/" class="brand-mark" transform="translate(668.8 223)">
+            <rect width="16" height="16" rx="4" class="brand-mark-badge"/>
+            <path d="M11.248 18.25q-.825 0-1.568-.314a4.3 4.3 0 0 1-1.32-.874 4 4 0 0 1-1.304.214 4 4 0 0 1-2.046-.544 4.27 4.27 0 0 1-1.518-1.485 4 4 0 0 1-.56-2.095q0-.48.131-1.04A4.4 4.4 0 0 1 2.04 10.71a4.07 4.07 0 0 1 .017-3.4 4.2 4.2 0 0 1 1.056-1.418 3.8 3.8 0 0 1 1.6-.842 3.9 3.9 0 0 1 .76-1.683q.593-.759 1.451-1.188a4.04 4.04 0 0 1 1.832-.429q.825 0 1.567.313.742.314 1.32.875a4 4 0 0 1 1.304-.215q1.106 0 2.046.545a4.14 4.14 0 0 1 1.501 1.485q.578.941.578 2.095 0 .48-.132 1.04.66.61 1.023 1.419.363.792.363 1.666 0 .892-.38 1.717a4.3 4.3 0 0 1-1.072 1.435 3.8 3.8 0 0 1-1.584.825 3.8 3.8 0 0 1-.775 1.683 4.06 4.06 0 0 1-1.436 1.188 4.04 4.04 0 0 1-1.832.429m-4.076-2.062q.825 0 1.435-.347l3.103-1.782a.36.36 0 0 0 .164-.313v-1.42L7.881 14.62a.67.67 0 0 1-.726 0l-3.118-1.798a.5.5 0 0 1-.017.115v.198q0 .841.396 1.551.413.693 1.139 1.089a3.2 3.2 0 0 0 1.617.412m.165-2.69a.4.4 0 0 0 .181.05q.083 0 .165-.05l1.238-.71-3.977-2.31a.7.7 0 0 1-.363-.643v-3.58q-.825.362-1.32 1.122a2.9 2.9 0 0 0-.495 1.65q0 .809.413 1.55.412.743 1.072 1.123zm3.91 3.663q.875 0 1.585-.396a2.96 2.96 0 0 0 1.534-2.64v-3.564a.32.32 0 0 0-.165-.297l-1.254-.726v4.604a.7.7 0 0 1-.363.643l-3.119 1.799a3 3 0 0 0 1.783.577m.627-6.039V8.878L10.01 7.822 8.129 8.878v2.244l1.881 1.056zM7.057 5.859a.7.7 0 0 1 .363-.644l3.119-1.798a3 3 0 0 0-1.782-.578q-.874 0-1.584.396A2.96 2.96 0 0 0 6.05 4.324a3.07 3.07 0 0 0-.396 1.551v3.547q0 .199.165.314l1.237.726zm8.383 7.887q.825-.364 1.303-1.123.495-.758.495-1.65a3.15 3.15 0 0 0-.412-1.55q-.413-.743-1.073-1.123l-3.086-1.782q-.099-.065-.181-.049a.3.3 0 0 0-.165.05l-1.238.692 3.993 2.327a.6.6 0 0 1 .264.264.64.64 0 0 1 .1.363zm-3.317-8.382a.63.63 0 0 1 .726 0l3.135 1.831v-.297q0-.792-.396-1.501a2.86 2.86 0 0 0-1.105-1.155q-.71-.43-1.65-.43-.825 0-1.436.347L8.294 5.941a.36.36 0 0 0-.165.314v1.418z" transform="translate(3 3) scale(0.5)" fill="#000000"/>
+            <rect width="16" height="16" rx="4" class="brand-mark-frame"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="626.8" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Classifier</text>
+          <text data-detail="context" x="626.8" y="255" class="t-muted" font-size="8" text-anchor="middle">su perfil · gpt-6-luna</text>
+        </g>
+
+        <g id="node-anotar" data-node-id="anotar" data-node-label="Deliveries.add" tabindex="0" role="button" aria-label="Focus Deliveries.add, chat_id, url, light, term, _run_user · clasificar y anotar › Anotar y enviar" aria-pressed="false" data-node-kind="database" data-node-sublabel="chat_id, url, light, term" data-node-context="_run_user · clasificar y anotar › Anotar y enviar">
+          <title>Deliveries.add · chat_id, url, light, term · _run_user · clasificar y anotar › Anotar y enviar</title>
+          <rect x="737.5999999999999" y="217" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="737.5999999999999" y="217" width="128" height="52" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(743.5999999999999 223) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="801.5999999999999" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Deliveries.add</text>
+          <text data-detail="context" x="801.5999999999999" y="255" class="t-muted" font-size="8" text-anchor="middle">chat_id, url, light, term</text>
+        </g>
+
+        <g id="node-enviar" data-node-id="enviar" data-node-label="_send_by_keyword" tabindex="0" role="button" aria-label="Focus _send_by_keyword, 🟢🟡 + pendientes, A→Z, _run_user · enviar a Telegram › Anotar y enviar" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="🟢🟡 + pendientes, A→Z" data-node-context="_run_user · enviar a Telegram › Anotar y enviar">
+          <title>_send_by_keyword · 🟢🟡 + pendientes, A→Z · _run_user · enviar a Telegram › Anotar y enviar</title>
+          <rect x="737.5999999999999" y="341" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="737.5999999999999" y="341" width="128" height="52" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(743.5999999999999 347) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="801.5999999999999" y="362" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">_send_by_keyword</text>
+          <text data-detail="context" x="801.5999999999999" y="379" class="t-muted" font-size="8" text-anchor="middle">🟢🟡 + pendientes, A→Z</text>
+        </g>
+
+        <g id="node-resumen" data-node-id="resumen" data-node-label="_send_summary" tabindex="0" role="button" aria-label="Focus _send_summary, siempre, sin sonido, _run_user · enviar a Telegram › Anotar y enviar" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="siempre, sin sonido" data-node-context="_run_user · enviar a Telegram › Anotar y enviar">
+          <title>_send_summary · siempre, sin sonido · _run_user · enviar a Telegram › Anotar y enviar</title>
+          <rect x="926.8" y="341" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="926.8" y="341" width="128" height="52" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(932.8 347) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="990.8" y="362" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">_send_summary</text>
+          <text data-detail="context" x="990.8" y="379" class="t-muted" font-size="8" text-anchor="middle">siempre, sin sonido</text>
+        </g>
+
+        <g id="node-activos" data-node-id="activos" data-node-label="Users.active()" tabindex="0" role="button" aria-label="Focus Users.active(), por orden de alta, La corrida · un usuario tras otro › Buscar" aria-pressed="false" data-node-kind="database" data-node-sublabel="por orden de alta" data-node-context="La corrida · un usuario tras otro › Buscar">
+          <title>Users.active() · por orden de alta · La corrida · un usuario tras otro › Buscar</title>
+          <rect x="48" y="465" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="48" y="465" width="128" height="52" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(54 471) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="112" y="486" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Users.active()</text>
+          <text data-detail="context" x="112" y="503" class="t-muted" font-size="8" text-anchor="middle">por orden de alta</text>
+        </g>
+
+        <g id="node-bloqueo" data-node-id="bloqueo" data-node-label="status = blocked" tabindex="0" role="button" aria-label="Focus status = blocked, y sigue con el próximo, La corrida · un usuario tras otro › Anotar y enviar" aria-pressed="false" data-node-kind="security" data-node-sublabel="y sigue con el próximo" data-node-context="La corrida · un usuario tras otro › Anotar y enviar">
+          <title>status = blocked · y sigue con el próximo · La corrida · un usuario tras otro › Anotar y enviar</title>
+          <rect x="737.5999999999999" y="465" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="737.5999999999999" y="465" width="128" height="52" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(743.5999999999999 471) scale(0.6875)">
             <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
             <path d="m5.8 8 1.5 1.5 3-3"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="784" y="115" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Descartadas</text>
-          <text data-detail="context" x="784" y="132" class="t-muted" font-size="8" text-anchor="middle">no se evalúan</text>
+          <text data-node-label="" data-detail-anchor="" x="801.5999999999999" y="486" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">status = blocked</text>
+          <text data-detail="context" x="801.5999999999999" y="503" class="t-muted" font-size="8" text-anchor="middle">y sigue con el próximo</text>
         </g>
 
-        <g id="node-resultados" data-node-id="resultados" data-node-label="resultados/*.json" tabindex="0" role="button" aria-label="Focus resultados/*.json, ordenado por color, main.py › Leer y juzgar" aria-pressed="false" data-node-kind="database" data-node-sublabel="ordenado por color" data-node-context="main.py › Leer y juzgar">
-          <title>resultados/*.json · ordenado por color · main.py › Leer y juzgar</title>
-          <rect x="1068.8" y="94" width="140" height="52" rx="6" class="c-mask"/>
-          <rect x="1068.8" y="94" width="140" height="52" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(1074.8 100) scale(0.6875)">
+        <g id="node-guardar" data-node-id="guardar" data-node-label="_save_results" tabindex="0" role="button" aria-label="Focus _save_results, al final: .json y .csv, La corrida · un usuario tras otro › Anotar y enviar" aria-pressed="false" data-node-kind="database" data-node-sublabel="al final: .json y .csv" data-node-context="La corrida · un usuario tras otro › Anotar y enviar">
+          <title>_save_results · al final: .json y .csv · La corrida · un usuario tras otro › Anotar y enviar</title>
+          <rect x="926.8" y="465" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="926.8" y="465" width="128" height="52" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(932.8 471) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="1138.8" y="115" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">resultados/*.json</text>
-          <text data-detail="context" x="1138.8" y="132" class="t-muted" font-size="8" text-anchor="middle">ordenado por color</text>
-        </g>
-
-        <g id="node-buscar" data-node-id="buscar" data-node-label="search()" tabindex="0" role="button" aria-label="Focus search(), TERMS · 10 páginas, LinkedIn · jobs-guest › Recolectar" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="TERMS · 10 páginas" data-node-tag="100 ofertas máx" data-node-context="LinkedIn · jobs-guest › Recolectar">
-          <title>search() · TERMS · 10 páginas · LinkedIn · jobs-guest › Recolectar · 100 ofertas máx</title>
-          <rect x="48" y="212" width="140" height="68" rx="6" class="c-mask"/>
-          <rect x="48" y="212" width="140" height="68" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(54 218) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="118" y="233" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">search()</text>
-          <text data-detail="context" x="118" y="250" class="t-muted" font-size="8" text-anchor="middle">TERMS · 10 páginas</text>
-        <text data-detail="fine" x="118" y="268" class="t-cloud" font-size="7" text-anchor="middle">100 ofertas máx</text>
-        </g>
-
-        <g id="node-detalle" data-node-id="detalle" data-node-label="detail()" tabindex="0" role="button" aria-label="Focus detail(), descripción completa, LinkedIn · jobs-guest › Recortar" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="descripción completa" data-node-tag="el Python escondido" data-node-context="LinkedIn · jobs-guest › Recortar">
-          <title>detail() · descripción completa · LinkedIn · jobs-guest › Recortar · el Python escondido</title>
-          <rect x="714" y="212" width="140" height="68" rx="6" class="c-mask"/>
-          <rect x="714" y="212" width="140" height="68" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(720 218) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="784" y="233" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">detail()</text>
-          <text data-detail="context" x="784" y="250" class="t-muted" font-size="8" text-anchor="middle">descripción completa</text>
-        <text data-detail="fine" x="784" y="268" class="t-cloud" font-size="7" text-anchor="middle">el Python escondido</text>
-        </g>
-
-        <g id="node-perfil" data-node-id="perfil" data-node-label="perfil.md" tabindex="0" role="button" aria-label="Focus perfil.md, el CV en texto, Evaluación · Groq › Recortar" aria-pressed="false" data-node-kind="database" data-node-sublabel="el CV en texto" data-node-context="Evaluación · Groq › Recortar">
-          <title>perfil.md · el CV en texto · Evaluación · Groq › Recortar</title>
-          <rect x="714" y="346" width="140" height="52" rx="6" class="c-mask"/>
-          <rect x="714" y="346" width="140" height="52" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(720 352) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="784" y="367" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">perfil.md</text>
-          <text data-detail="context" x="784" y="384" class="t-muted" font-size="8" text-anchor="middle">el CV en texto</text>
-        </g>
-
-        <g id="node-evaluar" data-node-id="evaluar" data-node-label="Evaluar" tabindex="0" role="button" aria-label="Focus Evaluar, perfil vs aviso, Evaluación · Groq › Leer y juzgar" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="perfil vs aviso" data-node-tag="🟢 🟡 🔴" data-node-context="Evaluación · Groq › Leer y juzgar">
-          <title>Evaluar · perfil vs aviso · Evaluación · Groq › Leer y juzgar · 🟢 🟡 🔴</title>
-          <rect x="948.8" y="338" width="140" height="68" rx="6" class="c-mask"/>
-          <rect x="948.8" y="338" width="140" height="68" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(954.8 344) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="1018.8" y="359" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Evaluar</text>
-          <text data-detail="context" x="1018.8" y="376" class="t-muted" font-size="8" text-anchor="middle">perfil vs aviso</text>
-        <text data-detail="fine" x="1018.8" y="394" class="t-cloud" font-size="7" text-anchor="middle">🟢 🟡 🔴</text>
+          <text data-node-label="" data-detail-anchor="" x="990.8" y="486" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">_save_results</text>
+          <text data-detail="context" x="990.8" y="503" class="t-muted" font-size="8" text-anchor="middle">al final: .json y .csv</text>
         </g>
 
         <!-- Edge labels -->
-        <g data-detail="context" data-edge-from="buscar" data-edge-to="depurar" data-edge-label="JobCard[]" data-edge-key="0" data-edge-id="buscar-a-depurar">
-          <rect x="241.4" y="226" width="53.199999999999996" height="14" rx="3" class="c-mask"/>
-          <text x="268" y="236" class="t-backend" font-size="8" text-anchor="middle">JobCard[]</text>
+
+
+
+        <g data-detail="context" data-edge-from="buscar" data-edge-to="vista" data-edge-label="Found" data-edge-key="3" data-edge-id="buscar-a-vista">
+          <rect x="180" y="99" width="34" height="14" rx="3" class="c-mask"/>
+          <text x="197" y="109" class="t-backend" font-size="8" text-anchor="middle">Found</text>
         </g>
-        <g data-detail="context" data-edge-from="cache" data-edge-to="depurar" data-edge-label="saltea lo visto" data-edge-key="1" data-edge-id="cache-a-depurar">
-          <rect x="192" y="100" width="82" height="14" rx="3" class="c-mask"/>
-          <text x="233" y="110" class="t-database" font-size="8" text-anchor="middle">saltea lo visto</text>
+        <g data-detail="context" data-edge-from="clasificar" data-edge-to="anotar" data-edge-label="🟢🟡🔴" data-edge-key="4" data-edge-id="clasificar-a-anotar">
+          <rect x="694.8" y="223" width="38.8" height="14" rx="3" class="c-mask"/>
+          <text x="714.1999999999999" y="233" class="t-backend" font-size="8" text-anchor="middle">🟢🟡🔴</text>
         </g>
-        <g data-detail="context" data-edge-from="depurar" data-edge-to="filtrar" data-edge-label="únicas" data-edge-key="2" data-edge-id="depurar-a-filtrar">
-          <rect x="422" y="100" width="38.8" height="14" rx="3" class="c-mask"/>
-          <text x="441.4" y="110" class="t-backend" font-size="8" text-anchor="middle">únicas</text>
+        <g data-detail="context" data-edge-from="descripcion" data-edge-to="clasificar" data-edge-label="Offer" data-edge-key="5" data-edge-id="descripcion-a-clasificar">
+          <rect x="524.8" y="223" width="34" height="14" rx="3" class="c-mask"/>
+          <text x="541.8" y="233" class="t-backend" font-size="8" text-anchor="middle">Offer</text>
         </g>
-        <g data-detail="context" data-edge-from="detalle" data-edge-to="evaluar" data-edge-label="descripción + criterios" data-edge-key="3" data-edge-id="detalle-a-evaluar">
-          <rect x="872.6999999999999" y="226" width="120.39999999999999" height="14" rx="3" class="c-mask"/>
-          <text x="932.9" y="236" class="t-backend" font-size="8" text-anchor="middle">descripción + criterios</text>
+        <g data-detail="context" data-edge-from="enviar" data-edge-to="bloqueo" data-edge-label="403" data-edge-key="6" data-edge-id="enviar-403">
+          <rect x="826.5999999999999" y="394" width="30" height="14" rx="3" class="c-mask"/>
+          <text x="841.5999999999999" y="404" class="t-security" font-size="8" text-anchor="middle">403</text>
         </g>
-        <g data-detail="context" data-edge-from="evaluar" data-edge-to="resultados" data-edge-label="Job con veredicto" data-edge-key="4" data-edge-id="evaluar-a-resultados">
-          <rect x="1033" y="211" width="91.6" height="14" rx="3" class="c-mask"/>
-          <text x="1078.8" y="221" class="t-backend" font-size="8" text-anchor="middle">Job con veredicto</text>
+        <g data-detail="context" data-edge-from="enviar" data-edge-to="resumen" data-edge-label="y después" data-edge-key="7" data-edge-id="enviar-a-resumen">
+          <rect x="869.5999999999999" y="340" width="53.199999999999996" height="14" rx="3" class="c-mask"/>
+          <text x="896.1999999999999" y="350" class="t-backend" font-size="8" text-anchor="middle">y después</text>
         </g>
-        <g data-detail="context" data-edge-from="filtrar" data-edge-to="detalle" data-edge-label="las que pasan" data-edge-key="5" data-edge-id="filtrar-a-detalle">
-          <rect x="588.1999999999999" y="226" width="72.4" height="14" rx="3" class="c-mask"/>
-          <text x="624.4" y="236" class="t-backend" font-size="8" text-anchor="middle">las que pasan</text>
+        <g data-detail="context" data-edge-from="resumen" data-edge-to="bloqueo" data-edge-label="403" data-edge-key="8" data-edge-id="resumen-403">
+          <rect x="921.1999999999999" y="394" width="30" height="14" rx="3" class="c-mask"/>
+          <text x="936.1999999999999" y="404" class="t-security" font-size="8" text-anchor="middle">403</text>
         </g>
-        <g data-detail="context" data-edge-from="filtrar" data-edge-to="descartadas" data-edge-label="sap · .net · ventas" data-edge-key="6" data-edge-id="filtro-descarta">
-          <rect x="608.8" y="100" width="101.2" height="14" rx="3" class="c-mask"/>
-          <text x="659.4" y="110" class="t-security" font-size="8" text-anchor="middle">sap · .net · ventas</text>
-        </g>
-        <g data-detail="context" data-edge-from="perfil" data-edge-to="evaluar" data-edge-label="vara de medición" data-edge-key="7" data-edge-id="perfil-a-evaluar">
-          <rect x="858" y="352" width="86.8" height="14" rx="3" class="c-mask"/>
-          <text x="901.4" y="362" class="t-muted" font-size="8" text-anchor="middle">vara de medición</text>
+
+        <g data-detail="context" data-edge-from="vista" data-edge-to="bloqueada" data-edge-label="nuevas" data-edge-key="10" data-edge-id="vista-a-bloqueada">
+          <rect x="350" y="99" width="38.8" height="14" rx="3" class="c-mask"/>
+          <text x="369.4" y="109" class="t-backend" font-size="8" text-anchor="middle">nuevas</text>
         </g>
 
         <!-- Legend -->
         <g data-legend="" data-legend-bridge="">
-          <text x="20" y="434" class="t-primary" font-size="12" font-weight="650">Legend</text>
-          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="Agent logic" data-legend-x="20" data-legend-baseline="454" data-legend-width="91">
-            <rect x="20" y="446" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
-            <text x="42" y="454" class="t-muted" font-size="7.5" font-weight="500">Agent logic</text>
+          <text x="20" y="552" class="t-primary" font-size="12" font-weight="650">Legend</text>
+          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Mensaje a Telegram" data-legend-x="20" data-legend-baseline="572" data-legend-width="122">
+            <rect x="20" y="564" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
+            <text x="42" y="572" class="t-muted" font-size="7.5" font-weight="500">Mensaje a Telegram</text>
           </g>
-          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="Policy" data-legend-x="118" data-legend-baseline="454" data-legend-width="70">
-            <rect x="118" y="446" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
-            <text x="140" y="454" class="t-muted" font-size="7.5" font-weight="500">Policy</text>
+          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="Corte o bloqueo" data-legend-x="149" data-legend-baseline="572" data-legend-width="109">
+            <rect x="149" y="564" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
+            <text x="171" y="572" class="t-muted" font-size="7.5" font-weight="500">Corte o bloqueo</text>
           </g>
-          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="Context / trace" data-legend-x="195" data-legend-baseline="454" data-legend-width="109">
-            <rect x="195" y="446" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
-            <text x="217" y="454" class="t-muted" font-size="7.5" font-weight="500">Context / trace</text>
+          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="labubot.db o disco" data-legend-x="265" data-legend-baseline="572" data-legend-width="122">
+            <rect x="265" y="564" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
+            <text x="287" y="572" class="t-muted" font-size="7.5" font-weight="500">labubot.db o disco</text>
           </g>
-          <g data-legend-semantic-kind="cloud" data-legend-kind="cloud" data-legend-label="Cloud service" data-legend-x="311" data-legend-baseline="454" data-legend-width="100">
-            <rect x="311" y="446" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
-            <text x="333" y="454" class="t-muted" font-size="7.5" font-weight="500">Cloud service</text>
+          <g data-legend-semantic-kind="cloud" data-legend-kind="cloud" data-legend-label="OpenAI" data-legend-x="394" data-legend-baseline="572" data-legend-width="70">
+            <rect x="394" y="564" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
+            <text x="416" y="572" class="t-muted" font-size="7.5" font-weight="500">OpenAI</text>
+          </g>
+          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="Portales" data-legend-x="471" data-legend-baseline="572" data-legend-width="78">
+            <rect x="471" y="564" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
+            <text x="493" y="572" class="t-muted" font-size="7.5" font-weight="500">Portales</text>
           </g>
         </g>
       </svg>
@@ -5541,33 +5587,33 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       <div class="card">
         <div class="card-header">
           <div class="card-dot cyan"></div>
-          <h3>Dos cortes antes del LLM</h3>
+          <h3>7 por palabra, 5 una vez</h3>
         </div>
         <ul>
-          <li>&bull; vistas.json evita re-evaluar lo de ayer</li>
-          <li>&bull; Cada descarte ahorra un request y una llamada</li>
+          <li>&bull; LinkedIn, Computrabajo, GetOnBoard, Himalayas, Talent, Indeed, Workable</li>
+          <li>&bull; Bumeran, EmpleosIT, Jobicy, SuTrabajo, WeWorkRemotely</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot emerald"></div>
-          <h3>Por qué se baja el detalle</h3>
+          <h3>Envío por palabra</h3>
         </div>
         <ul>
-          <li>&bull; La tarjeta del listado no trae el cuerpo del aviso</li>
-          <li>&bull; Ahí aparece el Python de los avisos &quot;Developer&quot;</li>
+          <li>&bull; A→Z, 🟢 antes que 🟡; &quot;Otros portales&quot;, último y si trajo algo</li>
+          <li>&bull; Sin ofertas, en silencio: &quot;No se encontraron coincidencias.&quot;</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot amber"></div>
-          <h3>Ritmo</h3>
+          <h3>Lo que queda</h3>
         </div>
         <ul>
-          <li>&bull; De a una: sin paralelismo ni async</li>
-          <li>&bull; 8000 tokens/min de Groq: ~3 por minuto</li>
+          <li>&bull; deliveries anota cada color al toque: lo no enviado sale después</li>
+          <li>&bull; Un 403 pasa al usuario a blocked y la corrida sigue</li>
         </ul>
       </div>
     </div>

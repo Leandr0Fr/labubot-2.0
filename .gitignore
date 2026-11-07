@@ -9,3 +9,4 @@ resultados/
 vistas.json
 vistas.txt
 logs/
+*.db*

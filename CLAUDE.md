@@ -1,7 +1,7 @@
 # labubot
 
-Buscador de ofertas laborales: "scrapea" portales de empleo por HTTP puro y las
-evalúa contra `perfil.md` con un LLM.
+Bot de Telegram que busca ofertas laborales: "scrapea" portales de empleo por HTTP
+puro y las evalúa con un LLM contra el perfil de cada usuario del bot.
 
 ## Estilo
 
@@ -21,23 +21,44 @@ evalúa contra `perfil.md` con un LLM.
 
 ## Arquitectura
 
+Dos procesos sobre `labubot.db` (SQLite en modo WAL): `api.py` recibe a Telegram
+por webhook (FastAPI + uvicorn) y `daemon.py` corre `main()` cada hora: una
+búsqueda por usuario activo, uno tras otro, con una caché de búsquedas en memoria.
+
 - `src/driver/` es el ÚNICO que toca httpx. `Driver.get()` y `Driver.post_json()`
-  reciben una URL y devuelven lo que vuelve. Nada específico de un portal ni de
-  un proveedor de LLM entra acá.
+  reciben una URL y devuelven lo que vuelve (429, 403 y otros errores como
+  excepciones `Labubot*`). Nada específico de un portal, de Telegram ni de un
+  proveedor de LLM entra acá.
 - `src/portals/` una carpeta por portal, con TODO lo de ese sitio adentro:
-  `portal.py` (qué pedir, recibe el `Driver` inyectado), `parser.py` (leer su
-  HTML) y `constants.py` (URLs, paginación, selectores). Sumar un portal es
-  crear una carpeta, no tocar tres.
-- `src/classifier/` sabe qué preguntarle al LLM: arma el prompt, lotea y parsea.
-  Habla con OpenAI por el SDK oficial (`openai`), no por el `Driver`.
-- `src/parsers/` interpreta lo que no es de un portal: hoy solo el veredicto
-  del LLM. El parser de un sitio vive con su portal.
-- `src/notifier/` manda las ofertas a Telegram, por `Driver.post_json()`.
-- `src/schemas/` los TypedDicts del dominio, sin lógica.
-- `src/db/` lo que se recuerda entre corridas: hoy, las urls ya leídas en un `.txt`.
-- `src/constants/` lo configurable y lo medido que NO es de un portal
-  (`http.py` transporte, `openai.py` ese modelo). Lo de cada portal va en su
-  carpeta.
+  `portal.py` (qué pedir, recibe el `Driver` inyectado), su extractor
+  (`html_extractor.py`, `json_extractor.py` o `xml_extractor.py`) y
+  `constants.py` (URLs, paginación, selectores). Sumar un portal es crear una
+  carpeta y anotarlo en la lista de `main.py` (y en `WITHOUT_SEARCH` si no busca
+  por palabra), no tocar tres.
+- `src/telegram/` todo lo de la Bot API, como un portal: `bot.py` (lo que sale,
+  siempre por el `Driver`), `webhook.py` y `handlers.py` (lo que entra: FastAPI
+  solo recibe), `keyboards.py` y `constants.py` (URLs, comandos y textos). Nada
+  de python-telegram-bot ni aiogram.
+- `src/classifier/` sabe qué preguntarle al LLM: arma el prompt con el perfil de
+  cada usuario y hace una llamada a Decisions por oferta. Habla con OpenAI por el
+  SDK oficial (`openai`), no por el `Driver`.
+- `src/db/` lo que se recuerda entre corridas, en `labubot.db`: `connect()`,
+  `Users` (estado, perfil, términos y bloqueadas), `Offers` (una descripción por
+  url) y `Deliveries` (qué se evaluó y se mandó a cada usuario, y con qué palabra).
+- `src/schemas/` los TypedDicts del dominio (`Offer`, `Found`, `User`) y del
+  Update de Telegram, sin lógica.
+- `src/enums/` `TrafficLight`, `UserStatus` y `ChatState`.
+- `src/exceptions/` `LabubotError` y sus hijas: `LabubotRequestError`,
+  `LabubotRateLimitError` (429) y `LabubotForbiddenError` (403; en Telegram, el
+  usuario bloqueó el bot).
+- `src/constants/` lo configurable y lo medido que NO es de un sitio externo
+  (`http.py` transporte, `openai.py` ese modelo, `prompt.py` la pregunta). Lo de
+  cada portal y lo de Telegram va en su carpeta.
+- `src/config/settings.py` el `.env` y el log. Los términos y las bloqueadas son
+  de cada usuario y viven en `labubot.db`: no hay listas de búsqueda en el código.
+- En la raíz, además: `migrate.py` (se corre una vez) y `set_webhook.py` (una vez
+  por deploy). `deploy/` tiene las unidades systemd (api, worker y el túnel
+  ngrok), `ngrok.yml`, el Caddyfile alternativo y la rotación de logs.
 
 **Solo HTTP.** Nada de Playwright, Selenium ni navegador headless.
 
@@ -46,4 +67,9 @@ evalúa contra `perfil.md` con un LLM.
 ```bash
 poetry install
 python -m ruff check . && python -m ruff format --check .
+.venv/Scripts/python.exe -m uvicorn api:app --port 8000 --reload   # la api en la PC
+.venv/Scripts/python.exe main.py                                   # una corrida
 ```
+
+El diseño está en `docs/telegram/` y el despliegue paso a paso en
+`docs/telegram/despliegue.md`.

@@ -2,258 +2,347 @@
   "schema_version": 2,
   "diagram_type": "workflow",
   "meta": {
-    "title": "LABUBOT 2.0 — Pipeline de una corrida",
+    "title": "LABUBOT 2.0 — Corrida horaria",
     "quality_profile": "showcase",
+    "legend": {
+      "entries": {
+        "frontend": {
+          "label": "Mensaje a Telegram"
+        },
+        "security": {
+          "label": "Corte o bloqueo"
+        },
+        "database": {
+          "label": "labubot.db o disco"
+        },
+        "cloud": {
+          "label": "OpenAI"
+        },
+        "external": {
+          "label": "Portales"
+        }
+      }
+    },
     "views": [
       {
-        "id": "camino-feliz",
-        "label": "De la búsqueda al veredicto",
+        "id": "una-oferta",
+        "label": "Una oferta, de punta a punta",
         "focus": [
+          "activos",
           "buscar",
-          "depurar",
-          "filtrar",
-          "detalle",
-          "evaluar",
-          "resultados"
+          "vista",
+          "bloqueada",
+          "descripcion",
+          "clasificar",
+          "anotar"
         ],
-        "note": "El recorrido completo de una oferta que llega hasta el LLM."
+        "note": "De las palabras del usuario al color anotado en deliveries, con su perfil en el prompt."
       },
       {
         "id": "ahorro",
-        "label": "Dónde se ahorra cuota",
+        "label": "Dónde se ahorra",
         "focus": [
-          "cache",
-          "depurar",
-          "filtrar",
-          "descartadas"
+          "buscar",
+          "vista",
+          "bloqueada",
+          "descripcion"
         ],
-        "note": "Los dos cortes que evitan pagarle al LLM por ofertas que no sirven."
+        "note": "La caché de búsquedas, deliveries, las bloqueadas y offers cortan antes de pagarle al LLM."
       },
       {
-        "id": "persistencia",
-        "label": "Qué queda en disco",
+        "id": "envio",
+        "label": "El envío por palabra",
         "focus": [
-          "perfil",
-          "cache",
-          "resultados"
+          "anotar",
+          "enviar",
+          "resumen",
+          "bloqueo"
         ],
-        "note": "Lo que se lee al arrancar y lo que se escribe al terminar."
+        "note": "Un bloque por palabra y el resumen silencioso; un 403 deja al usuario en blocked."
+      },
+      {
+        "id": "corrida",
+        "label": "La corrida entera",
+        "focus": [
+          "activos",
+          "buscar",
+          "resumen",
+          "guardar"
+        ],
+        "note": "Los activos, uno tras otro; al final, resultados/*.csv con chat_id, term, light, title, url."
       }
     ]
   },
   "lanes": [
     {
-      "id": "proceso",
-      "label": "main.py"
+      "id": "recorte",
+      "label": "_run_user · buscar y recortar"
     },
     {
-      "id": "linkedin",
-      "label": "LinkedIn · jobs-guest"
+      "id": "juicio",
+      "label": "_run_user · clasificar y anotar"
     },
     {
-      "id": "llm",
-      "label": "Evaluación · Groq"
+      "id": "envio",
+      "label": "_run_user · enviar a Telegram"
+    },
+    {
+      "id": "corrida",
+      "label": "La corrida · un usuario tras otro"
     }
   ],
   "phases": [
     {
-      "id": "recolectar",
-      "label": "Recolectar",
+      "id": "fase-buscar",
+      "label": "Buscar",
       "fromCol": 0,
-      "toCol": 1
+      "toCol": 0
     },
     {
-      "id": "recortar",
+      "id": "fase-recortar",
       "label": "Recortar",
-      "fromCol": 2,
-      "toCol": 3,
+      "fromCol": 1,
+      "toCol": 2,
       "variant": "emphasis"
     },
     {
-      "id": "juzgar",
-      "label": "Leer y juzgar",
-      "fromCol": 4,
-      "toCol": 5,
+      "id": "fase-clasificar",
+      "label": "Clasificar",
+      "fromCol": 3,
+      "toCol": 3,
       "variant": "dashed"
+    },
+    {
+      "id": "fase-enviar",
+      "label": "Anotar y enviar",
+      "fromCol": 4,
+      "toCol": 5
+    }
+  ],
+  "groups": [
+    {
+      "id": "cortes",
+      "label": "Dos cortes antes del LLM",
+      "lane": "recorte",
+      "fromCol": 1,
+      "toCol": 2,
+      "variant": "security"
     }
   ],
   "mainPath": [
+    "activos",
     "buscar",
-    "depurar",
-    "filtrar",
-    "detalle",
-    "evaluar",
-    "resultados"
+    "vista",
+    "bloqueada",
+    "descripcion",
+    "clasificar",
+    "anotar",
+    "enviar",
+    "resumen",
+    "guardar"
   ],
   "nodes": [
     {
-      "id": "cache",
-      "lane": "proceso",
+      "id": "activos",
+      "lane": "corrida",
       "col": 0,
       "type": "database",
-      "label": "vistas.json",
-      "sublabel": "ids ya evaluados",
-      "width": 140
+      "label": "Users.active()",
+      "sublabel": "por orden de alta",
+      "width": 128
     },
     {
       "id": "buscar",
-      "lane": "linkedin",
+      "lane": "recorte",
       "col": 0,
-      "type": "cloud",
-      "label": "search()",
-      "sublabel": "TERMS · 10 páginas",
-      "tag": "100 ofertas máx",
-      "width": 140
+      "type": "external",
+      "label": "_search_user",
+      "sublabel": "caché (portal, palabra)",
+      "width": 128
     },
     {
-      "id": "depurar",
-      "lane": "proceso",
+      "id": "vista",
+      "lane": "recorte",
       "col": 1,
-      "type": "backend",
-      "label": "Deduplicar",
-      "sublabel": "por id · saltea vistas",
-      "width": 140
+      "type": "database",
+      "label": "¿Ya evaluada?",
+      "sublabel": "su url en deliveries",
+      "width": 128
     },
     {
-      "id": "filtrar",
-      "lane": "proceso",
+      "id": "bloqueada",
+      "lane": "recorte",
       "col": 2,
       "type": "security",
-      "label": "Palabras baneadas",
-      "sublabel": "título partido en palabras",
-      "tag": "gratis",
-      "width": 140
+      "label": "¿Bloqueada?",
+      "sublabel": "palabra suya en el título",
+      "width": 128
     },
     {
-      "id": "descartadas",
-      "lane": "proceso",
-      "col": 3,
-      "type": "security",
-      "label": "Descartadas",
-      "sublabel": "no se evalúan",
-      "width": 140
+      "id": "descripcion",
+      "lane": "juicio",
+      "col": 2,
+      "type": "external",
+      "label": "Descripción",
+      "sublabel": "offers, o se baja una vez",
+      "width": 128
     },
     {
-      "id": "detalle",
-      "lane": "linkedin",
+      "id": "clasificar",
+      "lane": "juicio",
       "col": 3,
       "type": "cloud",
-      "label": "detail()",
-      "sublabel": "descripción completa",
-      "tag": "el Python escondido",
-      "width": 140
+      "label": "Classifier",
+      "sublabel": "su perfil · gpt-6-luna",
+      "brand": "openai",
+      "width": 128
     },
     {
-      "id": "perfil",
-      "lane": "llm",
-      "col": 3,
-      "type": "database",
-      "label": "perfil.md",
-      "sublabel": "el CV en texto",
-      "width": 140
-    },
-    {
-      "id": "evaluar",
-      "lane": "llm",
+      "id": "anotar",
+      "lane": "juicio",
       "col": 4,
-      "type": "cloud",
-      "label": "Evaluar",
-      "sublabel": "perfil vs aviso",
-      "tag": "🟢 🟡 🔴",
-      "width": 140
+      "type": "database",
+      "label": "Deliveries.add",
+      "sublabel": "chat_id, url, light, term",
+      "width": 128
     },
     {
-      "id": "resultados",
-      "lane": "proceso",
+      "id": "bloqueo",
+      "lane": "corrida",
+      "col": 4,
+      "type": "security",
+      "label": "status = blocked",
+      "sublabel": "y sigue con el próximo",
+      "width": 128
+    },
+    {
+      "id": "enviar",
+      "lane": "envio",
+      "col": 4,
+      "type": "frontend",
+      "label": "_send_by_keyword",
+      "sublabel": "🟢🟡 + pendientes, A→Z",
+      "width": 128
+    },
+    {
+      "id": "resumen",
+      "lane": "envio",
+      "col": 5,
+      "type": "frontend",
+      "label": "_send_summary",
+      "sublabel": "siempre, sin sonido",
+      "width": 128
+    },
+    {
+      "id": "guardar",
+      "lane": "corrida",
       "col": 5,
       "type": "database",
-      "label": "resultados/*.json",
-      "sublabel": "ordenado por color",
-      "width": 140
+      "label": "_save_results",
+      "sublabel": "al final: .json y .csv",
+      "width": 128
     }
   ],
   "edges": [
     {
-      "id": "buscar-a-depurar",
+      "id": "activos-a-buscar",
+      "from": "activos",
+      "to": "buscar",
+      "variant": "emphasis"
+    },
+    {
+      "id": "buscar-a-vista",
       "from": "buscar",
-      "to": "depurar",
-      "label": "JobCard[]",
+      "to": "vista",
+      "label": "Found",
       "variant": "emphasis"
     },
     {
-      "id": "cache-a-depurar",
-      "from": "cache",
-      "to": "depurar",
-      "label": "saltea lo visto",
-      "variant": "dashed"
-    },
-    {
-      "id": "depurar-a-filtrar",
-      "from": "depurar",
-      "to": "filtrar",
-      "label": "únicas",
+      "id": "vista-a-bloqueada",
+      "from": "vista",
+      "to": "bloqueada",
+      "label": "nuevas",
       "variant": "emphasis"
     },
     {
-      "id": "filtro-descarta",
-      "from": "filtrar",
-      "to": "descartadas",
-      "label": "sap · .net · ventas",
+      "id": "bloqueada-a-descripcion",
+      "from": "bloqueada",
+      "to": "descripcion",
+      "variant": "emphasis"
+    },
+    {
+      "id": "descripcion-a-clasificar",
+      "from": "descripcion",
+      "to": "clasificar",
+      "label": "Offer",
+      "variant": "emphasis"
+    },
+    {
+      "id": "clasificar-a-anotar",
+      "from": "clasificar",
+      "to": "anotar",
+      "label": "🟢🟡🔴",
+      "variant": "emphasis"
+    },
+    {
+      "id": "anotar-a-enviar",
+      "from": "anotar",
+      "to": "enviar",
+      "variant": "emphasis"
+    },
+    {
+      "id": "enviar-a-resumen",
+      "from": "enviar",
+      "to": "resumen",
+      "variant": "emphasis",
+      "label": "y después"
+    },
+    {
+      "id": "resumen-a-guardar",
+      "from": "resumen",
+      "to": "guardar",
+      "variant": "emphasis"
+    },
+    {
+      "id": "enviar-403",
+      "from": "enviar",
+      "to": "bloqueo",
+      "label": "403",
       "variant": "security",
       "role": "error"
     },
     {
-      "id": "filtrar-a-detalle",
-      "from": "filtrar",
-      "to": "detalle",
-      "label": "las que pasan",
-      "variant": "emphasis"
-    },
-    {
-      "id": "detalle-a-evaluar",
-      "from": "detalle",
-      "to": "evaluar",
-      "label": "descripción + criterios",
-      "variant": "emphasis"
-    },
-    {
-      "id": "perfil-a-evaluar",
-      "from": "perfil",
-      "to": "evaluar",
-      "label": "vara de medición"
-    },
-    {
-      "id": "evaluar-a-resultados",
-      "from": "evaluar",
-      "to": "resultados",
-      "label": "Job con veredicto",
-      "role": "return",
-      "variant": "emphasis"
+      "id": "resumen-403",
+      "from": "resumen",
+      "to": "bloqueo",
+      "label": "403",
+      "variant": "security",
+      "role": "error"
     }
   ],
   "cards": [
     {
       "dot": "cyan",
-      "title": "Dos cortes antes del LLM",
+      "title": "7 por palabra, 5 una vez",
       "items": [
-        "vistas.json evita re-evaluar lo de ayer",
-        "Cada descarte ahorra un request y una llamada"
+        "LinkedIn, Computrabajo, GetOnBoard, Himalayas, Talent, Indeed, Workable",
+        "Bumeran, EmpleosIT, Jobicy, SuTrabajo, WeWorkRemotely"
       ]
     },
     {
       "dot": "emerald",
-      "title": "Por qué se baja el detalle",
+      "title": "Envío por palabra",
       "items": [
-        "La tarjeta del listado no trae el cuerpo del aviso",
-        "Ahí aparece el Python de los avisos \"Developer\""
+        "A→Z, 🟢 antes que 🟡; \"Otros portales\", último y si trajo algo",
+        "Sin ofertas, en silencio: \"No se encontraron coincidencias.\""
       ]
     },
     {
       "dot": "amber",
-      "title": "Ritmo",
+      "title": "Lo que queda",
       "items": [
-        "De a una: sin paralelismo ni async",
-        "8000 tokens/min de Groq: ~3 por minuto"
+        "deliveries anota cada color al toque: lo no enviado sale después",
+        "Un 403 pasa al usuario a blocked y la corrida sigue"
       ]
     }
   ]

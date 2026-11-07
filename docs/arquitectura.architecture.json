@@ -5,323 +5,300 @@
     "title": "LABUBOT 2.0 — Arquitectura",
     "quality_profile": "showcase",
     "viewBox": [
-      1140,
+      1360,
       580
     ],
     "views": [
       {
-        "id": "camino-principal",
-        "label": "Camino principal",
+        "id": "lo-que-entra",
+        "label": "Lo que entra: el webhook",
         "focus": [
-          "main",
-          "linkedin_drv",
-          "linkedin_api",
-          "evaluator",
-          "groq"
+          "telegram",
+          "ngrok",
+          "api",
+          "db",
+          "driver"
         ],
-        "note": "De la búsqueda al veredicto: los dos drivers y sus servicios externos."
+        "note": "Telegram hace POST al dominio fijo de ngrok; la api valida el secreto, usa la base y contesta por el Driver."
       },
       {
-        "id": "parsers",
-        "label": "Drivers y parsers",
+        "id": "la-corrida",
+        "label": "La corrida horaria",
         "focus": [
-          "linkedin_drv",
-          "html_parser",
-          "evaluator",
-          "json_parser"
+          "worker",
+          "db",
+          "driver",
+          "portals",
+          "openai",
+          "telegram",
+          "results"
         ],
-        "note": "Los drivers piden y devuelven crudo; interpretar es tarea de los parsers."
+        "note": "daemon.py corre main() cada hora: busca por el Driver, clasifica con OpenAI y manda 🟢🟡 a cada usuario."
       },
       {
         "id": "estado",
-        "label": "Configuración y estado",
+        "label": "Estado: labubot.db",
         "focus": [
-          "profile",
-          "search_cfg",
-          "cache",
-          "results",
-          "main"
+          "db",
+          "api",
+          "worker",
+          "results"
         ],
-        "note": "Lo que se edita a mano y lo que queda en disco entre corridas."
+        "note": "La api escribe usuarios, estado y listas; el worker, offers, deliveries y el blocked de un 403."
       }
     ]
   },
   "components": [
     {
-      "id": "profile",
-      "type": "database",
-      "label": "perfil.md",
-      "sublabel": "el CV en texto plano",
-      "tag": "vara de medición",
+      "id": "telegram",
+      "type": "cloud",
+      "label": "Telegram Bot API",
+      "sublabel": "api.telegram.org",
+      "brand": "telegram",
       "pos": [
         30,
-        150
+        60
       ],
       "size": [
-        180,
-        60
+        190,
+        72
       ]
     },
     {
-      "id": "search_cfg",
-      "type": "database",
-      "label": "config/search.py",
-      "sublabel": "TERMS · BLOCKED_TITLE_WORDS",
+      "id": "ngrok",
+      "type": "security",
+      "label": "Túnel ngrok",
+      "sublabel": "dominio fijo · labubot-ngrok",
+      "tag": "unidad labubot-ngrok · Caddy es la alternativa",
       "pos": [
-        30,
-        250
+        400,
+        60
       ],
       "size": [
-        180,
-        60
+        190,
+        72
       ]
     },
     {
-      "id": "cache",
-      "type": "database",
-      "label": "vistas.json",
-      "sublabel": "ids ya evaluados",
-      "pos": [
-        30,
-        360
-      ],
-      "size": [
-        180,
-        60
-      ]
-    },
-    {
-      "id": "main",
+      "id": "api",
       "type": "backend",
-      "label": "main.py",
-      "sublabel": "orquesta, de a una",
-      "tag": "Python 3.14 síncrono",
+      "label": "api · FastAPI",
+      "sublabel": "uvicorn api:app · 127.0.0.1:8000",
+      "tag": "webhook.py · handlers.py",
+      "brand": "fastapi",
       "pos": [
-        300,
-        205
+        740,
+        60
       ],
       "size": [
-        180,
+        232,
+        72
+      ]
+    },
+    {
+      "id": "portals",
+      "type": "external",
+      "label": "12 portales de empleo",
+      "sublabel": "src/portals/* · HTTP puro",
+      "pos": [
+        30,
+        260
+      ],
+      "size": [
+        190,
+        72
+      ]
+    },
+    {
+      "id": "driver",
+      "type": "backend",
+      "label": "src/driver · Driver",
+      "sublabel": "el único que usa httpx",
+      "tag": "get() · post_json()",
+      "pos": [
+        400,
+        260
+      ],
+      "size": [
+        190,
+        72
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "labubot.db",
+      "sublabel": "SQLite WAL · 5 tablas",
+      "tag": "users · user_terms · user_blocked_words · offers · deliveries",
+      "brand": "sqlite",
+      "pos": [
+        740,
+        260
+      ],
+      "size": [
+        232,
         72
       ]
     },
     {
       "id": "results",
       "type": "database",
-      "label": "resultados/*.json",
-      "sublabel": "ofertas con veredicto",
+      "label": "resultados/",
+      "sublabel": "*.json y *.csv por corrida",
       "pos": [
-        300,
-        360
-      ],
-      "size": [
-        180,
-        60
-      ]
-    },
-    {
-      "id": "filters",
-      "type": "security",
-      "label": "utils/filters.py",
-      "sublabel": "palabras baneadas del título",
-      "pos": [
-        560,
-        205
-      ],
-      "size": [
-        180,
-        60
-      ]
-    },
-    {
-      "id": "linkedin_drv",
-      "type": "backend",
-      "label": "driver/http.py",
-      "sublabel": "LinkedIn · httpx.Client",
-      "pos": [
-        560,
-        60
-      ],
-      "size": [
-        180,
-        72
-      ]
-    },
-    {
-      "id": "linkedin_api",
-      "type": "external",
-      "label": "LinkedIn jobs-guest",
-      "sublabel": "endpoint público",
-      "tag": "sin cookie ni sesión",
-      "pos": [
-        880,
-        60
-      ],
-      "size": [
-        190,
-        72
-      ]
-    },
-    {
-      "id": "html_parser",
-      "type": "backend",
-      "label": "parsers/html.py",
-      "sublabel": "selectolax · Lexbor",
-      "pos": [
-        880,
-        170
-      ],
-      "size": [
-        190,
-        60
-      ]
-    },
-    {
-      "id": "evaluator",
-      "type": "backend",
-      "label": "driver/llm.py",
-      "sublabel": "Evaluator · httpx.Client",
-      "pos": [
-        560,
-        350
-      ],
-      "size": [
-        180,
-        72
-      ]
-    },
-    {
-      "id": "groq",
-      "type": "cloud",
-      "label": "Groq",
-      "sublabel": "qwen/qwen3.8-27b",
-      "tag": "8000 tokens/min",
-      "pos": [
-        880,
-        350
-      ],
-      "size": [
-        190,
-        72
-      ]
-    },
-    {
-      "id": "json_parser",
-      "type": "backend",
-      "label": "parsers/json.py",
-      "sublabel": "respuesta → Verdict",
-      "pos": [
-        880,
+        400,
         460
       ],
       "size": [
         190,
-        60
+        72
       ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "worker · daemon.py",
+      "sublabel": "main() al arrancar y cada hora",
+      "tag": "unidad labubot-worker",
+      "pos": [
+        740,
+        460
+      ],
+      "size": [
+        232,
+        72
+      ]
+    },
+    {
+      "id": "openai",
+      "type": "cloud",
+      "label": "OpenAI Decisions",
+      "sublabel": "gpt-6-luna",
+      "tag": "SDK oficial openai",
+      "brand": "openai",
+      "pos": [
+        1130,
+        460
+      ],
+      "size": [
+        190,
+        72
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "VPS · tres unidades systemd",
+      "wraps": [
+        "ngrok",
+        "api",
+        "driver",
+        "db",
+        "results",
+        "worker"
+      ],
+      "pad": 22
     }
   ],
   "connections": [
     {
-      "id": "cv-a-main",
-      "from": "profile",
-      "to": "main",
+      "id": "webhook",
+      "from": "telegram",
+      "to": "ngrok",
+      "label": "POST /telegram/webhook + secreto",
+      "variant": "security"
+    },
+    {
+      "id": "tunel",
+      "from": "ngrok",
+      "to": "api",
+      "label": "a 127.0.0.1:8000",
       "variant": "emphasis"
     },
     {
-      "id": "config-a-main",
-      "from": "search_cfg",
-      "to": "main"
+      "id": "api-db",
+      "from": "api",
+      "to": "db",
+      "label": "usuarios · estado · listas",
+      "labelDy": 24
     },
     {
-      "id": "cache-a-main",
-      "from": "cache",
-      "to": "main",
-      "variant": "dashed"
+      "id": "api-driver",
+      "from": "api",
+      "to": "driver",
+      "label": "respuestas y botones"
     },
     {
-      "id": "main-a-linkedin",
-      "from": "main",
-      "to": "linkedin_drv",
-      "label": "search() · detail()",
-      "variant": "emphasis",
+      "id": "worker-db",
+      "from": "worker",
+      "to": "db",
+      "label": "activos · offers · deliveries"
+    },
+    {
+      "id": "worker-driver",
+      "from": "worker",
+      "to": "driver",
+      "label": "búsquedas · envíos",
+      "variant": "emphasis"
+    },
+    {
+      "id": "driver-portals",
+      "from": "driver",
+      "to": "portals",
+      "label": "búsqueda y detalle",
+      "variant": "emphasis"
+    },
+    {
+      "id": "driver-telegram",
+      "from": "driver",
+      "to": "telegram",
+      "label": "sendMessage · editMessageText · answerCallbackQuery",
       "fromSide": "top",
-      "toSide": "left"
+      "toSide": "bottom"
     },
     {
-      "id": "linkedin-http",
-      "from": "linkedin_drv",
-      "to": "linkedin_api",
-      "label": "GET jobs-guest",
+      "id": "worker-openai",
+      "from": "worker",
+      "to": "openai",
+      "label": "1 por usuario y oferta",
       "variant": "emphasis"
     },
     {
-      "id": "html-crudo",
-      "from": "linkedin_drv",
-      "to": "html_parser",
-      "label": "HTML crudo",
-      "fromSide": "bottom",
-      "toSide": "left"
-    },
-    {
-      "id": "main-a-filtro",
-      "from": "main",
-      "to": "filters",
-      "label": "títulos"
-    },
-    {
-      "id": "filtro-a-eval",
-      "from": "filters",
-      "to": "evaluator",
-      "label": "las que pasan",
-      "variant": "emphasis",
-      "labelDy": 24
-    },
-    {
-      "id": "groq-http",
-      "from": "evaluator",
-      "to": "groq",
-      "label": "POST /chat/completions",
-      "variant": "emphasis"
-    },
-    {
-      "id": "json-crudo",
-      "from": "evaluator",
-      "to": "json_parser",
-      "label": "texto del modelo",
-      "fromSide": "bottom",
-      "toSide": "left"
-    },
-    {
-      "id": "main-a-resultados",
-      "from": "main",
+      "id": "worker-results",
+      "from": "worker",
       "to": "results",
-      "label": "Job[] por color",
-      "labelDy": 24
+      "label": "_save_results",
+      "variant": "dashed",
+      "labelAt": [
+        665,
+        524
+      ]
     }
   ],
   "cards": [
     {
-      "dot": "cyan",
-      "title": "Sin sesión",
+      "dot": "rose",
+      "title": "Entrada: el webhook",
       "items": [
-        "jobs-guest es lo que ve un visitante anónimo de LinkedIn",
-        "Sin cookie ni cuenta: el peor caso es un 429 pasajero"
+        "POST a https://<nombre>.ngrok-free.dev/telegram/webhook; Caddy, la alternativa",
+        "Sin el X-Telegram-Bot-Api-Secret-Token correcto, 403; con él, siempre 200"
       ]
     },
     {
-      "dot": "violet",
-      "title": "Drivers y parsers",
+      "dot": "cyan",
+      "title": "Salida: el Driver, salvo OpenAI",
       "items": [
-        "Los drivers piden y devuelven crudo; no interpretan nada",
-        "Si cambia el DOM de LinkedIn o el modelo, se toca un solo archivo"
+        "Portales y Bot API van por Driver.get() y post_json(): el único con httpx",
+        "OpenAI va por su SDK: una llamada a Decisions por usuario y oferta"
       ]
     },
     {
       "dot": "amber",
-      "title": "Estado en disco",
+      "title": "Estado en labubot.db",
       "items": [
-        "perfil.md es lo único que define si una oferta sirve",
-        "vistas.json saltea lo ya evaluado y ahorra cuota de LLM"
+        "WAL: la api abre una conexión por update y el worker una por corrida",
+        "migrate.py la crea una vez con el admin; set_webhook.py registra el webhook y el menú"
       ]
     }
   ]
