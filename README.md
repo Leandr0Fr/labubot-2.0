@@ -229,6 +229,7 @@ src/
     http.py                 timeout, idioma y user agent
     openai.py               modelo
     prompt.py               ← las instrucciones y los tres colores
+    run.py                  portales sin búsqueda, el hub y resultados/
   driver/                   el único que toca httpx
     http.py                 Driver: get() y post_json()
   portals/                  una carpeta por portal
@@ -279,7 +280,7 @@ División por módulos:
 Si LinkedIn cambia el markup se toca `portals/linkedin/html_extractor.py`; si
 cambia la query, `portals/linkedin/portal.py`. Sumar un portal es crear una
 carpeta en `portals/` y agregarlo a la lista de portales de `main.py` (y a
-`WITHOUT_SEARCH` si no busca por palabra): ni el `Driver` ni el `Classifier` se
+`WITHOUT_SEARCH`, en `src/constants/run.py`, si no busca por palabra): ni el `Driver` ni el `Classifier` se
 enteran.
 
 ### El LLM: Luna, por la Decisions API

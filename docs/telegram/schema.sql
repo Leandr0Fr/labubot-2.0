@@ -11,8 +11,7 @@ CREATE TABLE users (
   status      TEXT NOT NULL DEFAULT 'pending', -- UserStatus: pending | active | paused | rejected | blocked
   profile     TEXT NOT NULL DEFAULT '',        -- el CV (lo que hoy es perfil.md); '' = todavía no lo cargó
   state       TEXT NOT NULL DEFAULT '',        -- ChatState: qué espera el bot del próximo mensaje ('' = nada)
-  created_at  TEXT NOT NULL,
-  approved_at TEXT
+  created_at  TEXT NOT NULL
 );
 
 CREATE TABLE user_terms (
@@ -28,11 +27,10 @@ CREATE TABLE user_blocked_words (
 );
 
 CREATE TABLE offers (                          -- caché compartida de descripciones: una bajada por url
-  url         TEXT PRIMARY KEY,                -- sin query, como hoy
+  url         TEXT PRIMARY KEY NOT NULL,       -- sin query, como hoy
   portal      TEXT NOT NULL,                   -- nombre de la clase: LinkedIn, Bumeran...
   title       TEXT NOT NULL,
-  description TEXT NOT NULL,                   -- '' si el portal no la dio (no se vuelve a pedir)
-  fetched_at  TEXT NOT NULL
+  description TEXT NOT NULL                    -- '' si el portal no la dio (no se vuelve a pedir)
 );
 
 CREATE TABLE deliveries (                      -- qué ya se evaluó para cada usuario (reemplaza vistas.txt)
@@ -44,5 +42,3 @@ CREATE TABLE deliveries (                      -- qué ya se evaluó para cada u
   sent_at       TEXT,                          -- NULL si es roja, importada, o si el envío falló (se reintenta)
   PRIMARY KEY (chat_id, url)
 );
-
-CREATE INDEX deliveries_pending ON deliveries (sent_at) WHERE sent_at IS NULL AND light IN ('green', 'yellow');

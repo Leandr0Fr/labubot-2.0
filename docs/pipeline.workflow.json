@@ -156,7 +156,7 @@
       "lane": "recorte",
       "col": 0,
       "type": "external",
-      "label": "_search_user",
+      "label": "_search_terms",
       "sublabel": "caché (portal, palabra)",
       "width": 128
     },

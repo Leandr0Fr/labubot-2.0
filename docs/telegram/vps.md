@@ -200,7 +200,7 @@ En las dos máquinas, poné `LOG_LEVEL=DEBUG` en `.env`: así quedan en el log l
 Que la prueba no coincida con la corrida horaria del daemon de la PC, o pausalo mientras dura. Dos scrapes a la vez desde casa inflan los 429 del lado de la PC y la comparación sale a favor del VPS.
 
 ### 3. Prueba A: solo búsqueda, sin OpenAI ni Telegram
-Script descartable `prueba_ip.py`: va en la raíz del clon y **no se commitea**. Recorre los mismos portales y términos que `main.py` y pide la descripción de las primeras 20 ofertas de cada portal. Solo 5 portales salen a buscarla por HTTP: LinkedIn, Computrabajo, Talent, Bumeran y EmpleosIT. Los otros 6 devuelven la que ya trajo la búsqueda. Está escrito contra el código del commit `ac57dfd`: si ya hiciste la F1 (`TERMS` pasa a llamarse `DEFAULT_TERMS`), cambiá el import.
+Script descartable `prueba_ip.py`: va en la raíz del clon y **no se commitea**. Recorre los 12 portales con los términos del admin, como los busca `main.py` (palabra por palabra en los 7 con búsqueda), y pide la descripción de las primeras 20 ofertas de cada portal. Solo 5 portales salen a buscarla por HTTP: LinkedIn, Computrabajo, Talent, Bumeran y EmpleosIT. Los otros 7 devuelven la que ya trajo la búsqueda. Está al día con el código multiusuario (los términos que `migrate.py` le carga al admin, Indeed y Workable de a una palabra, SuTrabajo).
 
 ```python
 """Prueba de IP: busca en los 11 portales y baja una muestra de descripciones."""
@@ -208,7 +208,7 @@ Script descartable `prueba_ip.py`: va en la raíz del clon y **no se commitea**.
 import logging
 import time
 
-from src.config.search import TERMS
+from migrate import ADMIN_TERMS
 from src.driver.http import Driver
 from src.portals.bumeran import Bumeran
 from src.portals.computrabajo import Computrabajo
@@ -218,6 +218,7 @@ from src.portals.himalayas import Himalayas
 from src.portals.indeed import Indeed
 from src.portals.jobicy import Jobicy
 from src.portals.linkedin import LinkedIn
+from src.portals.sutrabajo import SuTrabajo
 from src.portals.talent import Talent
 from src.portals.weworkremotely import WeWorkRemotely
 from src.portals.workable import Workable
@@ -231,7 +232,7 @@ def check(portal, jobs: dict[str, str], start: float) -> None:
     """
     Baja la descripción de las primeras SAMPLE ofertas y deja el resumen en el log.
     Args:
-        portal: El portal que buscó (6 de los 11 guardan ahí las descripciones).
+        portal: El portal que buscó (7 de los 12 guardan ahí las descripciones).
         jobs: {url: título} que devolvió la búsqueda.
         start: time.monotonic() de cuando arrancó ese portal.
     """
@@ -255,28 +256,20 @@ def main() -> None:
         GetOnBoard(driver),
         Himalayas(driver),
         Talent(driver),
+        Indeed(driver),
+        Workable(driver),
     ):
         start = time.monotonic()
         jobs: dict[str, str] = {}
-        for term in TERMS:
+        for term in ADMIN_TERMS:
             jobs.update(portal.search(term))
         check(portal, jobs, start)
-
-    quoted_terms = []
-    for term in TERMS:
-        quoted = term
-        if " " in term:
-            quoted = f'"{term}"'
-        quoted_terms.append(quoted)
-    any_term = " OR ".join(quoted_terms)
-    for portal in (Indeed(driver), Workable(driver)):
-        start = time.monotonic()
-        check(portal, portal.search(any_term), start)
 
     for portal in (
         Bumeran(driver),
         EmpleosIT(driver),
         Jobicy(driver),
+        SuTrabajo(driver),
         WeWorkRemotely(driver),
     ):
         start = time.monotonic()
@@ -305,7 +298,7 @@ top                                                    # columna %st: CPU robada
 ### 4. Criterio de aceptación (propuesto; ajustalo vos)
 - **LinkedIn e Indeed:** en el VPS, al menos el 90 % de las ofertas que trae la PC en la misma corrida, en todas las repeticiones. Lo mismo durante las 24 corridas horarias, sin una tendencia a la baja.
 - **Ningún portal** con 403 o 999 sostenidos (más de 3 seguidos sobre la misma búsqueda).
-- **Descripciones:** al menos 18 de 20 en cada portal donde la PC también las trae. Solo mide algo en los 5 que piden el detalle aparte: en los otros 6, si la búsqueda anduvo, da 20 de 20.
+- **Descripciones:** al menos 18 de 20 en cada portal donde la PC también las trae. Solo mide algo en los 5 que piden el detalle aparte: en los otros 7, si la búsqueda anduvo, da 20 de 20.
 - **Reintentos de LinkedIn** (`Reintento tras`) que no superen el doble de los de la PC, y que sean 429 y no 403 o 999.
 - **Duración por portal** (los segundos del log de `prueba_ip`) que no supere el doble de la de la PC: la corrida tiene que entrar holgada en la hora.
 - **Portales chicos** (Jobicy, WeWorkRemotely y GetOnBoard traen 3 a 4 ofertas cada uno): que falle alguno es tolerable, pero anotalo.

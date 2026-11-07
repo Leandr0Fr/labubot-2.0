@@ -79,7 +79,7 @@
     {
       "from": 208,
       "to": 632,
-      "label": "loop · _run_user() por cada usuario activo, por orden de alta, sin hilos: started → _search_user → filtro → clasificar → _send_by_keyword → _send_summary"
+      "label": "loop · _run_user() por cada usuario activo, por orden de alta, sin hilos: started → _search_terms → filtro → clasificar → _send_by_keyword → _send_summary"
     }
   ],
   "messages": [

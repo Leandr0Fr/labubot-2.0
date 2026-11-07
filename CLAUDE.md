@@ -33,8 +33,8 @@ búsqueda por usuario activo, uno tras otro, con una caché de búsquedas en mem
   `portal.py` (qué pedir, recibe el `Driver` inyectado), su extractor
   (`html_extractor.py`, `json_extractor.py` o `xml_extractor.py`) y
   `constants.py` (URLs, paginación, selectores). Sumar un portal es crear una
-  carpeta y anotarlo en la lista de `main.py` (y en `WITHOUT_SEARCH` si no busca
-  por palabra), no tocar tres.
+  carpeta y anotarlo en la lista de `main.py` (y en `WITHOUT_SEARCH` de
+  `src/constants/run.py` si no busca por palabra), no tocar tres.
 - `src/telegram/` todo lo de la Bot API, como un portal: `bot.py` (lo que sale,
   siempre por el `Driver`), `webhook.py` y `handlers.py` (lo que entra: FastAPI
   solo recibe), `keyboards.py` y `constants.py` (URLs, comandos y textos). Nada
@@ -52,8 +52,8 @@ búsqueda por usuario activo, uno tras otro, con una caché de búsquedas en mem
   `LabubotRateLimitError` (429) y `LabubotForbiddenError` (403; en Telegram, el
   usuario bloqueó el bot).
 - `src/constants/` lo configurable y lo medido que NO es de un sitio externo
-  (`http.py` transporte, `openai.py` ese modelo, `prompt.py` la pregunta). Lo de
-  cada portal y lo de Telegram va en su carpeta.
+  (`http.py` transporte, `openai.py` ese modelo, `prompt.py` la pregunta,
+  `run.py` la corrida). Lo de cada portal y lo de Telegram va en su carpeta.
 - `src/config/settings.py` el `.env` y el log. Los términos y las bloqueadas son
   de cada usuario y viven en `labubot.db`: no hay listas de búsqueda en el código.
 - En la raíz, además: `migrate.py` (se corre una vez) y `set_webhook.py` (una vez
