@@ -43,7 +43,7 @@ class Bumeran:
             if hours >= settings.hours:
                 filters.append({"id": RECENCY_FILTER, "value": value})
                 break
-        body = {"filtros": filters, "query": "", "internacional": False}
+        body = {"filtros": filters, "internacional": False}
 
         jobs: dict[str, str] = {}
         for page in count():

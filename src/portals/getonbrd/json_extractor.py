@@ -18,13 +18,13 @@ def extract_offers(raw: str, since: float) -> list[Offer] | None:
         list[Offer] | None: Las ofertas recientes de la página, o None si la
         página vino vacía.
     """
-    data = json.loads(raw)["data"]
-    if not data:
+    jobs = json.loads(raw)["data"]
+    if not jobs:
         return None
 
     offers: list[Offer] = []
-    for item in data:
-        attributes = item["attributes"]
+    for job in jobs:
+        attributes = job["attributes"]
         published_at = attributes["published_at"]
         if published_at < since:
             continue
@@ -37,7 +37,7 @@ def extract_offers(raw: str, since: float) -> list[Offer] | None:
             Offer(
                 title=attributes["title"].strip(),
                 description=description.get_text(separator="\n", strip=True),
-                url=item["links"]["public_url"],
+                url=job["links"]["public_url"],
             )
         )
     return offers

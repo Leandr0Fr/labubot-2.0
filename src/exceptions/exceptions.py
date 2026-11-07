@@ -19,3 +19,11 @@ class LabubotRateLimitError(LabubotError):
     A diferencia de un ban, se cura solo esperando. La excepción es OpenAI sin
     créditos (`insufficient_quota`): también llega como 429 y ese no se cura.
     """
+
+
+class LabubotForbiddenError(LabubotError):
+    """
+    El sitio devolvió 403.
+
+    En Telegram quiere decir que el usuario bloqueó el bot.
+    """

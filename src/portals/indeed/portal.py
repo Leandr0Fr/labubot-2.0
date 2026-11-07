@@ -28,12 +28,15 @@ class Indeed:
 
     def search(self, keywords: str) -> dict[str, str]:
         """
-        Trae url y título de las ofertas de la búsqueda.
+        Trae url y título de las ofertas de un término.
         Args:
-            keywords: Términos unidos con OR; los de varias palabras, entre comillas.
+            keywords: Un término; si tiene espacios, se busca como frase.
         Returns:
             dict[str, str]: url : título, sin repetir.
         """
+        what = keywords
+        if " " in keywords:
+            what = f'"{keywords}"'
         jobs: dict[str, str] = {}
         cursor = None
         while True:
@@ -42,7 +45,7 @@ class Indeed:
             if cursor:
                 cursor_arg = f"cursor: {json.dumps(cursor)}"
             query = QUERY.format(
-                what=json.dumps(keywords),
+                what=json.dumps(what),
                 where=json.dumps(settings.location),
                 radius=RADIUS,
                 limit=JOBS_PER_PAGE,
@@ -58,7 +61,7 @@ class Indeed:
                 )
                 offers = extract_offers(raw)
             except LabubotError as error:
-                logger.warning(f"Búsqueda cortada: {error}")
+                logger.warning(f"Búsqueda '{keywords}' cortada: {error}")
                 break
             for offer in offers:
                 jobs[offer["url"]] = offer["title"]

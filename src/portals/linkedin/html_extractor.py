@@ -3,6 +3,7 @@
 from bs4 import BeautifulSoup
 
 from src.portals.linkedin.constants import (
+    SEL_DESCRIPTION,
     SEL_DETAIL_LOCATION,
     SEL_JOB_CARD,
     SEL_JOB_TITLE,
@@ -41,6 +42,6 @@ def extract_description(html: str) -> str:
     """
     soup = BeautifulSoup(html, "html.parser")
     location = soup.select_one(SEL_DETAIL_LOCATION).get_text(strip=True)
-    description_container = soup.find("div", class_="show-more-less-html__markup")
+    description_container = soup.select_one(SEL_DESCRIPTION)
     description = description_container.get_text(separator="\n", strip=True)
     return f"Ubicación: {location}\n{description}"

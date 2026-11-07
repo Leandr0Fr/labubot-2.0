@@ -10,6 +10,16 @@ from main import main
 logger = logging.getLogger(__name__)
 
 
+def daemon() -> None:
+    """Corre una vez al arrancar y después cada hora, hasta que se lo corte."""
+    logger.info("Daemon iniciado")
+    run()
+    schedule.every().hour.do(run)
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
+
+
 def run() -> None:
     """Una corrida; si falla, deja el error en el log y la siguiente sigue en pie."""
     logger.info("Arranca la corrida")
@@ -21,16 +31,6 @@ def run() -> None:
         return
     minutes = (time.monotonic() - start) / 60
     logger.info(f"Corrida terminada en {minutes:.1f} min")
-
-
-def daemon() -> None:
-    """Corre una vez al arrancar y después cada hora, hasta que se lo corte."""
-    logger.info("Daemon iniciado")
-    run()
-    schedule.every().hour.do(run)
-    while True:
-        schedule.run_pending()
-        time.sleep(60)
 
 
 if __name__ == "__main__":

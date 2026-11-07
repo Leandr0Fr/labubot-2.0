@@ -18,3 +18,4 @@ SEL_JOB_LINK = ".base-card__full-link"
 
 # El primero es la ubicación; el segundo, la cantidad de postulantes.
 SEL_DETAIL_LOCATION = ".topcard__flavor--bullet"
+SEL_DESCRIPTION = "div.show-more-less-html__markup"

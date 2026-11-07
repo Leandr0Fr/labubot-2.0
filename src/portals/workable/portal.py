@@ -26,19 +26,21 @@ class Workable:
 
     def search(self, keywords: str) -> dict[str, str]:
         """
-        Trae url y título de las ofertas recientes de la búsqueda.
+        Trae url y título de las ofertas recientes de un término.
         Args:
-            keywords: Búsqueda, tal como la escribirías en el portal; entiende
-                varios términos unidos por OR y frases entre comillas.
+            keywords: Un término; si tiene espacios, se busca como frase.
         Returns:
             dict[str, str]: url : título, sin repetir dentro de la búsqueda.
         """
+        query = keywords
+        if " " in keywords:
+            query = f'"{keywords}"'
         since = datetime.now(UTC) - timedelta(hours=settings.hours)
         # Filtra en días calendario: se pide lo que cubre la ventana y se recorta
         # con `since`.
         days = math.ceil(settings.hours / 24)
         params = {
-            "query": keywords,
+            "query": query,
             "location": settings.location,
             "day_range": str(days),
         }
@@ -47,7 +49,7 @@ class Workable:
             try:
                 raw = self.driver.get(SEARCH_URL, "el listado de ofertas", params)
             except LabubotError as error:
-                logger.warning(f"Búsqueda cortada: {error}")
+                logger.warning(f"Búsqueda '{keywords}' cortada: {error}")
                 break
             for offer in extract_offers(raw, since):
                 jobs[offer["url"]] = offer["title"]

@@ -21,36 +21,25 @@ class Classifier:
         """
         Arma las instructions una sola vez con el CV adentro.
         Args:
-            cv: El perfil de la persona, tal como está en perfil.md.
+            cv: El perfil del usuario, tal como lo cargó en el bot.
         """
         self.client = OpenAI(api_key=settings.llm_api_key)
         self.instructions = INSTRUCTIONS.format(cv=cv)
 
-    def classify(self, offers: list[Offer]) -> dict[str, TrafficLight]:
+    def classify(self, offer: Offer) -> TrafficLight:
         """
-        Un color por oferta, indexado por url.
-        Args:
-            offers: Ofertas a evaluar.
-        Returns:
-            dict[str, TrafficLight]: url de la oferta → color que le dio el modelo.
-        """
-        offers_results: dict[str, TrafficLight] = {}
-        for offer in offers:
-            offers_results[offer["url"]] = self._decide(offer)
-        return offers_results
-
-    def _decide(self, offer: Offer) -> TrafficLight:
-        """
-        Una llamada a Decisions para una oferta.
+        Le pregunta a Decisions de qué color es una oferta.
         Args:
             offer: Título, descripción y url de la oferta.
         Returns:
             TrafficLight: El color que eligió el modelo.
         """
-        job = OFFER_BLOCK.format(title=offer["title"], description=offer["description"])
+        offer_block = OFFER_BLOCK.format(
+            title=offer["title"], description=offer["description"]
+        )
         decision = self.client.decisions.create(
             model=MODEL,
-            input=job,
+            input=offer_block,
             questions=[
                 {
                     "type": "choice",

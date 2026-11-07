@@ -11,22 +11,6 @@ from src.portals.indeed.constants import JOB_URL
 from src.schemas.job import Offer
 
 
-def _search(raw: str) -> dict[str, Any]:
-    """
-    Decodifica la respuesta y devuelve el nodo jobSearch.
-    Args:
-        raw: JSON devuelto por la API GraphQL.
-    Returns:
-        dict[str, Any]: El nodo jobSearch.
-    Raises:
-        LabubotRequestError: Si GraphQL devolvió errores.
-    """
-    data = json.loads(raw)
-    if data.get("errors"):
-        raise LabubotRequestError(f"Indeed devolvió errores: {data['errors']}")
-    return data["data"]["jobSearch"]
-
-
 def extract_offers(raw: str) -> list[Offer]:
     """
     Extrae las ofertas de una página de la búsqueda, ya con su descripción.
@@ -39,16 +23,16 @@ def extract_offers(raw: str) -> list[Offer]:
         LabubotRequestError: Si GraphQL devolvió errores.
     """
     offers: list[Offer] = []
-    for result in _search(raw)["results"]:
+    for result in _parse_job_search(raw)["results"]:
         job = result["job"]
         # Las remotas vienen como "Desde casa".
         location = job["location"]["formatted"]["long"]
-        description = BeautifulSoup(job["description"]["html"], "html.parser")
-        text = description.get_text(separator="\n", strip=True)
+        soup = BeautifulSoup(job["description"]["html"], "html.parser")
+        description = soup.get_text(separator="\n", strip=True)
         offers.append(
             Offer(
                 title=html.unescape(job["title"]).strip(),
-                description=f"Ubicación: {location}\n{text}",
+                description=f"Ubicación: {location}\n{description}",
                 url=JOB_URL.format(job_id=job["key"]),
             )
         )
@@ -65,4 +49,20 @@ def extract_next_cursor(raw: str) -> str | None:
     Raises:
         LabubotRequestError: Si GraphQL devolvió errores.
     """
-    return _search(raw)["pageInfo"]["nextCursor"]
+    return _parse_job_search(raw)["pageInfo"]["nextCursor"]
+
+
+def _parse_job_search(raw: str) -> dict[str, Any]:
+    """
+    Decodifica la respuesta y devuelve el nodo jobSearch.
+    Args:
+        raw: JSON devuelto por la API GraphQL.
+    Returns:
+        dict[str, Any]: El nodo jobSearch.
+    Raises:
+        LabubotRequestError: Si GraphQL devolvió errores.
+    """
+    response = json.loads(raw)
+    if response.get("errors"):
+        raise LabubotRequestError(f"Indeed devolvió errores: {response['errors']}")
+    return response["data"]["jobSearch"]
