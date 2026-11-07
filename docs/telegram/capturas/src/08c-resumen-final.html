@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=390">
+  <title>labubot · Resumen de la corrida</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+  <link rel="stylesheet" href="telegram.css">
+  <script>
+    function applyTheme() {
+      const theme = location.hash.slice(1);
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+      else delete document.documentElement.dataset.theme;
+    }
+    applyTheme();
+    addEventListener("hashchange", applyTheme);
+  </script>
+</head>
+<body>
+  <div class="phone">
+    <div class="statusbar"><span>11:24</span><span class="sb-icons"><svg viewBox="0 0 16 13" fill="currentColor"><rect x="0" y="9" width="3" height="4" rx=".6"/><rect x="4.3" y="6" width="3" height="7" rx=".6"/><rect x="8.6" y="3" width="3" height="10" rx=".6"/><rect x="12.9" y="0" width="3" height="13" rx=".6"/></svg><svg viewBox="0 0 18 13" fill="currentColor"><path d="M9 13L0 3.4A13 13 0 0 1 18 3.4z"/></svg><svg viewBox="0 0 26 13" fill="none" stroke="currentColor"><rect x=".6" y=".6" width="22" height="11.8" rx="3"/><rect x="2.4" y="2.4" width="15" height="8.2" rx="1.6" fill="currentColor" stroke="none"/><path d="M24.4 4.5v4" stroke-width="1.6" stroke-linecap="round"/></svg></span></div>
+    <div class="topbar">
+      <div class="ico back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4.5M11 5l-7 7 7 7"/></svg></div>
+      <img class="avatar " src="../../logo/labubot.svg" alt="">
+      <div class="who"><span class="name">labubot</span><span class="sub">bot</span></div>
+      <div class="ico"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="19" r="1.9"/></svg></div>
+    </div>
+    <main class="chat">
+      <svg class="wall" aria-hidden="true"><defs><pattern id="wall" width="160" height="160" patternUnits="userSpaceOnUse"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="26" r="6"/><path d="M96 18v14M89 25h14"/><path d="M130 60l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z"/><path d="M14 100c8-8 16 8 24 0s16 8 24 0"/><rect x="92" y="104" width="26" height="18" rx="4"/><path d="M100 104v-4h10v4"/><path d="M52 64l24-10-9 24-4-10z"/><circle cx="142" cy="142" r="3"/><path d="M30 140l6-6 6 6-6 6z"/></g></pattern></defs><rect width="100%" height="100%" fill="url(#wall)"/></svg>
+      <div class="stream">
+        <div class="botinfo"><div class="botinfo-title">¿Qué puede hacer este bot?</div>Cada hora busco ofertas de trabajo en 11 portales y te mando por acá las que encajan con tu CV.<br><span class="e">🟢</span> encaja · <span class="e">🟡</span> puede servir<br>El acceso lo aprueba el admin.</div>
+        <div class="date">30 de octubre</div>
+        <div class="row out first tail"><div class="bubble"><span class="link">/start</span><span class="meta ghost">10:12<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span><span class="meta real">10:12<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span></div></div>
+        <div class="row in first tail"><div class="bubble"><span class="e">👋</span> Hola Lucía. Soy labubot: busco ofertas en 11 portales y te mando las que encajan con tu perfil.<br>Tu solicitud quedó pendiente: te aviso cuando la apruebe el admin.<span class="meta ghost">10:12</span><span class="meta real">10:12</span></div></div>
+        <div class="row out first tail"><div class="bubble"><span class="link">/settings</span><span class="meta ghost">10:13<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span><span class="meta real">10:13<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span></div></div>
+        <div class="row in first tail"><div class="bubble"><span class="e">⏳</span> Tu solicitud sigue pendiente.<span class="meta ghost">10:13</span><span class="meta real">10:13</span></div></div>
+        <div class="row in first tail"><div class="bubble"><span class="e">✅</span> ¡Listo, ya tenés acceso!<br>Mandame tu CV con <span class="link">/perfil</span>: lo uso para decidir qué ofertas te sirven.<span class="meta ghost">10:19</span><span class="meta real">10:19</span></div></div>
+        <div class="row out first tail"><div class="bubble"><span class="link">/perfil</span><span class="meta ghost">10:21<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span><span class="meta real">10:21<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span></div></div>
+        <div class="row in first tail"><div class="bubble"><span class="e">📄</span> Mandame tu perfil como texto o como archivo .md / .txt. Reemplaza al anterior.<span class="meta ghost">10:21</span><span class="meta real">10:21</span></div></div>
+        <div class="row out first tail"><div class="bubble doc"><div class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></div><div class="doc-info"><span class="doc-name">perfil.md</span><span class="doc-size">8.0 KB</span></div><span class="meta real">10:22<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span></div></div>
+        <div class="row in first tail"><div class="bubble"><span class="e">📄</span> Perfil guardado (7986 caracteres). Desde la próxima corrida te mando ofertas.<span class="meta ghost">10:22</span><span class="meta real">10:22</span></div></div>
+        <div class="row out first tail"><div class="bubble"><span class="link">/settings</span><span class="meta ghost">10:25<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span><span class="meta real">10:25<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span></div></div>
+        <div class="row in first tail"><div class="kbmsg"><div class="bubble">Mandame las palabras separadas por coma.<span class="meta ghost">editado 10:25</span><span class="meta real">editado 10:25</span></div><div class="kb"><div class="kb-row"><div class="btn"><span class="e">✖</span> Cancelar</div></div></div></div></div>
+        <div class="row out first tail"><div class="bubble">wordpress, laravel<span class="meta ghost">10:26<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span><span class="meta real">10:26<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span></div></div>
+        <div class="row in first tail"><div class="bubble">Agregados: wordpress, laravel. Ahora tenés 34.<span class="meta ghost">10:26</span><span class="meta real">10:26</span></div></div>
+        <div class="row out first tail"><div class="bubble"><span class="link">/settings</span><span class="meta ghost">10:27<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span><span class="meta real">10:27<svg class="checks" viewBox="0 0 18 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6.5-7.5M8 8.6l.9.9 6.6-8"/></svg></span></div></div>
+        <div class="row in first tail"><div class="kbmsg"><div class="bubble"><span class="e">🔎</span> Términos (22)<br>analista programador · backend · backend developer · desarrollador · desarrollador backend · desarrollador jr · desarrollador junior · desarrollador python · desarrollador semi senior · developer · fastapi · ingeniero de software · integraciones · junior developer · programador · programador jr · programador junior · python · python developer · software engineer · ssr developer · web scraping<span class="meta ghost">editado 10:27</span><span class="meta real">editado 10:27</span></div><div class="kb"><div class="kb-row"><div class="btn"><span class="e">➕</span> Agregar</div><div class="btn"><span class="e">➖</span> Quitar</div></div><div class="kb-row"><div class="btn"><span class="e">⬅</span> Volver</div></div></div></div></div>
+        <div class="row in first"><div class="bubble">Búsqueda palabra &quot;analista programador&quot;:<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟡</span> Analista Programador Python Jr<br><span class="link">https://ar.linkedin.com/jobs/view/analista-programador-python-jr-4485402917</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;backend&quot;:<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟢</span> Desarrollador/a Python Backend (FastAPI) - Remoto<br><span class="link">https://ar.linkedin.com/jobs/view/desarrollador-python-backend-fastapi-remoto-4485437208</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟡</span> Backend Developer Ssr (Python / Django)<br><span class="link">https://ar.indeed.com/viewjob?jk=5d2e8a1b47c0f39e</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;backend developer&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;desarrollador&quot;:<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟢</span> Desarrollador Python Semi Senior (Web Scraping)<br><span class="link">https://ar.talent.com/view?id=643889417520386615</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟡</span> Desarrollador Python Jr - Automatizaciones<br><span class="link">https://www.bumeran.com.ar/empleos/1118489713.html</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;desarrollador backend&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;desarrollador jr&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;desarrollador junior&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;desarrollador python&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;desarrollador semi senior&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;developer&quot;:<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟢</span> Python Developer - Integraciones y APIs<br><span class="link">https://www.getonbrd.com/jobs/python-developer-integraciones-apis-remote</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;fastapi&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;ingeniero de software&quot;:<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟡</span> Ingeniero/a de Software Jr (Python)<br><span class="link">https://ar.linkedin.com/jobs/view/ingeniero-a-de-software-jr-python-4485519364</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;integraciones&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;junior developer&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;programador&quot;:<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟡</span> Programador Python Jr - Automatización de procesos<br><span class="link">https://ar.computrabajo.com/ofertas-de-trabajo/oferta-de-trabajo-de-programador-python-jr-en-capital-federal-0C4F7A92E1D35B8661373E686DCF3405</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟡</span> Programador/a Backend Python (Flask)<br><span class="link">https://ar.indeed.com/viewjob?jk=c40f2b9e18d7a356</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;programador jr&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;programador junior&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;python&quot;:<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟢</span> Python Jr - Scraping y ETL (Remoto)<br><span class="link">https://ar.indeed.com/viewjob?jk=a71c3e09b4d28f65</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟢</span> Python Developer - Bots y Automatización<br><span class="link">https://www.getonbrd.com/jobs/python-developer-bots-automatizacion-remote</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟡</span> Data Analyst (Python, SQL)<br><span class="link">https://jobicy.com/jobs/157218-data-analyst-python-sql</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;python developer&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;software engineer&quot;:<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟡</span> Software Engineer Jr - LATAM<br><span class="link">https://ar.talent.com/view?id=643896032718845190</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;ssr developer&quot;:<br>No se encontraron coincidencias.<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Búsqueda palabra &quot;web scraping&quot;:<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟢</span> Especialista en Web Scraping<br><span class="link">https://www.getonbrd.com/jobs/especialista-web-scraping-remote</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble">Otros portales:<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟢</span> Ingeniero/a Back-end Django<br><span class="link">https://www.empleosit.com.ar/display-job/131652/</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in"><div class="bubble"><span class="e">🟡</span> Automatización con RPA (Jr)<br><span class="link">https://www.bumeran.com.ar/empleos/1118494182.html</span><span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+        <div class="row in tail"><div class="bubble">Resumen corrida (11:19 - 11:24):<br>analista programador: 1 amarillo encontrado<br>backend: 1 verde encontrado - 1 amarillo encontrado<br>backend developer: No encontramos coincidencias<br>desarrollador: 1 verde encontrado - 1 amarillo encontrado<br>desarrollador backend: No encontramos coincidencias<br>desarrollador jr: No encontramos coincidencias<br>desarrollador junior: No encontramos coincidencias<br>desarrollador python: No encontramos coincidencias<br>desarrollador semi senior: No encontramos coincidencias<br>developer: 1 verde encontrado<br>fastapi: No encontramos coincidencias<br>ingeniero de software: 1 amarillo encontrado<br>integraciones: No encontramos coincidencias<br>junior developer: No encontramos coincidencias<br>programador: 2 amarillos encontrados<br>programador jr: No encontramos coincidencias<br>programador junior: No encontramos coincidencias<br>python: 2 verdes encontrados - 1 amarillo encontrado<br>python developer: No encontramos coincidencias<br>software engineer: 1 amarillo encontrado<br>ssr developer: No encontramos coincidencias<br>web scraping: 1 verde encontrado<br>Otros portales: 1 verde encontrado - 1 amarillo encontrado<span class="meta ghost">11:24</span><span class="meta real">11:24</span></div></div>
+      </div>
+      
+      
+    </main>
+    <div class="composer">
+      <div class="menu-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h9"/></svg>Menú</div>
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M8 14.2c1 1.6 2.4 2.4 4 2.4s3-.8 4-2.4"/><circle cx="9" cy="9.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="9.6" r="1.1" fill="currentColor" stroke="none"/></svg></div>
+      <div class="field">Mensaje</div>
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.2l-8.3 8.3a5.3 5.3 0 0 1-7.5-7.5l8.6-8.6a3.6 3.6 0 0 1 5.1 5.1l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9"/></svg></div><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11.5" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></div>
+    </div>
+    <div class="navbar"><i></i></div>
+  </div>
+  <script>
+    // Un borde de burbuja sin texto bajo la cabecera o sobre el menú parece un error de dibujo: se oculta.
+    document.fonts.ready.then(() => {
+      const chat = document.querySelector(".chat").getBoundingClientRect();
+      const stream = document.querySelector(".stream");
+      // Chat desplazado hacia arriba: el último mensaje arranca a data-last-top px del borde.
+      if (stream.dataset.lastTop) {
+        const last = stream.lastElementChild.getBoundingClientRect().top;
+        stream.style.bottom = last - chat.top - Number(stream.dataset.lastTop) + "px";
+      }
+      const top = chat.top;
+      const popup = document.querySelector(".cmds");
+      const bottom = popup ? popup.getBoundingClientRect().top : chat.bottom;
+      for (const el of document.querySelectorAll(".stream > *")) {
+        const box = el.getBoundingClientRect();
+        const peeksTop = box.top < top && box.bottom - top < 16;
+        const peeksBottom = box.bottom > bottom && bottom - box.top < 16;
+        if (peeksTop || peeksBottom) el.style.visibility = "hidden";
+      }
+    });
+  </script>
+</body>
+</html>

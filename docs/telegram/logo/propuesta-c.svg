@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>labubot · propuesta C: monograma b con el semáforo en el asta</title>
+  <rect width="512" height="512" fill="#ffd36b"/>
+  <!-- panza de la b -->
+  <circle cx="275" cy="316" r="84" fill="none" stroke="#18222e" stroke-width="60"/>
+  <!-- asta-semáforo -->
+  <rect x="123" y="82" width="108" height="348" rx="54" fill="#18222e"/>
+  <!-- base: une el asta con la panza sin muesca -->
+  <rect x="177" y="376" width="98" height="54" fill="#18222e"/>
+  <circle cx="177" cy="152" r="32" fill="#ff3b30"/>
+  <circle cx="177" cy="256" r="32" fill="#ffcc00"/>
+  <circle cx="177" cy="360" r="32" fill="#34c759"/>
+</svg>

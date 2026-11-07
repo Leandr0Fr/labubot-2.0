@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capturas del bot</title>
+  <script>
+    function applyTheme() {
+      const theme = location.hash.slice(1);
+      if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+      else delete document.documentElement.dataset.theme;
+    }
+    applyTheme();
+    addEventListener("hashchange", applyTheme);
+  </script>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --fg: #17212b;
+      --muted: #5b6b7a;
+      --line: #dfe5ea;
+      --accent: #2a7ab9;
+      --shot-bg: #0e1621;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0b1119;
+        --card: #17212b;
+        --fg: #e9eef3;
+        --muted: #8a9bab;
+        --line: #243444;
+        --accent: #6ab3f3;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1119;
+      --card: #17212b;
+      --fg: #e9eef3;
+      --muted: #8a9bab;
+      --line: #243444;
+      --accent: #6ab3f3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      line-height: 1.45;
+    }
+    .e { font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; }
+    main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 48px; }
+    h1 { margin: 0 0 6px; font-size: 26px; }
+    .lead { margin: 0 0 28px; color: var(--muted); max-width: 72ch; }
+    .lead a { color: var(--accent); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 22px;
+    }
+    .card {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 390 / 844;
+      background: var(--shot-bg);
+      border-bottom: 1px solid var(--line);
+    }
+    figcaption { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .num { font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
+    h2 { margin: 0; font-size: 16px; }
+    p { margin: 0; font-size: 14px; color: var(--muted); flex: 1; overflow-wrap: anywhere; }
+    .src { margin-top: 6px; font-size: 13px; color: var(--accent); text-decoration: none; }
+    .src:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Así se va a ver labubot en Telegram</h1>
+    <p class="lead">Maquetas del bot multiusuario en el tema oscuro de Telegram (Android, 390×844). Lucía (@lucia_dev) es una usuaria ficticia. Los textos son los canónicos del contrato, salvo ASK_LIST, que en 06 va concordado («las palabras separadas»); los mensajes por palabra y el resumen son los de la revisión del 1/11 (diseno.md §4). El avatar es el logo de <a href="../logo/">logo/</a>. Tocá una captura para verla en tamaño real.</p>
+    <div class="grid">
+      <figure class="card">
+        <a href="01-start-pendiente.png"><img src="01-start-pendiente.png" alt="Alta pendiente" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">01</span>
+          <h2>Alta pendiente</h2>
+          <p>Lucía manda /start: queda pending y el bot le explica qué hace. Mientras espera, todo lo demás contesta STILL_PENDING.</p>
+          <a class="src" href="src/01-start-pendiente.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="02a-admin-aprobacion.png"><img src="02a-admin-aprobacion.png" alt="Solicitud al admin" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">02a</span>
+          <h2>Solicitud al admin</h2>
+          <p>En el chat del admin (ADMIN_CHAT_ID) llega ADMIN_REQUEST con los botones approve:{chat_id} y reject:{chat_id}. Arriba, el final del resumen de su corrida de las 9:00.</p>
+          <a class="src" href="src/02a-admin-aprobacion.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="02b-admin-aprobada.png"><img src="02b-admin-aprobada.png" alt="Solicitud aprobada" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">02b</span>
+          <h2>Solicitud aprobada</h2>
+          <p>El admin toca Aprobar: editMessageText reemplaza el mismo mensaje (sin botones) y Lucía pasa a active.</p>
+          <a class="src" href="src/02b-admin-aprobada.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="03-perfil.png"><img src="03-perfil.png" alt="Carga del perfil" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">03</span>
+          <h2>Carga del perfil</h2>
+          <p>Le llega APPROVED; con /perfil el bot pasa a awaiting_profile y Lucía manda su CV como perfil.md (se baja con getFile).</p>
+          <a class="src" href="src/03-perfil.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="04-settings.png"><img src="04-settings.png" alt="Panel /settings" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">04</span>
+          <h2>Panel /settings</h2>
+          <p>Un solo mensaje con contadores y cuatro botones; navegar lo edita en lugar de mandar mensajes nuevos.</p>
+          <a class="src" href="src/04-settings.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="05-bloqueadas.png"><img src="05-bloqueadas.png" alt="Palabras bloqueadas" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">05</span>
+          <h2>Palabras bloqueadas</h2>
+          <p>Botón <span class="e">🚫</span> Bloqueadas (callback blocked): el panel se edita a la lista, con la semilla DEFAULT_<wbr>BLOCKED_<wbr>TITLE_<wbr>WORDS.</p>
+          <a class="src" href="src/05-bloqueadas.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="06-agregar-bloqueadas.png"><img src="06-agregar-bloqueadas.png" alt="Agregar bloqueadas" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">06</span>
+          <h2>Agregar bloqueadas</h2>
+          <p><span class="e">➕</span> Agregar deja awaiting_blocked_add y el panel pide las palabras. Lucía manda «wordpress, laravel»: pasa de 32 a 34 bloqueadas.</p>
+          <a class="src" href="src/06-agregar-bloqueadas.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="07-terminos.png"><img src="07-terminos.png" alt="Términos de búsqueda" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">07</span>
+          <h2>Términos de búsqueda</h2>
+          <p>Botón <span class="e">🔎</span> Términos (callback terms): las palabras clave de Lucía, en orden alfabético. La corrida las busca de a una y agrupa cada oferta bajo la primera que la trajo.</p>
+          <a class="src" href="src/07-terminos.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="08a-ofertas-por-palabra.png"><img src="08a-ofertas-por-palabra.png" alt="Ofertas por palabra" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">08a</span>
+          <h2>Ofertas por palabra</h2>
+          <p>La corrida de las 11:00 le llega a las 11:24, después de la de Leandro. Sus 22 palabras, en orden alfabético: si trajo <span class="e">🟢</span><span class="e">🟡</span>, KEYWORD_HEADER («Búsqueda palabra &quot;…&quot;:») y un OFFER por oferta, verdes primero; si no, un solo mensaje con NO_MATCHES («No se encontraron coincidencias.»), sin sonido (disable_notification). Las compuestas casi nunca traen nada: sus ofertas ya las trajo la palabra más corta. Supone link_preview_options desactivado.</p>
+          <a class="src" href="src/08a-ofertas-por-palabra.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="08b-resumen.png"><img src="08b-resumen.png" alt="Fin de la corrida" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">08b</span>
+          <h2>Fin de la corrida</h2>
+          <p>El final de la corrida, con el chat desplazado hacia arriba: el resumen no entra en una pantalla. Las últimas palabras y «Otros portales:», que aparece solo porque trajo algo (portales sin búsqueda y ninguna palabra en el título). Después, siempre y sin sonido, el resumen: de 11:19, cuando arrancó la corrida de Lucía, a 11:24, cuando se manda.</p>
+          <a class="src" href="src/08b-resumen.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="08c-resumen-final.png"><img src="08c-resumen-final.png" alt="Resumen de la corrida" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">08c</span>
+          <h2>Resumen de la corrida</h2>
+          <p>El resto del resumen. Una línea por palabra, en el mismo orden: las <span class="e">🟢</span><span class="e">🟡</span> que se le mandaron («1 verde encontrado - 1 amarillo encontrado», «2 amarillos encontrados») o «No encontramos coincidencias». «Otros portales» va al final y solo si trajo algo.</p>
+          <a class="src" href="src/08c-resumen-final.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="09-pausa.png"><img src="09-pausa.png" alt="Pausar y reanudar" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">09</span>
+          <h2>Pausar y reanudar</h2>
+          <p>/pausa deja a Lucía en paused y las corridas la saltean, resumen incluido: no le llega nada; a la mañana siguiente, /reanudar la vuelve a active.</p>
+          <a class="src" href="src/09-pausa.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="10-menu-comandos.png"><img src="10-menu-comandos.png" alt="Menú de comandos" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">10</span>
+          <h2>Menú de comandos</h2>
+          <p>Al escribir «/» aparecen los comandos de setMyCommands. /usuarios no figura: solo se registra en el chat del admin.</p>
+          <a class="src" href="src/10-menu-comandos.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+      <figure class="card">
+        <a href="11-admin-usuarios.png"><img src="11-admin-usuarios.png" alt="Usuarios (admin)" width="390" height="844" loading="lazy"></a>
+        <figcaption>
+          <span class="num">11</span>
+          <h2>Usuarios (admin)</h2>
+          <p>En el chat del admin, /usuarios lista a todos por orden de alta, pendientes y rechazados incluidos: nombre y @usuario arriba, estado y chat_id abajo. Desde otro chat contesta UNKNOWN.</p>
+          <a class="src" href="src/11-admin-usuarios.html">maqueta HTML</a>
+        </figcaption>
+      </figure>
+    </div>
+  </main>
+</body>
+</html>

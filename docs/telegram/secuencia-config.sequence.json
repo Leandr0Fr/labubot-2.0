@@ -1,0 +1,338 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "labubot — Editar palabras bloqueadas",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1080,
+      696
+    ],
+    "legend": {
+      "entries": {
+        "emphasis": {
+          "label": "app de Telegram"
+        },
+        "security": {
+          "label": "webhook + secreto"
+        },
+        "dashed": {
+          "label": "Bot API vía Driver"
+        },
+        "default": {
+          "label": "labubot.db"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "usuario",
+      "type": "frontend",
+      "label": "Usuario",
+      "sublabel": "chat privado"
+    },
+    {
+      "id": "telegram",
+      "type": "cloud",
+      "label": "Telegram",
+      "sublabel": "Bot API",
+      "brand": "telegram"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "api (webhook)",
+      "sublabel": "FastAPI · handlers.py",
+      "brand": "fastapi"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "labubot.db",
+      "sublabel": "SQLite · WAL",
+      "brand": "sqlite"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 230,
+      "label": "1 · /settings abre el panel"
+    },
+    {
+      "from": 248,
+      "to": 356,
+      "label": "2 · 🚫 Bloqueadas muestra la lista"
+    },
+    {
+      "from": 374,
+      "to": 482,
+      "label": "3 · ➕ Agregar pide las palabras"
+    },
+    {
+      "from": 500,
+      "to": 608,
+      "label": "4 · El texto se guarda"
+    }
+  ],
+  "messages": [
+    {
+      "id": "cmd-settings",
+      "from": "usuario",
+      "to": "telegram",
+      "y": 174,
+      "label": "/settings",
+      "variant": "emphasis",
+      "note": "Solo active o paused: pending, rejected y blocked se atienden como /start"
+    },
+    {
+      "id": "webhook-settings",
+      "from": "telegram",
+      "to": "api",
+      "y": 190,
+      "label": "POST /telegram/webhook · message",
+      "variant": "security",
+      "note": "Secreto distinto de WEBHOOK_SECRET: 403; si no, 200 {\"ok\": true} siempre"
+    },
+    {
+      "id": "read-user",
+      "from": "api",
+      "to": "db",
+      "y": 206,
+      "label": "Users.get · terms · blocked_words",
+      "variant": "default",
+      "note": "Los conteos del panel"
+    },
+    {
+      "id": "send-panel",
+      "from": "api",
+      "to": "telegram",
+      "y": 222,
+      "label": "sendMessage · settings_keyboard",
+      "variant": "dashed",
+      "note": "El único sendMessage del panel: de acá en más, cada botón lo edita"
+    },
+    {
+      "id": "deliver-panel",
+      "from": "telegram",
+      "to": "usuario",
+      "y": 222,
+      "label": "⚙️ Términos: 22 · Bloqueadas: 32 · …",
+      "variant": "emphasis",
+      "note": "Perfil ✅ · Alertas: activas. [🔎 Términos] [🚫 Bloqueadas] [📄 Perfil] [⏸ Pausar]"
+    },
+    {
+      "id": "tap-blocked",
+      "from": "usuario",
+      "to": "telegram",
+      "y": 272,
+      "label": "toca 🚫 Bloqueadas",
+      "variant": "emphasis"
+    },
+    {
+      "id": "cb-blocked",
+      "from": "telegram",
+      "to": "api",
+      "y": 288,
+      "label": "callback_query · blocked",
+      "variant": "security"
+    },
+    {
+      "id": "answer-blocked",
+      "from": "api",
+      "to": "telegram",
+      "y": 316,
+      "label": "answerCallbackQuery (siempre)",
+      "variant": "dashed",
+      "note": "Antes que nada: si no, el botón queda cargando"
+    },
+    {
+      "id": "read-blocked",
+      "from": "api",
+      "to": "db",
+      "y": 332,
+      "label": "Users.blocked_words(chat_id)",
+      "variant": "default",
+      "note": "En orden alfabético"
+    },
+    {
+      "id": "edit-list",
+      "from": "api",
+      "to": "telegram",
+      "y": 348,
+      "label": "editMessageText · list_keyboard",
+      "variant": "dashed",
+      "note": "Edita el mensaje del panel: la lista separada por \" · \""
+    },
+    {
+      "id": "deliver-list",
+      "from": "telegram",
+      "to": "usuario",
+      "y": 348,
+      "label": "🚫 Bloqueadas (32) .net · abap · … · php · …",
+      "variant": "emphasis",
+      "note": "[➕ Agregar] [➖ Quitar] [⬅ Volver]"
+    },
+    {
+      "id": "tap-add",
+      "from": "usuario",
+      "to": "telegram",
+      "y": 398,
+      "label": "toca ➕ Agregar",
+      "variant": "emphasis"
+    },
+    {
+      "id": "cb-add",
+      "from": "telegram",
+      "to": "api",
+      "y": 414,
+      "label": "callback_query · blocked:add",
+      "variant": "security"
+    },
+    {
+      "id": "answer-add",
+      "from": "api",
+      "to": "telegram",
+      "y": 442,
+      "label": "answerCallbackQuery (siempre)",
+      "variant": "dashed"
+    },
+    {
+      "id": "await-blocked",
+      "from": "api",
+      "to": "db",
+      "y": 458,
+      "label": "set_state(awaiting_blocked_add)",
+      "variant": "default",
+      "note": "El próximo texto son palabras bloqueadas"
+    },
+    {
+      "id": "edit-ask",
+      "from": "api",
+      "to": "telegram",
+      "y": 474,
+      "label": "editMessageText ASK_LIST · cancel_keyboard",
+      "variant": "dashed",
+      "note": "Mismo mensaje del panel, ahora con un solo botón"
+    },
+    {
+      "id": "deliver-ask",
+      "from": "telegram",
+      "to": "usuario",
+      "y": 474,
+      "label": "Mandame las palabras… [✖ Cancelar]",
+      "variant": "emphasis",
+      "note": "Mandame las palabras separadas por coma. ✖ Cancelar (cancel): state '' y vuelve el panel"
+    },
+    {
+      "id": "type-words",
+      "from": "usuario",
+      "to": "telegram",
+      "y": 524,
+      "label": "\"php, wordpress\"",
+      "variant": "emphasis"
+    },
+    {
+      "id": "webhook-text",
+      "from": "telegram",
+      "to": "api",
+      "y": 540,
+      "label": "POST /telegram/webhook · text",
+      "variant": "security"
+    },
+    {
+      "id": "read-state",
+      "from": "api",
+      "to": "db",
+      "y": 556,
+      "label": "Users.get → awaiting_blocked_add",
+      "variant": "default"
+    },
+    {
+      "id": "save-words",
+      "from": "api",
+      "to": "db",
+      "y": 584,
+      "label": "add_blocked_words + set_state('')",
+      "variant": "default",
+      "note": "Parte por coma y pasa a minúsculas; devuelve solo las nuevas: php ya estaba"
+    },
+    {
+      "id": "send-added",
+      "from": "api",
+      "to": "telegram",
+      "y": 600,
+      "label": "sendMessage ADDED",
+      "variant": "dashed",
+      "note": "Mensaje nuevo, sin botones"
+    },
+    {
+      "id": "deliver-added",
+      "from": "telegram",
+      "to": "usuario",
+      "y": 600,
+      "label": "Agregados: wordpress. Ahora tenés 33.",
+      "variant": "emphasis"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "api",
+      "from": 186,
+      "to": 226,
+      "type": "backend"
+    },
+    {
+      "participant": "api",
+      "from": 284,
+      "to": 352,
+      "type": "backend"
+    },
+    {
+      "participant": "api",
+      "from": 410,
+      "to": 478,
+      "type": "backend"
+    },
+    {
+      "participant": "api",
+      "from": 536,
+      "to": 604,
+      "type": "backend"
+    },
+    {
+      "participant": "db",
+      "from": 552,
+      "to": 588,
+      "type": "database"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Un panel, un mensaje",
+      "items": [
+        "/settings: sendMessage, una vez",
+        "Cada botón: editMessageText"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "users.state decide",
+      "items": [
+        "blocked:add → awaiting_blocked_add",
+        "Guardar, cancelar o un comando: ''"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "La próxima corrida ya filtra",
+      "items": [
+        "Título con wordpress: se descarta",
+        "Antes del LLM: no se paga la llamada"
+      ]
+    }
+  ]
+}

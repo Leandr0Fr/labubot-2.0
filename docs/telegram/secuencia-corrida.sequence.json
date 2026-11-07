@@ -1,0 +1,329 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "labubot — Corrida horaria por usuario",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1084,
+      699
+    ],
+    "legend": {
+      "entries": {
+        "emphasis": {
+          "label": "paso principal"
+        },
+        "default": {
+          "label": "llamada"
+        },
+        "return": {
+          "label": "respuesta"
+        },
+        "dashed": {
+          "label": "caché de la corrida"
+        },
+        "security": {
+          "label": "403 · bloqueado"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "db",
+      "type": "database",
+      "label": "labubot.db",
+      "sublabel": "SQLite · WAL",
+      "brand": "sqlite"
+    },
+    {
+      "id": "cache",
+      "type": "messagebus",
+      "label": "searches",
+      "sublabel": "caché en memoria"
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "worker",
+      "sublabel": "daemon.py · main.py"
+    },
+    {
+      "id": "portales",
+      "type": "external",
+      "label": "Portales",
+      "sublabel": "11 sitios de empleo"
+    },
+    {
+      "id": "openai",
+      "type": "cloud",
+      "label": "OpenAI",
+      "sublabel": "Decisions API",
+      "brand": "openai"
+    },
+    {
+      "id": "telegram",
+      "type": "cloud",
+      "label": "Telegram",
+      "sublabel": "Bot API",
+      "brand": "telegram"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 176,
+      "label": "main(): Driver, 11 portales, searches = {} y hora de arranque"
+    },
+    {
+      "from": 208,
+      "to": 632,
+      "label": "loop · _run_user() por cada usuario activo, por orden de alta, sin hilos: started → _search_user → filtro → clasificar → _send_by_keyword → _send_summary"
+    }
+  ],
+  "messages": [
+    {
+      "id": "activos",
+      "from": "worker",
+      "to": "db",
+      "y": 168,
+      "label": "Users.active()",
+      "variant": "emphasis",
+      "note": "Status active y perfil cargado, por orden de alta (como mucho 5); si no hay ninguno, termina. Un /pausa o un perfil nuevo rigen desde la próxima corrida."
+    },
+    {
+      "id": "terminos",
+      "from": "worker",
+      "to": "db",
+      "y": 230,
+      "label": "Users.terms · blocked_words · Deliveries.pending()",
+      "note": "las pendientes vuelven a su palabra"
+    },
+    {
+      "id": "cache-busca",
+      "from": "worker",
+      "to": "cache",
+      "y": 258,
+      "label": "¿(portal, palabra)?",
+      "variant": "dashed"
+    },
+    {
+      "id": "cache-hit",
+      "from": "cache",
+      "to": "worker",
+      "y": 286,
+      "label": "hit: {url: título}",
+      "variant": "return",
+      "note": "otro usuario ya la buscó: se reusa"
+    },
+    {
+      "id": "buscar",
+      "from": "worker",
+      "to": "portales",
+      "y": 300,
+      "label": "miss: search(palabra)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "sin-busqueda",
+      "from": "worker",
+      "to": "portales",
+      "y": 328,
+      "label": "sin búsqueda: 1 vez/corrida"
+    },
+    {
+      "id": "found",
+      "from": "portales",
+      "to": "worker",
+      "y": 356,
+      "label": "{url: título} → {url: Found}",
+      "variant": "return",
+      "note": "term: 1.ª palabra suya (alfabética) que la trajo; Indeed y Workable ya sin OR. Sin búsqueda: 1.ª en el título u Otros portales"
+    },
+    {
+      "id": "guardar",
+      "from": "worker",
+      "to": "cache",
+      "y": 370,
+      "label": "miss: guarda {url: título}",
+      "variant": "dashed"
+    },
+    {
+      "id": "filtro",
+      "from": "worker",
+      "to": "db",
+      "y": 398,
+      "label": "Deliveries.exists(chat_id, url) · Offers.get(url)",
+      "note": "ya vista (o de vistas.txt) o bloqueada por título: se saltea, no es nueva"
+    },
+    {
+      "id": "detalle",
+      "from": "worker",
+      "to": "portales",
+      "y": 412,
+      "label": "description(url) si falta"
+    },
+    {
+      "id": "detalle-ret",
+      "from": "portales",
+      "to": "worker",
+      "y": 440,
+      "label": "descripción (puede venir vacía)",
+      "variant": "return"
+    },
+    {
+      "id": "offers-add",
+      "from": "worker",
+      "to": "db",
+      "y": 454,
+      "label": "Offers.add(offer, portal)",
+      "note": "una bajada por url, para siempre; vacía se guarda igual y se saltea"
+    },
+    {
+      "id": "clasificar",
+      "from": "worker",
+      "to": "openai",
+      "y": 468,
+      "label": "Classifier(profile).classify([offer])",
+      "variant": "emphasis"
+    },
+    {
+      "id": "color",
+      "from": "openai",
+      "to": "worker",
+      "y": 496,
+      "label": "green · yellow · red",
+      "variant": "return"
+    },
+    {
+      "id": "registrar",
+      "from": "worker",
+      "to": "db",
+      "y": 510,
+      "label": "Deliveries.add(chat_id, url, light, term)",
+      "variant": "emphasis",
+      "note": "commit inmediato: lo pagado no se repite · term NULL = Otros portales"
+    },
+    {
+      "id": "encabezado",
+      "from": "worker",
+      "to": "telegram",
+      "y": 524,
+      "label": "_send_by_keyword · con 🟢🟡: KEYWORD_HEADER + un OFFER por oferta",
+      "variant": "emphasis",
+      "note": "un bloque por palabra, en orden alfabético · send_offer, verdes primero · PAUSE 1 s antes de cada mensaje"
+    },
+    {
+      "id": "marcar",
+      "from": "worker",
+      "to": "db",
+      "y": 538,
+      "label": "mark_sent(chat_id, url) si contestó 200"
+    },
+    {
+      "id": "vacio",
+      "from": "worker",
+      "to": "telegram",
+      "y": 552,
+      "label": "sin 🟢🟡: KEYWORD_HEADER + NO_MATCHES · silent=True",
+      "note": "un solo mensaje, sin sonido · Otros portales, al final y solo si trajo algo"
+    },
+    {
+      "id": "prohibido",
+      "from": "telegram",
+      "to": "worker",
+      "y": 580,
+      "label": "o 403 → LabubotForbiddenError",
+      "variant": "security",
+      "note": "en cualquier envío suyo"
+    },
+    {
+      "id": "bloqueado",
+      "from": "worker",
+      "to": "db",
+      "y": 594,
+      "label": "set_status(chat_id, blocked) · siguiente usuario",
+      "variant": "security",
+      "note": "sin resumen; lo no enviado le llega si vuelve con /start"
+    },
+    {
+      "id": "resumen",
+      "from": "worker",
+      "to": "telegram",
+      "y": 608,
+      "label": "_send_summary · siempre · send_message(silent=True)",
+      "note": "Resumen corrida (start - end): una línea por palabra con sus 🟢🟡 o \"No encontramos coincidencias\" · start = started de este usuario"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "cache",
+      "from": 252,
+      "to": 292,
+      "type": "messagebus"
+    },
+    {
+      "participant": "portales",
+      "from": 294,
+      "to": 362,
+      "type": "external"
+    },
+    {
+      "participant": "cache",
+      "from": 364,
+      "to": 376,
+      "type": "messagebus"
+    },
+    {
+      "participant": "portales",
+      "from": 406,
+      "to": 446,
+      "type": "external"
+    },
+    {
+      "participant": "openai",
+      "from": 462,
+      "to": 502,
+      "type": "cloud"
+    },
+    {
+      "participant": "telegram",
+      "from": 518,
+      "to": 586,
+      "type": "cloud"
+    },
+    {
+      "participant": "telegram",
+      "from": 602,
+      "to": 614,
+      "type": "cloud"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "La caché de la corrida",
+      "items": [
+        "(portal, palabra) → {url: título}",
+        "El primer usuario paga el scraping"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Uno tras otro, sin hilos",
+      "items": [
+        "Una búsqueda a LinkedIn a la vez",
+        "≈ 50 llamadas al LLM por usuario"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Lo que le llega a cada uno",
+      "items": [
+        "Bloque por palabra + 1 msj por oferta",
+        "Vacíos y resumen: sin sonido"
+      ]
+    }
+  ]
+}

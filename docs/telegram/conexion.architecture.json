@@ -1,0 +1,321 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "labubot — Cómo se conectan los usuarios",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1376,
+      650
+    ],
+    "views": [
+      {
+        "id": "un-usuario-escribe",
+        "label": "Un usuario escribe",
+        "focus": [
+          "users",
+          "telegram",
+          "caddy",
+          "api",
+          "db"
+        ],
+        "note": "Telegram llama al webhook; Caddy lo pasa al api, que lee y escribe la base y contesta por la Bot API."
+      },
+      {
+        "id": "corrida-horaria",
+        "label": "La corrida horaria",
+        "focus": [
+          "worker",
+          "db",
+          "portals",
+          "openai",
+          "telegram",
+          "users"
+        ],
+        "note": "El worker busca, clasifica por usuario y manda las verdes y amarillas a cada chat."
+      },
+      {
+        "id": "que-vive-en-el-vps",
+        "label": "Qué vive en el VPS",
+        "focus": [
+          "caddy",
+          "api",
+          "db",
+          "worker"
+        ],
+        "note": "Solo Caddy escucha afuera; api y worker son dos procesos systemd que comparten labubot.db."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "users",
+      "type": "frontend",
+      "label": "App de Telegram",
+      "sublabel": "cada usuario y el admin",
+      "tag": "chat privado",
+      "brand": "telegram",
+      "pos": [
+        20,
+        200
+      ],
+      "size": [
+        160,
+        72
+      ]
+    },
+    {
+      "id": "telegram",
+      "type": "cloud",
+      "label": "Telegram Bot API",
+      "sublabel": "api.telegram.org",
+      "brand": "telegram",
+      "pos": [
+        350,
+        200
+      ],
+      "size": [
+        170,
+        72
+      ]
+    },
+    {
+      "id": "caddy",
+      "type": "security",
+      "label": "Caddy",
+      "sublabel": "HTTPS :443 · TLS automático",
+      "tag": "labubot.ejemplo.com",
+      "pos": [
+        820,
+        40
+      ],
+      "size": [
+        180,
+        72
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "api · FastAPI",
+      "sublabel": "uvicorn 127.0.0.1:8000",
+      "tag": "api.py",
+      "brand": "fastapi",
+      "pos": [
+        820,
+        200
+      ],
+      "size": [
+        180,
+        72
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "labubot.db",
+      "sublabel": "SQLite · modo WAL",
+      "brand": "sqlite",
+      "pos": [
+        820,
+        330
+      ],
+      "size": [
+        180,
+        72
+      ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "worker · daemon.py",
+      "sublabel": "schedule · cada hora",
+      "tag": "main.py",
+      "pos": [
+        820,
+        460
+      ],
+      "size": [
+        180,
+        72
+      ]
+    },
+    {
+      "id": "portals",
+      "type": "external",
+      "label": "Portales de empleo",
+      "sublabel": "11 sitios · HTTP puro",
+      "pos": [
+        1180,
+        300
+      ],
+      "size": [
+        170,
+        72
+      ]
+    },
+    {
+      "id": "openai",
+      "type": "cloud",
+      "label": "OpenAI",
+      "sublabel": "Decisions API",
+      "brand": "openai",
+      "pos": [
+        1180,
+        546
+      ],
+      "size": [
+        170,
+        72
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "VPS Linux · Ubuntu 24.04",
+      "wraps": [
+        "caddy",
+        "api",
+        "db",
+        "worker"
+      ],
+      "pad": 22
+    },
+    {
+      "kind": "security-group",
+      "label": "no expuesto",
+      "wraps": [
+        "api",
+        "db",
+        "worker"
+      ],
+      "pad": 12
+    }
+  ],
+  "connections": [
+    {
+      "id": "user-msg",
+      "from": "users",
+      "to": "telegram",
+      "label": "mensajes · comandos · botones",
+      "variant": "emphasis",
+      "labelDy": 24
+    },
+    {
+      "id": "tg-to-user",
+      "from": "telegram",
+      "to": "users",
+      "label": "respuestas y ofertas"
+    },
+    {
+      "id": "webhook",
+      "from": "telegram",
+      "to": "caddy",
+      "label": "webhook POST + X-Telegram-Bot-Api-Secret-Token",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "left",
+      "via": [
+        [
+          435,
+          76
+        ]
+      ]
+    },
+    {
+      "id": "proxy",
+      "from": "caddy",
+      "to": "api",
+      "label": "proxy a 127.0.0.1:8000",
+      "variant": "emphasis",
+      "labelAt": [
+        910,
+        159
+      ]
+    },
+    {
+      "id": "api-db",
+      "from": "api",
+      "to": "db",
+      "label": "usuarios · estado · listas",
+      "labelAt": [
+        910,
+        304
+      ]
+    },
+    {
+      "id": "api-reply",
+      "from": "api",
+      "to": "telegram",
+      "label": "sendMessage · editMessageText · answerCallbackQuery",
+      "labelAt": [
+        660,
+        226
+      ]
+    },
+    {
+      "id": "worker-db",
+      "from": "worker",
+      "to": "db",
+      "label": "activos · offers · deliveries",
+      "labelAt": [
+        910,
+        434
+      ]
+    },
+    {
+      "id": "worker-portals",
+      "from": "worker",
+      "to": "portals",
+      "label": "búsqueda y detalle",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "worker-openai",
+      "from": "worker",
+      "to": "openai",
+      "label": "1 por usuario y oferta",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "worker-send",
+      "from": "worker",
+      "to": "telegram",
+      "label": "sendMessage · ofertas 🟢 🟡",
+      "variant": "emphasis",
+      "fromSide": "left",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Entrada: el webhook",
+      "items": [
+        "Telegram hace POST a https://labubot.ejemplo.com/telegram/webhook",
+        "Caddy termina TLS y pasa a 127.0.0.1:8000; el api valida el secreto y si no coincide contesta 403",
+        "Con secreto válido contesta 200 rápido siempre, o Telegram reintenta"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Salida: el Driver, salvo OpenAI",
+      "items": [
+        "api y worker hablan con la Bot API por Driver.post_json() y get(), sin librerías de bots",
+        "OpenAI va por su SDK oficial (openai), no por el Driver",
+        "Un 403 al mandar una oferta marca al usuario blocked y la corrida sigue"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Estado y desarrollo",
+      "items": [
+        "labubot.db en WAL: el api escribe usuarios y listas; el worker, offers, deliveries y el blocked de un 403",
+        "En desarrollo, un túnel cloudflared apunta al uvicorn local: mismo código"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base de datos · labubot</title>
+<meta name="description" content="Diagrama entidad-relación de labubot.db (SQLite) para labubot multiusuario por Telegram, con columnas, índices, valores posibles y consultas de ejemplo.">
+<script>
+  (function () {
+    var flags = (location.hash + location.search).toLowerCase();
+    var root = document.documentElement;
+    if (flags.indexOf("dark") !== -1) root.setAttribute("data-theme", "dark");
+    else if (flags.indexOf("light") !== -1) root.setAttribute("data-theme", "light");
+    if (flags.indexOf("solo") !== -1) root.classList.add("solo");
+  })();
+</script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f4f5f2;
+    --surface: #ffffff;
+    --surface-2: #f7f9f8;
+    --ink: #1b2321;
+    --ink-2: #44504c;
+    --muted: #5f6b67;
+    --border: #d9dfdc;
+    --accent: #0e7f63;
+    --accent-soft: #e3f3ec;
+    --dot: #dfe4e1;
+    --tbl-stroke: #9aa7a2;
+    --head-fill: #e3f3ec;
+    --head-ink: #0b6b53;
+    --row-sep: #e8ece9;
+    --row-hover: #f1f7f4;
+    --rel: #3f4b47;
+    --def: #0e7f63;
+    --pk-fill: #fdf0c8;
+    --pk-stroke: #c49a1c;
+    --pk-ink: #6f4f00;
+    --fk-fill: #e4eefc;
+    --fk-stroke: #5b84c4;
+    --fk-ink: #234b8a;
+    --idx-fill: #eee8fd;
+    --idx-stroke: #8a6be0;
+    --idx-ink: #4b2fb0;
+    --note-fill: #fff6d6;
+    --note-stroke: #c49a1c;
+    --green: #1fa34a;
+    --yellow: #e0a800;
+    --red: #d64545;
+    --mono: "JetBrains Mono", "Cascadia Code", Consolas, "SFMono-Regular", Menlo, monospace;
+    --sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0e1312;
+      --surface: #151c1a;
+      --surface-2: #1a2220;
+      --ink: #e4ebe8;
+      --ink-2: #aebbb6;
+      --muted: #93a29d;
+      --border: #2a3532;
+      --accent: #4fd1a5;
+      --accent-soft: #143229;
+      --dot: #1f2826;
+      --tbl-stroke: #4b5a55;
+      --head-fill: #143229;
+      --head-ink: #6fe0b8;
+      --row-sep: #232d2a;
+      --row-hover: #1b2522;
+      --rel: #b4c2bd;
+      --def: #4fd1a5;
+      --pk-fill: #2f2710;
+      --pk-stroke: #a8862a;
+      --pk-ink: #f2c230;
+      --fk-fill: #17243a;
+      --fk-stroke: #5d86c6;
+      --fk-ink: #9cc0ff;
+      --idx-fill: #231c3d;
+      --idx-stroke: #8f78e6;
+      --idx-ink: #c3b3ff;
+      --note-fill: #2a2412;
+      --note-stroke: #a8862a;
+      --green: #34c26b;
+      --yellow: #f2c230;
+      --red: #f07070;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0e1312;
+    --surface: #151c1a;
+    --surface-2: #1a2220;
+    --ink: #e4ebe8;
+    --ink-2: #aebbb6;
+    --muted: #93a29d;
+    --border: #2a3532;
+    --accent: #4fd1a5;
+    --accent-soft: #143229;
+    --dot: #1f2826;
+    --tbl-stroke: #4b5a55;
+    --head-fill: #143229;
+    --head-ink: #6fe0b8;
+    --row-sep: #232d2a;
+    --row-hover: #1b2522;
+    --rel: #b4c2bd;
+    --def: #4fd1a5;
+    --pk-fill: #2f2710;
+    --pk-stroke: #a8862a;
+    --pk-ink: #f2c230;
+    --fk-fill: #17243a;
+    --fk-stroke: #5d86c6;
+    --fk-ink: #9cc0ff;
+    --idx-fill: #231c3d;
+    --idx-stroke: #8f78e6;
+    --idx-ink: #c3b3ff;
+    --note-fill: #2a2412;
+    --note-stroke: #a8862a;
+    --green: #34c26b;
+    --yellow: #f2c230;
+    --red: #f07070;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 var(--sans);
+  }
+  .wrap { max-width: 1360px; margin: 0 auto; padding: 32px 24px 64px; }
+  .eyebrow {
+    font: 600 12px/1 var(--mono);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  h1 { font: 700 30px/1.15 var(--sans); margin: 0; letter-spacing: -.01em; }
+  .lead { color: var(--muted); max-width: 860px; margin: 12px 0 0; font-size: 16px; }
+  .theme { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+  .theme a {
+    font: 600 12px/1 var(--sans); color: var(--muted); text-decoration: none;
+    padding: 7px 12px; border-radius: 999px;
+  }
+  .theme a[aria-current="true"] { background: var(--accent-soft); color: var(--accent); }
+
+  .jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0 0; padding: 0; list-style: none; }
+  .jump a {
+    display: inline-block; font: 600 12px/1 var(--mono); color: var(--accent); text-decoration: none;
+    padding: 6px 9px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
+  }
+  .jump a:hover { border-color: var(--accent); }
+
+  figure.diagram {
+    margin: 24px 0 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  .scroll { overflow-x: auto; }
+  svg.erd { display: block; width: 100%; height: auto; min-width: 960px; }
+
+  /* SVG: tablas */
+  .tbl-box { fill: var(--surface); }
+  .tbl-head { fill: var(--head-fill); }
+  .tbl-outline { fill: none; stroke: var(--tbl-stroke); stroke-width: 1.4; }
+  .tbl:hover .tbl-outline { stroke: var(--accent); stroke-width: 2.2; }
+  .head-sep { stroke: var(--tbl-stroke); stroke-width: 1.2; }
+  .tbl-name { font: 700 16px var(--mono); fill: var(--head-ink); }
+  .tbl-cap { font: 12px var(--sans); fill: var(--muted); }
+  .row-sep { stroke: var(--row-sep); stroke-width: 1; }
+  .row-bg { fill: transparent; }
+  .row:hover .row-bg { fill: var(--row-hover); }
+  .col { font: 13.5px var(--mono); fill: var(--ink); }
+  .col.pk { font-weight: 700; }
+  .typ { font: 12.5px var(--mono); fill: var(--muted); }
+  .cons { font: 11.5px var(--mono); text-anchor: end; }
+  .cons .nn { fill: var(--ink-2); }
+  .cons .sep { fill: var(--muted); }
+  .cons .def { fill: var(--def); font-weight: 600; }
+  .cons .null { fill: var(--muted); font-style: italic; }
+  .badge text { font: 700 10px var(--mono); text-anchor: middle; }
+  .b-pk rect { fill: var(--pk-fill); stroke: var(--pk-stroke); stroke-width: 1; }
+  .b-pk text { fill: var(--pk-ink); }
+  .b-fk rect { fill: var(--fk-fill); stroke: var(--fk-stroke); stroke-width: 1; }
+  .b-fk text { fill: var(--fk-ink); }
+  .b-fk.b-logic rect { fill: none; stroke-dasharray: 3 2; }
+  .b-idx rect { fill: var(--idx-fill); stroke: var(--idx-stroke); stroke-width: 1; }
+  .b-idx text { fill: var(--idx-ink); }
+  .idx-band { fill: var(--surface-2); }
+  .idx-name { font: 600 12px var(--mono); fill: var(--ink-2); }
+  .idx-where { font: 11px var(--mono); fill: var(--muted); }
+
+  /* SVG: relaciones */
+  .rel { fill: none; stroke: var(--rel); stroke-width: 1.6; }
+  .rel.logic { stroke-dasharray: 7 5; }
+  .rel-g:hover .rel { stroke: var(--accent); stroke-width: 2.4; }
+  .mk { fill: none; stroke: var(--rel); stroke-width: 1.6; stroke-dasharray: none; }
+  .mk-o { fill: var(--surface); stroke: var(--rel); stroke-width: 1.6; stroke-dasharray: none; }
+  .rel-label {
+    font: 600 11.5px var(--mono); fill: var(--ink-2); text-anchor: middle;
+    paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round;
+  }
+  .note-box { fill: var(--note-fill); stroke: var(--note-stroke); stroke-width: 1.3; }
+  .note-fold { fill: none; stroke: var(--note-stroke); stroke-width: 1.3; }
+  .note-text { font: 12.5px var(--sans); fill: var(--ink); }
+  .note-text .strong { font-weight: 700; }
+
+  /* SVG: leyenda y archivo */
+  .legend-box, .file-box { fill: var(--surface); stroke: var(--border); stroke-width: 1.2; }
+  .legend-title { font: 700 11px var(--mono); letter-spacing: .08em; fill: var(--muted); }
+  .legend-text { font: 12.5px var(--sans); fill: var(--ink); }
+  .file-name { font: 700 14px var(--mono); fill: var(--ink); }
+  .file-line { font: 12px var(--mono); fill: var(--ink-2); }
+  .file-note { font: 12px var(--sans); fill: var(--muted); }
+  .cyl path, .cyl ellipse { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; }
+  .cyl path:last-child { fill: none; }
+
+  /* secciones */
+  section { margin-top: 44px; scroll-margin-top: 16px; }
+  h2 { font: 700 21px/1.25 var(--sans); margin: 0 0 6px; }
+  .section-lead { color: var(--muted); margin: 0 0 18px; max-width: 860px; }
+  h3 { font: 700 17px/1.3 var(--sans); margin: 0; }
+
+  .rels { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .rels li { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 14px; }
+  .rels li.logic { border-style: dashed; }
+  .rels .card { display: block; font: 700 13.5px/1.4 var(--mono); color: var(--ink); margin-bottom: 3px; }
+  .rels .card em { font-style: normal; color: var(--accent); }
+
+  .card-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px 16px; scroll-margin-top: 16px;
+  }
+  .card-box + .card-box { margin-top: 16px; }
+  .card-box header { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 4px; }
+  .card-box h3 code { font: 700 17px/1.3 var(--mono); background: none; border: 0; padding: 0; color: var(--head-ink); }
+  .card-box .role { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+  .card-box .extra { margin: 10px 0 0; font-size: 13.5px; color: var(--ink-2); }
+
+  .tbl-scroll { overflow-x: auto; }
+  table.cols { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.cols th {
+    text-align: left; font: 600 11.5px/1.2 var(--mono); text-transform: uppercase; letter-spacing: .05em;
+    color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  table.cols td { padding: 8px 10px; border-bottom: 1px solid var(--row-sep); vertical-align: top; }
+  table.cols tr:last-child td { border-bottom: 0; }
+  table.cols td.n { font: 600 13px/1.5 var(--mono); white-space: nowrap; }
+  table.cols td.t { font: 12.5px/1.6 var(--mono); color: var(--muted); white-space: nowrap; }
+  table.cols td.c { white-space: nowrap; }
+  .k {
+    display: inline-block; font: 700 10.5px/1 var(--mono); padding: 3px 5px; border-radius: 4px;
+    border: 1px solid; margin: 1px 2px 1px 0; vertical-align: 1px;
+  }
+  .k.pk { background: var(--pk-fill); border-color: var(--pk-stroke); color: var(--pk-ink); }
+  .k.fk { background: var(--fk-fill); border-color: var(--fk-stroke); color: var(--fk-ink); }
+  .k.fkl { background: none; border-color: var(--fk-stroke); border-style: dashed; color: var(--fk-ink); }
+  .k.idx { background: var(--idx-fill); border-color: var(--idx-stroke); color: var(--idx-ink); }
+  .k.nn { background: var(--surface-2); border-color: var(--border); color: var(--ink-2); }
+  .k.null { background: none; border-color: transparent; color: var(--muted); font-style: italic; }
+  .k.def { background: var(--accent-soft); border-color: transparent; color: var(--def); }
+
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  .grid3 .card-box + .card-box { margin-top: 0; }
+  .vals { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+  .vals li { padding: 7px 0; border-top: 1px solid var(--row-sep); }
+  .vals li:first-child { border-top: 0; padding-top: 2px; }
+  .vals li > code:first-child { font-weight: 700; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+  .dot.g { background: var(--green); } .dot.y { background: var(--yellow); } .dot.r { background: var(--red); }
+  .dot.n { background: none; border: 1.5px dashed var(--muted); }
+  .src { font: 12px var(--mono); color: var(--muted); }
+
+  .queries { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  .queries .card-box + .card-box { margin-top: 0; }
+  .queries h3 { font-size: 16px; }
+  .queries .who { margin: 4px 0 10px; font-size: 13.5px; color: var(--muted); }
+  pre {
+    margin: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; overflow-x: auto; font: 12.5px/1.55 var(--mono); color: var(--ink);
+  }
+  pre code { font: inherit; background: none; border: 0; padding: 0; }
+  .kw { color: var(--accent); font-weight: 600; }
+  .str { color: var(--pk-ink); }
+  .cm { color: var(--muted); font-style: italic; }
+  .plan { margin: 10px 0 0; font-size: 13px; color: var(--ink-2); }
+  .plan code { font-size: 11.5px; }
+
+  .facts { margin: 0; padding-left: 20px; font-size: 14px; }
+  .facts li { margin: 5px 0; }
+  details { margin-top: 16px; }
+  summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+  details pre { margin-top: 10px; }
+
+  code {
+    font: 12.5px/1.4 var(--mono); background: var(--surface-2); border: 1px solid var(--border);
+    padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere;
+  }
+  a { color: var(--accent); }
+  code, pre, .k, svg.erd text { font-variant-ligatures: none; font-feature-settings: "calt" 0, "liga" 0; }
+  footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
+
+  /* captura del diagrama solo: ?solo */
+  .solo body { width: 1600px; }
+  .solo .wrap { max-width: none; padding: 24px 20px 20px; }
+  .solo .lead, .solo .theme, .solo .jump, .solo section, .solo footer { display: none; }
+  .solo h1 { font-size: 26px; }
+  .solo figure.diagram { margin-top: 16px; }
+  .solo svg.erd { width: 1522px; min-width: 0; }
+
+  @media (max-width: 1080px) {
+    .grid3, .queries { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 760px) {
+    .rels { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .wrap { padding: 20px 16px 48px; }
+    h1 { font-size: 25px; }
+    figure.diagram { padding: 10px; }
+    .card-box { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">labubot · Telegram multiusuario</p>
+    <div class="top">
+      <h1>Base de datos</h1>
+      <nav class="theme" aria-label="Tema">
+        <a href="#" data-t="">Auto</a><a href="#light" data-t="light">Claro</a><a href="#dark" data-t="dark">Oscuro</a>
+      </nav>
+    </div>
+    <p class="lead"><code>labubot.db</code> es lo que se recuerda entre corridas: un SQLite en modo WAL que comparten la <strong>api</strong> (recibe el webhook de Telegram) y el <strong>worker</strong> (la corrida horaria). Reemplaza a <code>vistas.txt</code> y a <code>perfil.md</code>: guarda quién usa el bot, cómo configuró sus alertas, la caché de descripciones y qué ofertas ya se evaluaron para cada usuario.</p>
+    <ul class="jump">
+      <li><a href="#relaciones">Relaciones</a></li><li><a href="#tablas">Tablas</a></li><li><a href="#indices">Índices</a></li>
+      <li><a href="#valores">Valores</a></li><li><a href="#consultas">Consultas</a></li><li><a href="#ddl">Archivo y DDL</a></li>
+    </ul>
+  </header>
+
+  <figure class="diagram" id="diagrama">
+    <div class="scroll">
+<svg class="erd" viewBox="0 64 1480 682" width="1480" height="682" role="img" aria-labelledby="erd-title erd-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="erd-title">Diagrama entidad-relación de labubot.db</title>
+<desc id="erd-desc">Cinco tablas. users en el centro; a la izquierda user_terms y user_blocked_words, cada una con una FOREIGN KEY chat_id a users (uno a cero o muchos, ON DELETE CASCADE). A la derecha deliveries, también con FOREIGN KEY chat_id a users, y debajo offers, unida a deliveries por url con una relación lógica sin FOREIGN KEY: cada entrega tiene cero o una oferta y cada oferta cero o muchas entregas.</desc>
+<defs>
+  <marker id="m-one" viewBox="0 0 32 20" refX="32" refY="10" markerWidth="32" markerHeight="20" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+    <path class="mk" d="M19,2 V18 M25,2 V18"/>
+  </marker>
+  <marker id="m-many0" viewBox="0 0 32 20" refX="32" refY="10" markerWidth="32" markerHeight="20" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+    <path class="mk" d="M16,10 L32,2 M16,10 L32,18"/>
+    <circle class="mk-o" cx="8" cy="10" r="5"/>
+  </marker>
+  <marker id="m-one0" viewBox="0 0 32 20" refX="32" refY="10" markerWidth="32" markerHeight="20" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+    <path class="mk" d="M23,2 V18"/>
+    <circle class="mk-o" cx="10" cy="10" r="5"/>
+  </marker>
+</defs>
+
+<g class="rel-g"><title>users 1 — N user_terms (chat_id, ON DELETE CASCADE)</title>
+  <path class="rel" d="M470,163 H370" marker-start="url(#m-one)" marker-end="url(#m-many0)"/>
+  <text class="rel-label" x="420" y="149">chat_id</text>
+</g>
+<g class="rel-g"><title>users 1 — N user_blocked_words (chat_id, ON DELETE CASCADE)</title>
+  <path class="rel" d="M560,418 V543 H370" marker-start="url(#m-one)" marker-end="url(#m-many0)"/>
+  <text class="rel-label" x="468" y="531">chat_id</text>
+</g>
+<g class="rel-g"><title>users 1 — N deliveries (chat_id, ON DELETE CASCADE)</title>
+  <path class="rel" d="M950,163 H1060" marker-start="url(#m-one)" marker-end="url(#m-many0)"/>
+  <text class="rel-label" x="1005" y="149">chat_id</text>
+</g>
+<g class="rel-g"><title>offers 0..1 — N deliveries: relación lógica por url, sin FOREIGN KEY</title>
+  <path class="rel logic" d="M1150,500 V406" marker-start="url(#m-one0)" marker-end="url(#m-many0)"/>
+  <text class="rel-label" x="1140" y="457" style="text-anchor: end">url</text>
+</g>
+<g class="note">
+  <path class="note-box" d="M1176,417 H1438 L1450,429 V489 H1176 Z"/>
+  <path class="note-fold" d="M1438,417 V429 H1450"/>
+  <text class="note-text" x="1188" y="436"><tspan class="strong">Relación lógica por url, sin FK:</tspan></text>
+  <text class="note-text" x="1188" y="455">las entregas importadas de vistas.txt</text>
+  <text class="note-text" x="1188" y="474">(light NULL) no tienen fila en offers.</text>
+</g>
+<g class="tbl" id="t-user_terms">
+<title>user_terms: términos de búsqueda de cada usuario</title>
+<rect class="tbl-box" x="30" y="90" width="340" height="124" rx="10"/>
+<path class="tbl-head" d="M30,146 V100 a10,10 0 0 1 10,-10 H360 a10,10 0 0 1 10,10 V146 Z"/>
+<text class="tbl-name" x="46" y="115">user_terms</text>
+<text class="tbl-cap" x="46" y="135">términos de búsqueda de cada usuario</text>
+<line class="head-sep" x1="30" y1="146" x2="370" y2="146"/>
+<g class="row"><title>user_terms.chat_id — Dueño del término → users(chat_id), ON DELETE CASCADE</title>
+<rect class="row-bg" x="31" y="146.5" width="338" height="33"/>
+<g class="badge b-pk"><rect x="44" y="154.5" width="28" height="17" rx="4"/><text x="58" y="167">PK</text></g>
+<g class="badge b-fk"><rect x="76" y="154.5" width="28" height="17" rx="4"/><text x="90" y="167">FK</text></g>
+<text class="col pk" x="116" y="168">chat_id</text>
+<text class="typ" x="196" y="168">INTEGER</text>
+<text class="cons" x="354" y="168"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<g class="row"><title>user_terms.term — Término en minúsculas</title>
+<rect class="row-bg" x="31" y="180.5" width="338" height="33"/>
+<line class="row-sep" x1="40" y1="180" x2="360" y2="180"/>
+<g class="badge b-pk"><rect x="44" y="188.5" width="28" height="17" rx="4"/><text x="58" y="201">PK</text></g>
+<text class="col pk" x="116" y="202">term</text>
+<text class="typ" x="196" y="202">TEXT</text>
+<text class="cons" x="354" y="202"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<rect class="tbl-outline" x="30" y="90" width="340" height="124" rx="10"/>
+</g>
+<g class="tbl" id="t-user_blocked_words">
+<title>user_blocked_words: palabras que descartan un título</title>
+<rect class="tbl-box" x="30" y="470" width="340" height="124" rx="10"/>
+<path class="tbl-head" d="M30,526 V480 a10,10 0 0 1 10,-10 H360 a10,10 0 0 1 10,10 V526 Z"/>
+<text class="tbl-name" x="46" y="495">user_blocked_words</text>
+<text class="tbl-cap" x="46" y="515">palabras que descartan un título</text>
+<line class="head-sep" x1="30" y1="526" x2="370" y2="526"/>
+<g class="row"><title>user_blocked_words.chat_id — Dueño de la palabra → users(chat_id), ON DELETE CASCADE</title>
+<rect class="row-bg" x="31" y="526.5" width="338" height="33"/>
+<g class="badge b-pk"><rect x="44" y="534.5" width="28" height="17" rx="4"/><text x="58" y="547">PK</text></g>
+<g class="badge b-fk"><rect x="76" y="534.5" width="28" height="17" rx="4"/><text x="90" y="547">FK</text></g>
+<text class="col pk" x="116" y="548">chat_id</text>
+<text class="typ" x="196" y="548">INTEGER</text>
+<text class="cons" x="354" y="548"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<g class="row"><title>user_blocked_words.word — En minúsculas; se busca como substring del título en minúsculas</title>
+<rect class="row-bg" x="31" y="560.5" width="338" height="33"/>
+<line class="row-sep" x1="40" y1="560" x2="360" y2="560"/>
+<g class="badge b-pk"><rect x="44" y="568.5" width="28" height="17" rx="4"/><text x="58" y="581">PK</text></g>
+<text class="col pk" x="116" y="582">word</text>
+<text class="typ" x="196" y="582">TEXT</text>
+<text class="cons" x="354" y="582"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<rect class="tbl-outline" x="30" y="470" width="340" height="124" rx="10"/>
+</g>
+<g class="tbl" id="t-users">
+<title>users: un usuario por chat privado</title>
+<rect class="tbl-box" x="470" y="90" width="480" height="328" rx="10"/>
+<path class="tbl-head" d="M470,146 V100 a10,10 0 0 1 10,-10 H940 a10,10 0 0 1 10,10 V146 Z"/>
+<text class="tbl-name" x="486" y="115">users</text>
+<text class="tbl-cap" x="486" y="135">un usuario por chat privado</text>
+<line class="head-sep" x1="470" y1="146" x2="950" y2="146"/>
+<g class="row"><title>users.chat_id — Chat privado = id del usuario de Telegram</title>
+<rect class="row-bg" x="471" y="146.5" width="478" height="33"/>
+<g class="badge b-pk"><rect x="484" y="154.5" width="28" height="17" rx="4"/><text x="498" y="167">PK</text></g>
+<text class="col pk" x="556" y="168">chat_id</text>
+<text class="typ" x="674" y="168">INTEGER</text>
+</g>
+<g class="row"><title>users.username — @usuario, puede faltar</title>
+<rect class="row-bg" x="471" y="180.5" width="478" height="33"/>
+<line class="row-sep" x1="480" y1="180" x2="940" y2="180"/>
+<text class="col" x="556" y="202">username</text>
+<text class="typ" x="674" y="202">TEXT</text>
+<text class="cons" x="934" y="202"><tspan class="null">NULL</tspan></text>
+</g>
+<g class="row"><title>users.first_name — Nombre que muestra Telegram</title>
+<rect class="row-bg" x="471" y="214.5" width="478" height="33"/>
+<line class="row-sep" x1="480" y1="214" x2="940" y2="214"/>
+<text class="col" x="556" y="236">first_name</text>
+<text class="typ" x="674" y="236">TEXT</text>
+<text class="cons" x="934" y="236"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<g class="row"><title>users.status — UserStatus: pending | active | paused | rejected | blocked</title>
+<rect class="row-bg" x="471" y="248.5" width="478" height="33"/>
+<line class="row-sep" x1="480" y1="248" x2="940" y2="248"/>
+<text class="col" x="556" y="270">status</text>
+<text class="typ" x="674" y="270">TEXT</text>
+<text class="cons" x="934" y="270"><tspan class="nn">NOT NULL</tspan><tspan class="sep"> · </tspan><tspan class="def">DEFAULT 'pending'</tspan></text>
+</g>
+<g class="row"><title>users.profile — El CV; '' = todavía no lo cargó</title>
+<rect class="row-bg" x="471" y="282.5" width="478" height="33"/>
+<line class="row-sep" x1="480" y1="282" x2="940" y2="282"/>
+<text class="col" x="556" y="304">profile</text>
+<text class="typ" x="674" y="304">TEXT</text>
+<text class="cons" x="934" y="304"><tspan class="nn">NOT NULL</tspan><tspan class="sep"> · </tspan><tspan class="def">DEFAULT ''</tspan></text>
+</g>
+<g class="row"><title>users.state — ChatState: qué espera el bot del próximo mensaje</title>
+<rect class="row-bg" x="471" y="316.5" width="478" height="33"/>
+<line class="row-sep" x1="480" y1="316" x2="940" y2="316"/>
+<text class="col" x="556" y="338">state</text>
+<text class="typ" x="674" y="338">TEXT</text>
+<text class="cons" x="934" y="338"><tspan class="nn">NOT NULL</tspan><tspan class="sep"> · </tspan><tspan class="def">DEFAULT ''</tspan></text>
+</g>
+<g class="row"><title>users.created_at — Primer /start, ISO 8601 UTC</title>
+<rect class="row-bg" x="471" y="350.5" width="478" height="33"/>
+<line class="row-sep" x1="480" y1="350" x2="940" y2="350"/>
+<text class="col" x="556" y="372">created_at</text>
+<text class="typ" x="674" y="372">TEXT</text>
+<text class="cons" x="934" y="372"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<g class="row"><title>users.approved_at — Primera vez que pasó a active</title>
+<rect class="row-bg" x="471" y="384.5" width="478" height="33"/>
+<line class="row-sep" x1="480" y1="384" x2="940" y2="384"/>
+<text class="col" x="556" y="406">approved_at</text>
+<text class="typ" x="674" y="406">TEXT</text>
+<text class="cons" x="934" y="406"><tspan class="null">NULL</tspan></text>
+</g>
+<rect class="tbl-outline" x="470" y="90" width="480" height="328" rx="10"/>
+</g>
+<g class="tbl" id="t-deliveries">
+<title>deliveries: qué se evaluó para cada usuario</title>
+<rect class="tbl-box" x="1060" y="90" width="390" height="316" rx="10"/>
+<path class="tbl-head" d="M1060,146 V100 a10,10 0 0 1 10,-10 H1440 a10,10 0 0 1 10,10 V146 Z"/>
+<text class="tbl-name" x="1076" y="115">deliveries</text>
+<text class="tbl-cap" x="1076" y="135">qué se evaluó para cada usuario</text>
+<line class="head-sep" x1="1060" y1="146" x2="1450" y2="146"/>
+<g class="row"><title>deliveries.chat_id — Para quién → users(chat_id), ON DELETE CASCADE</title>
+<rect class="row-bg" x="1061" y="146.5" width="388" height="33"/>
+<g class="badge b-pk"><rect x="1074" y="154.5" width="28" height="17" rx="4"/><text x="1088" y="167">PK</text></g>
+<g class="badge b-fk"><rect x="1106" y="154.5" width="28" height="17" rx="4"/><text x="1120" y="167">FK</text></g>
+<text class="col pk" x="1146" y="168">chat_id</text>
+<text class="typ" x="1274" y="168">INTEGER</text>
+<text class="cons" x="1434" y="168"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<g class="row"><title>deliveries.url — Qué oferta; se cruza con offers(url) sin FOREIGN KEY</title>
+<rect class="row-bg" x="1061" y="180.5" width="388" height="33"/>
+<line class="row-sep" x1="1070" y1="180" x2="1440" y2="180"/>
+<g class="badge b-pk"><rect x="1074" y="188.5" width="28" height="17" rx="4"/><text x="1088" y="201">PK</text></g>
+<g class="badge b-fk b-logic"><rect x="1106" y="188.5" width="32" height="17" rx="4"/><text x="1122" y="201">REF</text></g>
+<text class="col pk" x="1146" y="202">url</text>
+<text class="typ" x="1274" y="202">TEXT</text>
+<text class="cons" x="1434" y="202"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<g class="row"><title>deliveries.term — Palabra clave que la trajo; NULL = "Otros portales" o importada de vistas.txt</title>
+<rect class="row-bg" x="1061" y="214.5" width="388" height="33"/>
+<line class="row-sep" x1="1070" y1="214" x2="1440" y2="214"/>
+<text class="col" x="1146" y="236">term</text>
+<text class="typ" x="1274" y="236">TEXT</text>
+<text class="cons" x="1434" y="236"><tspan class="null">NULL</tspan></text>
+</g>
+<g class="row"><title>deliveries.light — TrafficLight: green | yellow | red; NULL = importada de vistas.txt</title>
+<rect class="row-bg" x="1061" y="248.5" width="388" height="33"/>
+<line class="row-sep" x1="1070" y1="248" x2="1440" y2="248"/>
+<text class="col" x="1146" y="270">light</text>
+<text class="typ" x="1274" y="270">TEXT</text>
+<text class="cons" x="1434" y="270"><tspan class="null">NULL</tspan></text>
+</g>
+<g class="row"><title>deliveries.classified_at — Cuándo se clasificó (o se importó)</title>
+<rect class="row-bg" x="1061" y="282.5" width="388" height="33"/>
+<line class="row-sep" x1="1070" y1="282" x2="1440" y2="282"/>
+<text class="col" x="1146" y="304">classified_at</text>
+<text class="typ" x="1274" y="304">TEXT</text>
+<text class="cons" x="1434" y="304"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<g class="row"><title>deliveries.sent_at — NULL si es roja, importada o si el envío falló</title>
+<rect class="row-bg" x="1061" y="316.5" width="388" height="33"/>
+<line class="row-sep" x1="1070" y1="316" x2="1440" y2="316"/>
+<text class="col" x="1146" y="338">sent_at</text>
+<text class="typ" x="1274" y="338">TEXT</text>
+<text class="cons" x="1434" y="338"><tspan class="null">NULL</tspan></text>
+</g>
+<path class="idx-band" d="M1060.7,350 H1449.3 V396 a10,10 0 0 1 -10,10 H1070 a10,10 0 0 1 -10,-10 Z"/>
+<line class="head-sep" x1="1060" y1="350" x2="1450" y2="350"/>
+<g class="row"><title>Índice parcial: solo las verdes y amarillas que falta enviar</title>
+<g class="badge b-idx"><rect x="1074" y="359" width="32" height="17" rx="4"/><text x="1090" y="371.5">IDX</text></g>
+<text class="idx-name" x="1114" y="372">deliveries_pending (sent_at)</text>
+<text class="idx-where" x="1076" y="394">WHERE sent_at IS NULL AND light IN ('green', 'yellow')</text>
+</g>
+<rect class="tbl-outline" x="1060" y="90" width="390" height="316" rx="10"/>
+</g>
+<g class="tbl" id="t-offers">
+<title>offers: caché compartida de descripciones</title>
+<rect class="tbl-box" x="1060" y="500" width="390" height="226" rx="10"/>
+<path class="tbl-head" d="M1060,556 V510 a10,10 0 0 1 10,-10 H1440 a10,10 0 0 1 10,10 V556 Z"/>
+<text class="tbl-name" x="1076" y="525">offers</text>
+<text class="tbl-cap" x="1076" y="545">caché compartida de descripciones</text>
+<line class="head-sep" x1="1060" y1="556" x2="1450" y2="556"/>
+<g class="row"><title>offers.url — Url sin query, como hoy</title>
+<rect class="row-bg" x="1061" y="556.5" width="388" height="33"/>
+<g class="badge b-pk"><rect x="1074" y="564.5" width="28" height="17" rx="4"/><text x="1088" y="577">PK</text></g>
+<text class="col pk" x="1146" y="578">url</text>
+<text class="typ" x="1274" y="578">TEXT</text>
+</g>
+<g class="row"><title>offers.portal — Nombre de la clase: LinkedIn, Bumeran...</title>
+<rect class="row-bg" x="1061" y="590.5" width="388" height="33"/>
+<line class="row-sep" x1="1070" y1="590" x2="1440" y2="590"/>
+<text class="col" x="1146" y="612">portal</text>
+<text class="typ" x="1274" y="612">TEXT</text>
+<text class="cons" x="1434" y="612"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<g class="row"><title>offers.title — Título del listado</title>
+<rect class="row-bg" x="1061" y="624.5" width="388" height="33"/>
+<line class="row-sep" x1="1070" y1="624" x2="1440" y2="624"/>
+<text class="col" x="1146" y="646">title</text>
+<text class="typ" x="1274" y="646">TEXT</text>
+<text class="cons" x="1434" y="646"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<g class="row"><title>offers.description — '' si el portal no la dio (no se vuelve a pedir)</title>
+<rect class="row-bg" x="1061" y="658.5" width="388" height="33"/>
+<line class="row-sep" x1="1070" y1="658" x2="1440" y2="658"/>
+<text class="col" x="1146" y="680">description</text>
+<text class="typ" x="1274" y="680">TEXT</text>
+<text class="cons" x="1434" y="680"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<g class="row"><title>offers.fetched_at — Cuándo se bajó la descripción</title>
+<rect class="row-bg" x="1061" y="692.5" width="388" height="33"/>
+<line class="row-sep" x1="1070" y1="692" x2="1440" y2="692"/>
+<text class="col" x="1146" y="714">fetched_at</text>
+<text class="typ" x="1274" y="714">TEXT</text>
+<text class="cons" x="1434" y="714"><tspan class="nn">NOT NULL</tspan></text>
+</g>
+<rect class="tbl-outline" x="1060" y="500" width="390" height="226" rx="10"/>
+</g>
+
+<g class="legend-g">
+  <rect class="legend-box" x="600" y="466" width="420" height="260" rx="10"/>
+  <text class="legend-title" x="620" y="492">NOTACIÓN</text>
+  <path class="rel" d="M620,516 H680" marker-end="url(#m-one)"/><text class="legend-text" x="696" y="520.5">uno y solo uno</text>
+  <path class="rel" d="M620,543 H680" marker-end="url(#m-many0)"/><text class="legend-text" x="696" y="547.5">cero o muchos</text>
+  <path class="rel" d="M620,570 H680" marker-end="url(#m-one0)"/><text class="legend-text" x="696" y="574.5">cero o uno</text>
+  <path class="rel logic" d="M620,597 H680"/><text class="legend-text" x="696" y="601.5">relación lógica: misma url, sin FOREIGN KEY</text>
+  <g class="badge b-pk"><rect x="620" y="615.5" width="28" height="17" rx="4"/><text x="634" y="628">PK</text></g><text class="legend-text" x="696" y="628.5">PRIMARY KEY (dos marcas = clave compuesta)</text>
+  <g class="badge b-fk"><rect x="620" y="642.5" width="28" height="17" rx="4"/><text x="634" y="655">FK</text></g><text class="legend-text" x="696" y="655.5">FOREIGN KEY a users(chat_id), ON DELETE CASCADE</text>
+  <g class="badge b-fk b-logic"><rect x="620" y="669.5" width="32" height="17" rx="4"/><text x="636" y="682">REF</text></g><text class="legend-text" x="696" y="682.5">referencia lógica a offers(url), sin FOREIGN KEY</text>
+  <text class="cons" x="680" y="709" text-anchor="end"><tspan class="null">NULL</tspan></text><text class="legend-text" x="696" y="709.5">la columna puede quedar vacía</text>
+</g>
+<g class="file-g">
+  <rect class="file-box" x="30" y="628" width="340" height="98" rx="10"/>
+  <g class="cyl" transform="translate(326,646)">
+    <path d="M0,4 V22 a14,4 0 0 0 28,0 V4"/>
+    <ellipse cx="14" cy="4" rx="14" ry="4"/>
+    <path d="M0,13 a14,4 0 0 0 28,0"/>
+  </g>
+  <text class="file-name" x="46" y="654">labubot.db</text>
+  <text class="file-line" x="46" y="677">PRAGMA journal_mode = WAL</text>
+  <text class="file-line" x="46" y="697">PRAGMA foreign_keys = ON</text>
+  <text class="file-note" x="46" y="717">fechas: TEXT ISO 8601, en UTC</text>
+</g>
+</svg>
+    </div>
+  </figure>
+
+  <section id="relaciones">
+    <h2>Relaciones</h2>
+    <p class="section-lead">Tres claves foráneas, todas a <code>users(chat_id)</code> y con <code>ON DELETE CASCADE</code>: borrar un usuario borra sus términos, sus palabras bloqueadas y su historial de entregas. La cuarta relación es lógica.</p>
+    <ul class="rels">
+      <li><span class="card">users <em>1 — N</em> user_terms</span>Cada usuario tiene cero o más términos de búsqueda. Al aprobarlo se le siembran los <code>DEFAULT_TERMS</code>.</li>
+      <li><span class="card">users <em>1 — N</em> user_blocked_words</span>Cada usuario tiene cero o más palabras que descartan un título. Semilla: <code>DEFAULT_BLOCKED_TITLE_WORDS</code>.</li>
+      <li><span class="card">users <em>1 — N</em> deliveries</span>Una fila por cada (usuario, url) evaluada. Es lo que evita volver a pagarle al LLM la misma oferta para la misma persona.</li>
+      <li class="logic"><span class="card">offers <em>0..1 — N</em> deliveries · por url, sin FK</span>Una oferta bajada se evalúa para varios usuarios. Una entrega importada de <code>vistas.txt</code> no tiene fila en <code>offers</code>, por eso no hay FOREIGN KEY.</li>
+    </ul>
+  </section>
+
+  <section id="tablas">
+    <h2>Tablas</h2>
+    <p class="section-lead">Una línea por columna. Las fechas son <code>TEXT</code> en ISO 8601 y en UTC (por ejemplo <code>2026-10-31T14:05:00+00:00</code>).</p>
+
+    <article class="card-box" id="tabla-users">
+      <header><h3><code>users</code></h3></header>
+      <p class="role">Un usuario por chat privado. Lo crea el primer <code>/start</code> (al admin, <code>migrate.py</code>); lo lee la corrida para saber a quién buscarle ofertas.</p>
+      <div class="tbl-scroll"><table class="cols">
+        <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Qué guarda</th></tr></thead>
+        <tbody>
+          <tr><td class="n">chat_id</td><td class="t">INTEGER</td><td class="c"><span class="k pk">PK</span></td><td>Id del chat privado, que en Telegram es el id del usuario. Como es <code>INTEGER PRIMARY KEY</code>, es el rowid y nunca queda NULL.</td></tr>
+          <tr><td class="n">username</td><td class="t">TEXT</td><td class="c"><span class="k null">NULL</span></td><td>El @usuario. Telegram no lo garantiza: puede faltar.</td></tr>
+          <tr><td class="n">first_name</td><td class="t">TEXT</td><td class="c"><span class="k nn">NOT NULL</span></td><td>Nombre que muestra Telegram; va en el saludo y en la solicitud que le llega al admin.</td></tr>
+          <tr><td class="n">status</td><td class="t">TEXT</td><td class="c"><span class="k nn">NOT NULL</span><span class="k def">DEFAULT 'pending'</span></td><td>Estado del acceso (<code>UserStatus</code>). Solo <code>active</code> con perfil recibe ofertas.</td></tr>
+          <tr><td class="n">profile</td><td class="t">TEXT</td><td class="c"><span class="k nn">NOT NULL</span><span class="k def">DEFAULT ''</span></td><td>El CV contra el que clasifica el LLM (lo que hoy es <code>perfil.md</code>). <code>''</code> = todavía no lo cargó.</td></tr>
+          <tr><td class="n">state</td><td class="t">TEXT</td><td class="c"><span class="k nn">NOT NULL</span><span class="k def">DEFAULT ''</span></td><td>Qué espera el bot del próximo mensaje (<code>ChatState</code>). <code>''</code> = nada.</td></tr>
+          <tr><td class="n">created_at</td><td class="t">TEXT</td><td class="c"><span class="k nn">NOT NULL</span></td><td>Cuándo mandó el primer <code>/start</code>.</td></tr>
+          <tr><td class="n">approved_at</td><td class="t">TEXT</td><td class="c"><span class="k null">NULL</span></td><td>La primera vez que pasó a <code>active</code>. NULL mientras está <code>pending</code> o si fue rechazado.</td></tr>
+        </tbody>
+      </table></div>
+    </article>
+
+    <article class="card-box" id="tabla-user_terms">
+      <header><h3><code>user_terms</code></h3></header>
+      <p class="role">Los términos de búsqueda de cada usuario. La corrida le busca a cada usuario los suyos, en orden alfabético; lo que ya buscó otro usuario en esa corrida sale de la caché en memoria.</p>
+      <div class="tbl-scroll"><table class="cols">
+        <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Qué guarda</th></tr></thead>
+        <tbody>
+          <tr><td class="n">chat_id</td><td class="t">INTEGER</td><td class="c"><span class="k pk">PK</span><span class="k fk">FK</span><span class="k nn">NOT NULL</span></td><td>Dueño del término → <code>users(chat_id)</code>, <code>ON DELETE CASCADE</code>.</td></tr>
+          <tr><td class="n">term</td><td class="t">TEXT</td><td class="c"><span class="k pk">PK</span><span class="k nn">NOT NULL</span></td><td>El término en minúsculas. La PK compuesta <code>(chat_id, term)</code> impide repetirlo.</td></tr>
+        </tbody>
+      </table></div>
+    </article>
+
+    <article class="card-box" id="tabla-user_blocked_words">
+      <header><h3><code>user_blocked_words</code></h3></header>
+      <p class="role">Las palabras que descartan una oferta por el título, para ese usuario y antes de llamar al LLM.</p>
+      <div class="tbl-scroll"><table class="cols">
+        <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Qué guarda</th></tr></thead>
+        <tbody>
+          <tr><td class="n">chat_id</td><td class="t">INTEGER</td><td class="c"><span class="k pk">PK</span><span class="k fk">FK</span><span class="k nn">NOT NULL</span></td><td>Dueño de la palabra → <code>users(chat_id)</code>, <code>ON DELETE CASCADE</code>.</td></tr>
+          <tr><td class="n">word</td><td class="t">TEXT</td><td class="c"><span class="k pk">PK</span><span class="k nn">NOT NULL</span></td><td>En minúsculas; se busca como substring del título en minúsculas. La PK compuesta impide repetirla.</td></tr>
+        </tbody>
+      </table></div>
+    </article>
+
+    <article class="card-box" id="tabla-offers">
+      <header><h3><code>offers</code></h3></header>
+      <p class="role">Caché compartida de descripciones: cada url se baja una sola vez, aunque le interese a varios usuarios.</p>
+      <div class="tbl-scroll"><table class="cols">
+        <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Qué guarda</th></tr></thead>
+        <tbody>
+          <tr><td class="n">url</td><td class="t">TEXT</td><td class="c"><span class="k pk">PK</span></td><td>Url de la oferta sin query, la misma clave que hoy usa <code>vistas.txt</code>.</td></tr>
+          <tr><td class="n">portal</td><td class="t">TEXT</td><td class="c"><span class="k nn">NOT NULL</span></td><td>Nombre de la clase del portal que la trajo: <code>LinkedIn</code>, <code>Bumeran</code>...</td></tr>
+          <tr><td class="n">title</td><td class="t">TEXT</td><td class="c"><span class="k nn">NOT NULL</span></td><td>Título tal como vino en el listado; es el que va en el mensaje de Telegram.</td></tr>
+          <tr><td class="n">description</td><td class="t">TEXT</td><td class="c"><span class="k nn">NOT NULL</span></td><td>El detalle bajado con <code>portal.description(url)</code>. <code>''</code> si el portal no lo dio: no se vuelve a pedir y la oferta se saltea.</td></tr>
+          <tr><td class="n">fetched_at</td><td class="t">TEXT</td><td class="c"><span class="k nn">NOT NULL</span></td><td>Cuándo se bajó la descripción.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="extra">Ojo: en SQLite una <code>PRIMARY KEY</code> que no es <code>INTEGER</code> acepta NULL si no dice <code>NOT NULL</code> (probado sobre este esquema). El contrato no lo agrega; en la práctica la url siempre viene de la oferta.</p>
+    </article>
+
+    <article class="card-box" id="tabla-deliveries">
+      <header><h3><code>deliveries</code></h3></header>
+      <p class="role">Qué ya se evaluó para cada usuario y si le llegó. Reemplaza a <code>vistas.txt</code>, pero por usuario: la misma url puede ser verde para uno y roja para otro.</p>
+      <div class="tbl-scroll"><table class="cols">
+        <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Qué guarda</th></tr></thead>
+        <tbody>
+          <tr><td class="n">chat_id</td><td class="t">INTEGER</td><td class="c"><span class="k pk">PK</span><span class="k fk">FK</span><span class="k nn">NOT NULL</span></td><td>Para quién se evaluó → <code>users(chat_id)</code>, <code>ON DELETE CASCADE</code>.</td></tr>
+          <tr><td class="n">url</td><td class="t">TEXT</td><td class="c"><span class="k pk">PK</span><span class="k fkl">REF</span><span class="k nn">NOT NULL</span></td><td>Qué oferta. Se cruza con <code>offers(url)</code> sin FOREIGN KEY: las importadas de <code>vistas.txt</code> no tienen fila ahí.</td></tr>
+          <tr><td class="n">term</td><td class="t">TEXT</td><td class="c"><span class="k null">NULL</span></td><td>La palabra clave que la trajo para ese usuario: el primero de sus términos (en orden alfabético) cuya búsqueda la trajo o, en los portales sin búsqueda, el primero contenido en el título. Le llega bajo el encabezado 🔎 de esa palabra, aunque salga recién en una corrida posterior. NULL = "Otros portales" o importada de <code>vistas.txt</code>. Es texto copiado, sin FK a <code>user_terms</code>: si el usuario después quita la palabra, la entrega la conserva.</td></tr>
+          <tr><td class="n">light</td><td class="t">TEXT</td><td class="c"><span class="k null">NULL</span></td><td>Veredicto del LLM para ese usuario (<code>TrafficLight</code>). NULL = importada de <code>vistas.txt</code>.</td></tr>
+          <tr><td class="n">classified_at</td><td class="t">TEXT</td><td class="c"><span class="k nn">NOT NULL</span></td><td>Cuándo se clasificó (o se importó). Se guarda con commit inmediato: lo clasificado no se vuelve a pagar aunque la corrida se corte.</td></tr>
+          <tr><td class="n">sent_at</td><td class="t">TEXT</td><td class="c"><span class="k null">NULL</span></td><td>Cuándo salió el mensaje. NULL si es roja, importada o si todavía no salió: el envío falló, la corrida se cortó entre clasificar y mandar, o Telegram dio 403. Se reintenta en la próxima corrida en que el usuario esté <code>active</code>, dentro del grupo de su <code>term</code>.</td></tr>
+        </tbody>
+      </table></div>
+    </article>
+  </section>
+
+  <section id="indices">
+    <h2>Índices</h2>
+    <p class="section-lead">Uno solo declarado a mano; el resto los crea SQLite por las PRIMARY KEY. Los nombres <code>sqlite_autoindex_*</code> son los que aparecen en <code>sqlite_master</code> al correr <code>schema.sql</code>. <code>deliveries.term</code> no lleva índice: nunca se busca por la palabra sola, se agrupa dentro de un usuario, y a sus filas se llega por la PK o por <code>deliveries_pending</code>.</p>
+    <div class="card-box">
+      <div class="tbl-scroll"><table class="cols">
+        <thead><tr><th>Índice</th><th>Sobre</th><th>Origen</th><th>Para qué</th></tr></thead>
+        <tbody>
+          <tr><td class="n">(rowid)</td><td class="t">users(chat_id)</td><td><code>INTEGER PRIMARY KEY</code>: es el rowid, sin índice aparte</td><td><code>Users.get(chat_id)</code> y el JOIN de las entregas pendientes.</td></tr>
+          <tr><td class="n">sqlite_autoindex_user_terms_1</td><td class="t">user_terms(chat_id, term)</td><td>PK compuesta</td><td>Los términos de un usuario, sin repetidos.</td></tr>
+          <tr><td class="n">sqlite_autoindex_user_blocked_words_1</td><td class="t">user_blocked_words(chat_id, word)</td><td>PK compuesta</td><td>Las palabras de un usuario, sin repetidas.</td></tr>
+          <tr><td class="n">sqlite_autoindex_offers_1</td><td class="t">offers(url)</td><td>PK</td><td><code>Offers.get(url)</code>: ¿la descripción ya se bajó?</td></tr>
+          <tr><td class="n">sqlite_autoindex_deliveries_1</td><td class="t">deliveries(chat_id, url)</td><td>PK compuesta</td><td><code>Deliveries.exists(chat_id, url)</code>; lo resuelve sin leer la tabla (índice cubriente).</td></tr>
+          <tr><td class="n"><span class="k idx">IDX</span> deliveries_pending</td><td class="t">deliveries(sent_at)<br>WHERE sent_at IS NULL<br>AND light IN ('green', 'yellow')</td><td><code>CREATE INDEX</code> parcial</td><td><code>Deliveries.pending()</code>. Solo guarda las verdes y amarillas sin enviar, así que queda chico aunque <code>deliveries</code> crezca con cada corrida.</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="valores">
+    <h2>Valores posibles</h2>
+    <p class="section-lead">Tres columnas <code>TEXT</code> que en Python son <code>StrEnum</code>. La base no los restringe con CHECK: los escribe solo el código.</p>
+    <div class="grid3">
+      <article class="card-box">
+        <header><h3><code>users.status</code></h3></header>
+        <p class="role"><span class="src">UserStatus · src/enums/user_status.py</span></p>
+        <ul class="vals">
+          <li><code>pending</code> mandó <code>/start</code> y espera al admin. Solo puede usar <code>/start</code>, que le contesta "⏳ Tu solicitud sigue pendiente."</li>
+          <li><code>active</code> aprobado. Recibe ofertas cuando <code>profile != ''</code>. El admin entra directo acá.</li>
+          <li><code>paused</code> usó <code>/pausa</code> o ⏸ Pausar. No entra en la corrida hasta <code>/reanudar</code> o ▶️ Reanudar.</li>
+          <li><code>rejected</code> el admin lo rechazó. Terminal: <code>/start</code> le responde "No tenés acceso a este bot."</li>
+          <li><code>blocked</code> Telegram devolvió 403 al mandarle (bloqueó el bot). Vuelve a <code>active</code> con <code>/start</code> (o con cualquier mensaje: si escribe, ya no tiene el bot bloqueado).</li>
+        </ul>
+      </article>
+      <article class="card-box">
+        <header><h3><code>users.state</code></h3></header>
+        <p class="role"><span class="src">ChatState · src/enums/chat_state.py</span></p>
+        <ul class="vals">
+          <li><code>''</code> (<code>IDLE</code>) no espera nada. Un texto suelto responde "No entendí...".</li>
+          <li><code>awaiting_profile</code> después de <code>/perfil</code> o 📄 Perfil: el próximo texto o archivo .md / .txt reemplaza <code>profile</code>.</li>
+          <li><code>awaiting_terms_add</code> / <code>awaiting_terms_remove</code> después de ➕ Agregar / ➖ Quitar en Términos: el próximo texto, separado por coma, entra o sale de <code>user_terms</code>.</li>
+          <li><code>awaiting_blocked_add</code> / <code>awaiting_blocked_remove</code> lo mismo con <code>user_blocked_words</code>.</li>
+          <li>Después de procesar el mensaje, con ✖ Cancelar o con cualquier comando, vuelve a <code>''</code>.</li>
+        </ul>
+      </article>
+      <article class="card-box">
+        <header><h3><code>deliveries.light</code></h3></header>
+        <p class="role"><span class="src">TrafficLight · src/enums/traffic_light.py</span></p>
+        <ul class="vals">
+          <li><span class="dot g"></span><code>green</code> compatible con el perfil. Se manda con 🟢.</li>
+          <li><span class="dot y"></span><code>yellow</code> para revisar a mano. Se manda con 🟡.</li>
+          <li><span class="dot r"></span><code>red</code> no compatible. No se manda: <code>sent_at</code> queda NULL para siempre.</li>
+          <li><span class="dot n"></span><code>NULL</code> importada de <code>vistas.txt</code> en la migración. Ni se clasifica ni se manda.</li>
+        </ul>
+      </article>
+    </div>
+
+    <article class="card-box" style="margin-top:16px">
+      <header><h3>Estado de una entrega</h3></header>
+      <p class="role">Lo dicen <code>light</code> y <code>sent_at</code> juntos.</p>
+      <div class="tbl-scroll"><table class="cols">
+        <thead><tr><th>light</th><th>sent_at</th><th>Qué significa</th></tr></thead>
+        <tbody>
+          <tr><td class="n"><span class="dot g"></span>green / <span class="dot y"></span>yellow</td><td class="t">fecha</td><td>Enviada.</td></tr>
+          <tr><td class="n"><span class="dot g"></span>green / <span class="dot y"></span>yellow</td><td class="t">NULL</td><td>Pendiente: el envío falló, la corrida se cortó antes de mandar o el usuario bloqueó el bot (403). Está en <code>deliveries_pending</code> y sale dentro del grupo de su <code>term</code>, junto con las nuevas de ese usuario, en la próxima corrida en que esté <code>active</code>.</td></tr>
+          <tr><td class="n"><span class="dot r"></span>red</td><td class="t">NULL</td><td>Descartada por el LLM.</td></tr>
+          <tr><td class="n"><span class="dot n"></span>NULL</td><td class="t">NULL</td><td>Importada de <code>vistas.txt</code>: cuenta como vista y nada más.</td></tr>
+        </tbody>
+      </table></div>
+    </article>
+  </section>
+
+  <section id="consultas">
+    <h2>Consultas de ejemplo</h2>
+    <p class="section-lead">Las tres que más usa el sistema y una para mirar a mano qué le falta mandar a un usuario. Corridas sobre <code>schema.sql</code>; el plan es la salida de <code>EXPLAIN QUERY PLAN</code>.</p>
+    <div class="queries">
+      <article class="card-box">
+        <h3>Usuarios activos con perfil</h3>
+        <p class="who"><code>Users.active()</code> · paso 1 de la corrida</p>
+        <pre><code><span class="kw">SELECT</span> *
+<span class="kw">FROM</span> users
+<span class="kw">WHERE</span> status = <span class="str">'active'</span>
+  <span class="kw">AND</span> profile != <span class="str">''</span>
+<span class="kw">ORDER</span> <span class="kw">BY</span> created_at;</code></pre>
+        <p class="plan">Plan: <code>SCAN users</code> y <code>USE TEMP B-TREE FOR ORDER BY</code>. Recorre la tabla entera y ordena por orden de alta en memoria; con pocos usuarios no hace falta índice.</p>
+      </article>
+      <article class="card-box">
+        <h3>Entregas pendientes</h3>
+        <p class="who"><code>Deliveries.pending()</code> · las que no llegaron en corridas anteriores; <code>_run_user</code> se queda con las de su <code>chat_id</code></p>
+        <pre><code><span class="kw">SELECT</span> d.chat_id, d.url, d.term, d.light, o.title
+<span class="kw">FROM</span> deliveries <span class="kw">AS</span> d
+<span class="kw">JOIN</span> users <span class="kw">AS</span> u <span class="kw">ON</span> u.chat_id = d.chat_id
+<span class="kw">JOIN</span> offers <span class="kw">AS</span> o <span class="kw">ON</span> o.url = d.url
+<span class="kw">WHERE</span> d.sent_at <span class="kw">IS</span> <span class="kw">NULL</span>
+  <span class="kw">AND</span> d.light <span class="kw">IN</span> (<span class="str">'green'</span>, <span class="str">'yellow'</span>)
+  <span class="kw">AND</span> u.status = <span class="str">'active'</span>
+<span class="kw">ORDER</span> <span class="kw">BY</span> d.classified_at;</code></pre>
+        <p class="plan">Plan: <code>SEARCH d USING INDEX deliveries_pending</code>, después <code>users</code> por rowid, <code>offers</code> por su PK y <code>USE TEMP B-TREE FOR ORDER BY</code> (ordena en memoria; son pocas filas). El <code>title</code> sale de <code>offers</code> porque el mensaje lo necesita, y el <code>term</code> dice en qué grupo entra cuando le toca a ese usuario.</p>
+      </article>
+      <article class="card-box">
+        <h3>¿Este usuario ya evaluó esta url?</h3>
+        <p class="who"><code>Deliveries.exists(chat_id, url)</code> · por usuario: elegir las ofertas nuevas</p>
+        <pre><code><span class="kw">SELECT</span> 1
+<span class="kw">FROM</span> deliveries
+<span class="kw">WHERE</span> chat_id = ?
+  <span class="kw">AND</span> url = ?;</code></pre>
+        <p class="plan">Plan: <code>SEARCH deliveries USING COVERING INDEX sqlite_autoindex_deliveries_1</code>. Si devuelve una fila, esa url no se le vuelve a clasificar.</p>
+      </article>
+      <article class="card-box">
+        <h3>Pendientes de un usuario, agrupadas por palabra</h3>
+        <p class="who">a mano con <code>sqlite3 labubot.db</code> · lo que tiene pendiente, por grupo</p>
+        <pre><code><span class="kw">.parameter</span> set :chat_id 123456789
+<span class="kw">SELECT</span> coalesce(d.term, <span class="str">'Otros portales'</span>) <span class="kw">AS</span> keyword,
+       sum(d.light = <span class="str">'green'</span>)  <span class="kw">AS</span> green,
+       sum(d.light = <span class="str">'yellow'</span>) <span class="kw">AS</span> yellow
+<span class="kw">FROM</span> deliveries <span class="kw">AS</span> d
+<span class="kw">WHERE</span> d.chat_id = :chat_id
+  <span class="kw">AND</span> d.sent_at <span class="kw">IS</span> <span class="kw">NULL</span>
+  <span class="kw">AND</span> d.light <span class="kw">IN</span> (<span class="str">'green'</span>, <span class="str">'yellow'</span>)
+<span class="kw">GROUP</span> <span class="kw">BY</span> d.term
+<span class="kw">ORDER</span> <span class="kw">BY</span> d.term <span class="kw">IS</span> <span class="kw">NULL</span>, d.term;</code></pre>
+        <p class="plan">Plan: <code>SEARCH d USING INDEX sqlite_autoindex_deliveries_1 (chat_id=?)</code>, <code>USE TEMP B-TREE FOR GROUP BY</code> y <code>USE TEMP B-TREE FOR ORDER BY</code>. Entra por la PK y filtra las filas de ese usuario; con unos miles por usuario no hace falta un índice nuevo. El orden es el de los encabezados: palabras en orden alfabético y "Otros portales" (<code>term</code> NULL) al final. Con verdes y amarillas de ejemplo da <code>fastapi 1 0</code>, <code>python 1 1</code>, <code>Otros portales 0 1</code>. Va <code>:chat_id</code> con <code>.parameter set</code> (el número es de ejemplo) y no <code>?</code>: en el CLI, un <code>?</code> sin valor vale NULL y la consulta no devuelve nada.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="ddl">
+    <h2>Archivo y DDL</h2>
+    <ul class="facts">
+      <li>Vive en <code>settings.db_path</code> (<code>DB_PATH</code> en el <code>.env</code>, por defecto <code>labubot.db</code>). En modo WAL aparecen al lado <code>labubot.db-wal</code> y <code>labubot.db-shm</code>: son parte de la base, no se borran a mano.</li>
+      <li><code>journal_mode = WAL</code> queda grabado en el archivo: la api y el worker leen sin bloquearse y escribe uno a la vez.</li>
+      <li><code>foreign_keys = ON</code> es por conexión: <code>connect()</code> lo activa cada vez. Sin eso, el <code>ON DELETE CASCADE</code> no corre.</li>
+      <li>El esquema de referencia está en <a href="schema.sql">schema.sql</a>. En el código va a <code>src/db/schema.sql</code> con <code>IF NOT EXISTS</code> y sin los PRAGMA: <code>connect()</code> los activa y crea las tablas que falten. <code>migrate.py</code> llena la base una sola vez desde <code>perfil.md</code>, <code>vistas.txt</code> y <code>src/config/search.py</code>.</li>
+    </ul>
+    <details>
+      <summary>Ver schema.sql</summary>
+      <pre><code><span class="cm">-- labubot.db: lo que se recuerda entre corridas, compartido por la api (webhook) y el worker.</span>
+<span class="cm">-- Fechas ISO 8601 en TEXT, UTC.</span>
+
+<span class="kw">PRAGMA</span> journal_mode = <span class="kw">WAL</span>;
+<span class="kw">PRAGMA</span> foreign_keys = <span class="kw">ON</span>;
+
+<span class="kw">CREATE</span> <span class="kw">TABLE</span> users (
+  chat_id     <span class="kw">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,             <span class="cm">-- chat privado = id del usuario de Telegram</span>
+  username    <span class="kw">TEXT</span>,                            <span class="cm">-- @usuario, puede faltar</span>
+  first_name  <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
+  status      <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="str">'pending'</span>, <span class="cm">-- UserStatus: pending | active | paused | rejected | blocked</span>
+  profile     <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="str">''</span>,        <span class="cm">-- el CV (lo que hoy es perfil.md); '' = todavía no lo cargó</span>
+  state       <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="str">''</span>,        <span class="cm">-- ChatState: qué espera el bot del próximo mensaje ('' = nada)</span>
+  created_at  <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
+  approved_at <span class="kw">TEXT</span>
+);
+
+<span class="kw">CREATE</span> <span class="kw">TABLE</span> user_terms (
+  chat_id <span class="kw">INTEGER</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(chat_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,
+  term    <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,                       <span class="cm">-- en minúsculas</span>
+  <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (chat_id, term)
+);
+
+<span class="kw">CREATE</span> <span class="kw">TABLE</span> user_blocked_words (
+  chat_id <span class="kw">INTEGER</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(chat_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,
+  word    <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,                       <span class="cm">-- en minúsculas; se busca como substring del título en minúsculas</span>
+  <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (chat_id, word)
+);
+
+<span class="kw">CREATE</span> <span class="kw">TABLE</span> offers (                          <span class="cm">-- caché compartida de descripciones: una bajada por url</span>
+  url         <span class="kw">TEXT</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,                <span class="cm">-- sin query, como hoy</span>
+  portal      <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,                   <span class="cm">-- nombre de la clase: LinkedIn, Bumeran...</span>
+  title       <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
+  description <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,                   <span class="cm">-- '' si el portal no la dio (no se vuelve a pedir)</span>
+  fetched_at  <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>
+);
+
+<span class="kw">CREATE</span> <span class="kw">TABLE</span> deliveries (                      <span class="cm">-- qué ya se evaluó para cada usuario (reemplaza vistas.txt)</span>
+  chat_id       <span class="kw">INTEGER</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(chat_id) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,
+  url           <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,                 <span class="cm">-- sin FK a offers: las importadas de vistas.txt no tienen fila en offers</span>
+  term          <span class="kw">TEXT</span>,                          <span class="cm">-- palabra clave que la trajo; NULL = "Otros portales" o importada de vistas.txt</span>
+  light         <span class="kw">TEXT</span>,                          <span class="cm">-- TrafficLight: green | yellow | red; NULL = importada de vistas.txt</span>
+  classified_at <span class="kw">TEXT</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,
+  sent_at       <span class="kw">TEXT</span>,                          <span class="cm">-- NULL si es roja, importada, o si el envío falló (se reintenta)</span>
+  <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (chat_id, url)
+);
+
+<span class="kw">CREATE</span> <span class="kw">INDEX</span> deliveries_pending <span class="kw">ON</span> deliveries (sent_at) <span class="kw">WHERE</span> sent_at <span class="kw">IS</span> <span class="kw">NULL</span> <span class="kw">AND</span> light <span class="kw">IN</span> (<span class="str">'green'</span>, <span class="str">'yellow'</span>);</code></pre>
+    </details>
+  </section>
+
+  <footer>Tablas, columnas, estados y métodos según el contrato de diseño de labubot multiusuario (octubre 2026). Ver también <a href="diseno.md">diseno.md</a>, <a href="casos-de-uso.html">los casos de uso</a>, <a href="ciclo-usuario.html">el ciclo de vida del usuario</a> y <a href="tareas.md">las tareas</a>.</footer>
+</div>
+<script>
+  (function () {
+    var links = document.querySelectorAll(".theme a");
+    function paint() {
+      var current = document.documentElement.getAttribute("data-theme") || "";
+      links.forEach(function (a) { a.setAttribute("aria-current", a.getAttribute("data-t") === current ? "true" : "false"); });
+    }
+    links.forEach(function (a) {
+      a.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        var t = a.getAttribute("data-t");
+        if (t) document.documentElement.setAttribute("data-theme", t);
+        else document.documentElement.removeAttribute("data-theme");
+        history.replaceState(null, "", t ? "#" + t : location.pathname + location.search);
+        paint();
+      });
+    });
+    window.addEventListener("hashchange", function () {
+      var t = location.hash.slice(1).toLowerCase();
+      if (t === "light" || t === "dark") { document.documentElement.setAttribute("data-theme", t); paint(); }
+    });
+    paint();
+  })();
+</script>
+</body>
+</html>

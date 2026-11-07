@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>labubot · propuesta A: bot buscador (antena-lupa y visor semáforo)</title>
+  <defs>
+    <linearGradient id="a-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7a6bff"/>
+      <stop offset="1" stop-color="#4536c9"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#a-bg)"/>
+  <!-- antena-lupa -->
+  <line x1="256" y1="236" x2="292" y2="150" stroke="#ffffff" stroke-width="30" stroke-linecap="round"/>
+  <circle cx="308" cy="116" r="42" fill="#c9c2ff" stroke="#ffffff" stroke-width="22"/>
+  <path d="M286 110 a24 24 0 0 1 17 -17" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
+  <!-- laterales -->
+  <rect x="82" y="286" width="38" height="74" rx="15" fill="#d9d4ff"/>
+  <rect x="392" y="286" width="38" height="74" rx="15" fill="#d9d4ff"/>
+  <!-- cabeza -->
+  <rect x="104" y="214" width="304" height="206" rx="64" fill="#ffffff"/>
+  <!-- visor semáforo -->
+  <rect x="136" y="252" width="240" height="108" rx="54" fill="#1c1a3f"/>
+  <circle cx="192" cy="306" r="28" fill="#34c759"/>
+  <circle cx="256" cy="306" r="28" fill="#ffcc00"/>
+  <circle cx="320" cy="306" r="28" fill="#ff3b30"/>
+  <!-- boca -->
+  <path d="M224 386 q32 20 64 0" fill="none" stroke="#1c1a3f" stroke-width="16" stroke-linecap="round"/>
+</svg>

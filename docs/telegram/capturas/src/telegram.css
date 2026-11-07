@@ -1,0 +1,470 @@
+/* Maqueta de Telegram para Android (390x844) usada en las capturas de labubot.
+   Claro = tema "Día"; oscuro = "Noche azul", el de las PNG. #light / #dark fuerzan uno. */
+
+:root {
+  --page-bg: #dfe5ea;
+  --status-bg: #4a75a0;
+  --header-bg: #527da3;
+  --header-fg: #ffffff;
+  --header-sub: #d5e5f4;
+  --header-icon: #ffffff;
+  --chat-base: #b9d3b4;
+  --chat-bg: linear-gradient(160deg, #d3e3b6 0%, #a9cba3 48%, #93bccb 100%);
+  --wall-stroke: rgba(255, 255, 255, 0.32);
+  --in-bg: #ffffff;
+  --out-bg: #effedd;
+  --text: #000000;
+  --meta-in: #a1aab3;
+  --meta-out: #5fae58;
+  --check: #5fae58;
+  --link-in: #2a7ab9;
+  --link-out: #3a8f3a;
+  --kb-bg: rgba(46, 78, 58, 0.34);
+  --kb-fg: #ffffff;
+  --pill-bg: rgba(46, 78, 58, 0.36);
+  --pill-fg: #ffffff;
+  --bar-bg: #ffffff;
+  --bar-fg: #000000;
+  --placeholder: #9aa5ae;
+  --icon: #8a969e;
+  --accent: #4f95d6;
+  --accent-fg: #ffffff;
+  --doc-icon: #6dbb68;
+  --doc-size: #5fae58;
+  --popup-bg: #ffffff;
+  --popup-sub: #8a969e;
+  --popup-line: rgba(0, 0, 0, 0.07);
+  --nav-pill: rgba(0, 0, 0, 0.4);
+  --shadow: rgba(0, 0, 0, 0.14);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page-bg: #0b1119;
+    --status-bg: #131c26;
+    --header-bg: #17212b;
+    --header-fg: #f5f5f5;
+    --header-sub: #708499;
+    --header-icon: #8e9ba7;
+    --chat-base: #0e1621;
+    --chat-bg: linear-gradient(180deg, #0e1621 0%, #0e1621 100%);
+    --wall-stroke: rgba(255, 255, 255, 0.045);
+    --in-bg: #182533;
+    --out-bg: #2b5278;
+    --text: #f5f5f5;
+    --meta-in: #6d7f8f;
+    --meta-out: #7da8d3;
+    --check: #72bcfd;
+    --link-in: #6ab3f3;
+    --link-out: #a9d6ff;
+    --kb-bg: rgba(34, 50, 68, 0.92);
+    --kb-fg: #f5f5f5;
+    --pill-bg: rgba(30, 44, 58, 0.9);
+    --pill-fg: #e4ecf2;
+    --bar-bg: #17212b;
+    --bar-fg: #f5f5f5;
+    --placeholder: #6d7f8f;
+    --icon: #6d7f8f;
+    --accent: #5288c1;
+    --accent-fg: #ffffff;
+    --doc-icon: #4f8fd0;
+    --doc-size: #7da8d3;
+    --popup-bg: #17212b;
+    --popup-sub: #708499;
+    --popup-line: rgba(255, 255, 255, 0.05);
+    --nav-pill: rgba(255, 255, 255, 0.45);
+    --shadow: rgba(0, 0, 0, 0.35);
+  }
+}
+
+:root[data-theme="dark"] {
+  --page-bg: #0b1119;
+  --status-bg: #131c26;
+  --header-bg: #17212b;
+  --header-fg: #f5f5f5;
+  --header-sub: #708499;
+  --header-icon: #8e9ba7;
+  --chat-base: #0e1621;
+  --chat-bg: linear-gradient(180deg, #0e1621 0%, #0e1621 100%);
+  --wall-stroke: rgba(255, 255, 255, 0.045);
+  --in-bg: #182533;
+  --out-bg: #2b5278;
+  --text: #f5f5f5;
+  --meta-in: #6d7f8f;
+  --meta-out: #7da8d3;
+  --check: #72bcfd;
+  --link-in: #6ab3f3;
+  --link-out: #a9d6ff;
+  --kb-bg: rgba(34, 50, 68, 0.92);
+  --kb-fg: #f5f5f5;
+  --pill-bg: rgba(30, 44, 58, 0.9);
+  --pill-fg: #e4ecf2;
+  --bar-bg: #17212b;
+  --bar-fg: #f5f5f5;
+  --placeholder: #6d7f8f;
+  --icon: #6d7f8f;
+  --accent: #5288c1;
+  --accent-fg: #ffffff;
+  --doc-icon: #4f8fd0;
+  --doc-size: #7da8d3;
+  --popup-bg: #17212b;
+  --popup-sub: #708499;
+  --popup-line: rgba(255, 255, 255, 0.05);
+  --nav-pill: rgba(255, 255, 255, 0.45);
+  --shadow: rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--page-bg); }
+
+body {
+  margin: 0;
+  font-family: "Roboto", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Chrome headless no baja de ~500 px de ancho: centrar solo en pantallas grandes. */
+@media (min-width: 720px) and (min-height: 900px) {
+  .phone { margin: 24px auto; border-radius: 18px; box-shadow: 0 8px 30px var(--shadow); }
+}
+
+.e {
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  font-weight: 400;
+}
+
+.phone {
+  width: 390px;
+  height: 844px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: var(--chat-base);
+}
+
+/* ---------- barra de estado ---------- */
+.statusbar {
+  height: 28px;
+  flex: none;
+  padding: 0 14px 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--status-bg);
+  color: var(--header-fg);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.sb-icons { display: flex; align-items: center; gap: 6px; }
+.sb-icons svg { height: 13px; width: auto; }
+
+/* ---------- cabecera del chat ---------- */
+.topbar {
+  height: 56px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  background: var(--header-bg);
+  color: var(--header-icon);
+  box-shadow: 0 1px 3px var(--shadow);
+  position: relative;
+  z-index: 2;
+}
+.ico {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ico svg { width: 24px; height: 24px; }
+.topbar .back { color: var(--header-fg); }
+.avatar {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: block;
+  border-radius: 50%;
+}
+.who { flex: 1; display: flex; flex-direction: column; line-height: 1.25; padding-left: 4px; }
+.name { color: var(--header-fg); font-size: 17px; font-weight: 500; }
+.sub { color: var(--header-sub); font-size: 13.5px; }
+
+/* ---------- chat ---------- */
+.chat {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--chat-base);
+  background-image: var(--chat-bg);
+}
+.wall {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--wall-stroke);
+}
+.stream {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.date {
+  align-self: center;
+  margin: 10px 0 6px;
+  padding: 3px 10px 4px;
+  border-radius: 12px;
+  background: var(--pill-bg);
+  color: var(--pill-fg);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+/* Descripción del bot: la tarjeta que Telegram muestra al principio del chat. */
+.botinfo {
+  align-self: center;
+  width: 300px;
+  margin: 6px 0 4px;
+  padding: 11px 14px 12px;
+  border-radius: 14px;
+  background: var(--in-bg);
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.38;
+  box-shadow: 0 1px 1px var(--shadow);
+}
+.botinfo-title { font-weight: 500; margin-bottom: 5px; }
+
+.row { display: flex; margin-top: 3px; }
+.row.first { margin-top: 9px; }
+.date + .row { margin-top: 4px; }
+.row.in { justify-content: flex-start; padding-left: 7px; }
+.row.out { justify-content: flex-end; padding-right: 7px; }
+
+.bubble {
+  position: relative;
+  max-width: 82%;
+  padding: 6px 10px 7px 10px;
+  border-radius: 14px;
+  font-size: 15.5px;
+  line-height: 1.34;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  box-shadow: 0 1px 1px var(--shadow);
+}
+.in .bubble { background: var(--in-bg); }
+.out .bubble { background: var(--out-bg); }
+
+/* La "colita" va solo en el último mensaje de cada tanda. */
+.in.tail .bubble { border-bottom-left-radius: 0; }
+.out.tail .bubble { border-bottom-right-radius: 0; }
+.tail .bubble::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 17px;
+  background: inherit;
+}
+.in.tail .bubble::before {
+  left: -9px;
+  clip-path: path("M10 0 C10 8 7 14 0 17 L10 17 Z");
+}
+.out.tail .bubble::before {
+  right: -9px;
+  clip-path: path("M0 0 C0 8 3 14 10 17 L0 17 Z");
+}
+
+.link { color: var(--link-in); }
+.out .link { color: var(--link-out); }
+
+/* Hora (y tildes): la copia invisible reserva lugar en la última línea. */
+.meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  line-height: 15px;
+  white-space: nowrap;
+  color: var(--meta-in);
+}
+.out .meta { color: var(--meta-out); }
+.meta.ghost { visibility: hidden; margin-left: 12px; vertical-align: -2px; }
+.meta.real { position: absolute; right: 9px; bottom: 5px; }
+.checks { width: 17px; height: 11px; color: var(--check); }
+
+/* Documento enviado (perfil.md). */
+.bubble.doc {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 236px;
+  padding: 8px 12px 8px 8px;
+}
+.doc-icon {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--doc-icon);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.doc-icon svg { width: 22px; height: 22px; }
+.doc-info { display: flex; flex-direction: column; gap: 3px; padding-bottom: 8px; }
+.doc-name { font-size: 15.5px; font-weight: 500; }
+.doc-size { font-size: 13px; color: var(--doc-size); }
+
+/* Mensaje con inline keyboard: los botones toman el ancho de la burbuja. */
+.kbmsg {
+  display: flex;
+  flex-direction: column;
+  max-width: 86%;
+  min-width: 262px;
+}
+.kbmsg .bubble { max-width: none; }
+.kb { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.kb-row { display: flex; gap: 4px; }
+.btn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 40px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: var(--kb-bg);
+  color: var(--kb-fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.btn .e { margin-right: 6px; font-size: 15px; }
+
+/* ---------- sugerencias de comandos ("/") ---------- */
+.cmds {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 6px 0 4px;
+  border-radius: 14px 14px 0 0;
+  background: var(--popup-bg);
+  box-shadow: 0 -3px 12px var(--shadow);
+  z-index: 3;
+}
+/* Android usa una fila de 36 dp: avatar chico, comando y descripción en la misma línea. */
+.cmd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 36px;
+  padding: 0 12px;
+}
+.cmd .avatar.sm { width: 28px; height: 28px; }
+.cmd-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  white-space: nowrap;
+  font-size: 15.5px;
+}
+.cmd-name { flex: none; color: var(--bar-fg); }
+.cmd-desc { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--popup-sub); }
+
+/* Botón "ir al final": aparece con el chat desplazado hacia arriba. */
+.fab-down {
+  position: absolute;
+  right: 12px;
+  bottom: 14px;
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bar-bg);
+  color: var(--icon);
+  box-shadow: 0 1px 4px var(--shadow);
+}
+.fab-down svg { width: 26px; height: 26px; }
+
+/* ---------- barra de escritura ---------- */
+.composer {
+  height: 52px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px 0 8px;
+  background: var(--bar-bg);
+  color: var(--icon);
+  position: relative;
+  z-index: 4;
+}
+.menu-btn {
+  height: 32px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px 0 8px;
+  margin-right: 2px;
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 14.5px;
+  font-weight: 500;
+}
+.menu-btn svg { width: 18px; height: 18px; }
+.menu-btn.collapsed { width: 36px; padding: 0; justify-content: center; }
+.field {
+  flex: 1;
+  min-width: 0;
+  color: var(--placeholder);
+  font-size: 16.5px;
+  display: flex;
+  align-items: center;
+}
+.field.typed { color: var(--bar-fg); }
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 20px;
+  margin-left: 1px;
+  background: var(--accent);
+}
+.ico.send { color: var(--accent); }
+
+.navbar {
+  height: 20px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bar-bg);
+}
+.navbar i {
+  width: 108px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--nav-pill);
+}

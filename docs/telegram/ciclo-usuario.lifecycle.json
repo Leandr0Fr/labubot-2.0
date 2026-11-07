@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "labubot — Ciclo de vida de un usuario (users.status)",
+    "quality_profile": "showcase",
+    "viewBox": [1050, 630],
+    "legend": {
+      "entries": {
+        "start": { "label": "Sin fila en users" },
+        "active": { "label": "Recibe ofertas" },
+        "waiting": { "label": "No recibe ofertas" },
+        "failure": { "label": "Fuera del bot" }
+      }
+    },
+    "views": [
+      { "id": "alta", "label": "Alta y aprobación", "focus": ["nuevo", "pending", "active_sin_perfil", "rejected"], "note": "Pendiente hasta que el admin aprueba o rechaza; el admin entra directo." },
+      { "id": "uso", "label": "Perfil y pausa", "focus": ["active_sin_perfil", "active", "paused"], "note": "Sin perfil no hay ofertas; /pausa y /reanudar no tocan perfil ni términos." },
+      { "id": "bloqueo", "label": "Bloqueo y vuelta", "focus": ["active", "paused", "blocked"], "note": "Un 403 al enviar marca blocked; un /start nuevo lo devuelve a active." }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "Alta y uso" },
+    { "id": "recuperable", "label": "Recuperable" },
+    { "id": "terminal", "label": "Terminal" }
+  ],
+  "states": [
+    { "id": "nuevo", "type": "start", "label": "Nuevo", "sublabel": "todavía sin fila", "lane": "main", "col": 0, "width": 100, "step": "01", "tag": "sin alta" },
+    { "id": "pending", "type": "waiting", "label": "pending", "sublabel": "espera al admin", "lane": "main", "col": 1, "width": 100, "step": "02", "tag": "solicitud" },
+    { "id": "active_sin_perfil", "type": "waiting", "label": "active", "sublabel": "sin perfil cargado", "lane": "main", "col": 2, "width": 100, "step": "03", "tag": "profile = ''" },
+    { "id": "active", "type": "active", "label": "active", "sublabel": "con perfil cargado", "lane": "main", "col": 3, "width": 100, "step": "04", "tag": "profile != ''" },
+    { "id": "paused", "type": "waiting", "label": "paused", "sublabel": "alertas en pausa", "lane": "main", "col": 4, "width": 100, "step": "05", "tag": "pausa" },
+    { "id": "blocked", "type": "failure", "label": "blocked", "sublabel": "bloqueó al bot", "lane": "recuperable", "col": 1, "tag": "recuperable" },
+    { "id": "rejected", "type": "failure", "label": "rejected", "sublabel": "/start: sin acceso", "lane": "terminal", "col": 0, "tag": "terminal" }
+  ],
+  "transitions": [
+    { "id": "t-start", "from": "nuevo", "to": "pending", "label": "/start", "route": "straight", "fromSide": "right", "toSide": "left" },
+    { "id": "t-aprobar", "from": "pending", "to": "active_sin_perfil", "label": "Aprobar", "route": "straight", "fromSide": "right", "toSide": "left" },
+    { "id": "t-admin", "from": "nuevo", "to": "active_sin_perfil", "label": "/start del admin", "labelSegment": 2, "fromSide": "left", "toSide": "top", "via": [[22, 157], [22, 72], [402, 72]] },
+    { "id": "t-perfil", "from": "active_sin_perfil", "to": "active", "label": "/perfil", "variant": "emphasis", "route": "straight", "fromSide": "right", "toSide": "left" },
+    { "id": "t-pausa", "from": "active", "to": "paused", "label": "/pausa", "route": "straight", "fromSide": "right", "toSide": "left" },
+    { "id": "t-reanudar", "from": "paused", "to": "active", "label": "/reanudar", "route": "top-channel", "fromSide": "top", "toSide": "top" },
+    { "id": "t-rechazar", "from": "pending", "to": "rejected", "label": "Rechazar", "variant": "security", "fromSide": "bottom", "toSide": "left" },
+    { "id": "t-403-active", "from": "active", "to": "blocked", "label": "403 al enviar", "variant": "security", "labelDx": -51, "labelDy": 58 },
+    { "id": "t-403-paused", "from": "paused", "to": "blocked", "label": "403 al enviar", "variant": "security", "fromSide": "bottom", "toSide": "right" },
+    { "id": "t-volver", "from": "blocked", "to": "active", "label": "/start de nuevo", "variant": "emphasis", "labelDx": 52, "labelDy": -32 }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Alta y perfil", "items": ["Aprobado sin perfil: no recibe ofertas hasta /perfil", "Al aprobar se siembran términos y bloqueadas por defecto"] },
+    { "dot": "rose", "title": "Dos salidas distintas", "items": ["rejected es terminal: /start no le da acceso", "blocked es recuperable: /start lo vuelve a active"] }
+  ]
+}

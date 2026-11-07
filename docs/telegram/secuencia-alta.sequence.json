@@ -1,0 +1,334 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "labubot — Alta de un usuario",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1080,
+      696
+    ],
+    "legend": {
+      "entries": {
+        "emphasis": {
+          "label": "app de Telegram"
+        },
+        "security": {
+          "label": "webhook + secreto"
+        },
+        "dashed": {
+          "label": "Bot API vía Driver"
+        },
+        "default": {
+          "label": "labubot.db"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "usuario",
+      "type": "frontend",
+      "label": "Usuario",
+      "sublabel": "chat privado"
+    },
+    {
+      "id": "admin",
+      "type": "frontend",
+      "label": "Admin",
+      "sublabel": "ADMIN_CHAT_ID"
+    },
+    {
+      "id": "telegram",
+      "type": "cloud",
+      "label": "Telegram",
+      "sublabel": "Bot API",
+      "brand": "telegram"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "api (webhook)",
+      "sublabel": "FastAPI · handlers.py",
+      "brand": "fastapi"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "labubot.db",
+      "sublabel": "SQLite · WAL",
+      "brand": "sqlite"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 252,
+      "label": "1 · Solicitud de acceso"
+    },
+    {
+      "from": 276,
+      "to": 406,
+      "label": "2 · Aprobación del admin"
+    },
+    {
+      "from": 430,
+      "to": 608,
+      "label": "3 · Carga del perfil"
+    }
+  ],
+  "messages": [
+    {
+      "id": "start",
+      "from": "usuario",
+      "to": "telegram",
+      "y": 168,
+      "label": "/start",
+      "variant": "emphasis",
+      "note": "Solo chat privado: chat.id == from.id"
+    },
+    {
+      "id": "webhook-start",
+      "from": "telegram",
+      "to": "api",
+      "y": 184,
+      "label": "POST /telegram/webhook · message",
+      "variant": "security",
+      "note": "Telegram manda el secreto en X-Telegram-Bot-Api-Secret-Token (si no coincide: 403); el endpoint contesta 200 {\"ok\": true}"
+    },
+    {
+      "id": "register",
+      "from": "api",
+      "to": "db",
+      "y": 200,
+      "label": "Users.get · register(pending)",
+      "variant": "default",
+      "note": "si es ADMIN_CHAT_ID: active directo"
+    },
+    {
+      "id": "send-welcome",
+      "from": "api",
+      "to": "telegram",
+      "y": 216,
+      "label": "sendMessage WELCOME_PENDING",
+      "variant": "dashed"
+    },
+    {
+      "id": "deliver-welcome",
+      "from": "telegram",
+      "to": "usuario",
+      "y": 216,
+      "label": "👋 Hola {first_name}… quedó pendiente",
+      "variant": "emphasis"
+    },
+    {
+      "id": "send-request",
+      "from": "api",
+      "to": "telegram",
+      "y": 244,
+      "label": "sendMessage ADMIN_REQUEST",
+      "variant": "dashed",
+      "note": "con approval_keyboard(chat_id): approve:{chat_id} / reject:{chat_id}"
+    },
+    {
+      "id": "deliver-request",
+      "from": "telegram",
+      "to": "admin",
+      "y": 244,
+      "label": "🆕 [✅ Aprobar] [❌ Rechazar]",
+      "variant": "emphasis"
+    },
+    {
+      "id": "tap-approve",
+      "from": "admin",
+      "to": "telegram",
+      "y": 294,
+      "label": "toca ✅ Aprobar",
+      "variant": "emphasis",
+      "note": "❌ Rechazar manda reject:{chat_id}: status rejected y el mensaje pasa a ❌ Rechazada: {first_name} (@{username})"
+    },
+    {
+      "id": "callback",
+      "from": "telegram",
+      "to": "api",
+      "y": 310,
+      "label": "callback_query · approve:{chat_id}",
+      "variant": "security",
+      "note": "approve / reject solo si from.id == ADMIN_CHAT_ID; Telegram manda el secreto en X-Telegram-Bot-Api-Secret-Token (si no coincide: 403); el endpoint contesta 200 {\"ok\": true}"
+    },
+    {
+      "id": "answer-callback",
+      "from": "api",
+      "to": "telegram",
+      "y": 338,
+      "label": "answerCallbackQuery (siempre)",
+      "variant": "dashed"
+    },
+    {
+      "id": "activate",
+      "from": "api",
+      "to": "db",
+      "y": 354,
+      "label": "set_status(active) + seed_defaults",
+      "variant": "default",
+      "note": "siembra DEFAULT_TERMS y DEFAULT_BLOCKED_TITLE_WORDS"
+    },
+    {
+      "id": "edit-request",
+      "from": "api",
+      "to": "telegram",
+      "y": 370,
+      "label": "editMessageText ✅ Aprobada",
+      "variant": "dashed"
+    },
+    {
+      "id": "deliver-edit",
+      "from": "telegram",
+      "to": "admin",
+      "y": 370,
+      "label": "✅ Aprobada: {first_name}…",
+      "variant": "emphasis",
+      "note": "texto completo: ✅ Aprobada: {first_name} (@{username}), sin botones"
+    },
+    {
+      "id": "send-approved",
+      "from": "api",
+      "to": "telegram",
+      "y": 398,
+      "label": "sendMessage APPROVED",
+      "variant": "dashed"
+    },
+    {
+      "id": "deliver-approved",
+      "from": "telegram",
+      "to": "usuario",
+      "y": 398,
+      "label": "✅ ¡Listo, ya tenés acceso!",
+      "variant": "emphasis",
+      "note": "Mandame tu CV con /perfil"
+    },
+    {
+      "id": "perfil-cmd",
+      "from": "usuario",
+      "to": "telegram",
+      "y": 448,
+      "label": "/perfil",
+      "variant": "emphasis",
+      "note": "Solo active o paused: pending, rejected y blocked se atienden como /start"
+    },
+    {
+      "id": "webhook-perfil",
+      "from": "telegram",
+      "to": "api",
+      "y": 464,
+      "label": "POST /telegram/webhook · message",
+      "variant": "security",
+      "note": "Telegram manda el secreto en X-Telegram-Bot-Api-Secret-Token (si no coincide: 403); el endpoint contesta 200 {\"ok\": true}"
+    },
+    {
+      "id": "await-profile",
+      "from": "api",
+      "to": "db",
+      "y": 480,
+      "label": "set_state(awaiting_profile)",
+      "variant": "default",
+      "note": "el próximo texto o documento es el perfil"
+    },
+    {
+      "id": "send-ask",
+      "from": "api",
+      "to": "telegram",
+      "y": 496,
+      "label": "sendMessage ASK_PROFILE",
+      "variant": "dashed"
+    },
+    {
+      "id": "deliver-ask",
+      "from": "telegram",
+      "to": "usuario",
+      "y": 496,
+      "label": "📄 Mandame tu perfil… .md / .txt",
+      "variant": "emphasis"
+    },
+    {
+      "id": "upload",
+      "from": "usuario",
+      "to": "telegram",
+      "y": 524,
+      "label": "perfil.md como documento",
+      "variant": "emphasis",
+      "note": "7.922 caracteres (8.058 bytes): no entra en un mensaje (tope 4096)"
+    },
+    {
+      "id": "webhook-document",
+      "from": "telegram",
+      "to": "api",
+      "y": 540,
+      "label": "POST /telegram/webhook · document",
+      "variant": "security",
+      "note": "solo con state = awaiting_profile; Telegram manda el secreto en X-Telegram-Bot-Api-Secret-Token (si no coincide: 403); el endpoint contesta 200 {\"ok\": true}"
+    },
+    {
+      "id": "get-file",
+      "from": "api",
+      "to": "telegram",
+      "y": 568,
+      "label": "getFile + GET → texto del .md",
+      "variant": "dashed",
+      "note": "download_file(file_id): getFile y Driver.get a FILE_URL; si no es .md / .txt, ASK_PROFILE otra vez"
+    },
+    {
+      "id": "save-profile",
+      "from": "api",
+      "to": "db",
+      "y": 584,
+      "label": "set_profile + set_state('')",
+      "variant": "default",
+      "note": "reemplaza al perfil anterior"
+    },
+    {
+      "id": "send-saved",
+      "from": "api",
+      "to": "telegram",
+      "y": 600,
+      "label": "sendMessage PROFILE_SAVED",
+      "variant": "dashed"
+    },
+    {
+      "id": "deliver-saved",
+      "from": "telegram",
+      "to": "usuario",
+      "y": 600,
+      "label": "📄 Perfil guardado ({chars} caracteres)",
+      "variant": "emphasis",
+      "note": "con perfil.md: 7922 caracteres"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "api",
+      "from": 180,
+      "to": 248,
+      "type": "backend"
+    },
+    {
+      "participant": "api",
+      "from": 306,
+      "to": 402,
+      "type": "backend"
+    },
+    {
+      "participant": "api",
+      "from": 460,
+      "to": 500,
+      "type": "backend"
+    },
+    {
+      "participant": "api",
+      "from": 536,
+      "to": 604,
+      "type": "backend"
+    }
+  ]
+}

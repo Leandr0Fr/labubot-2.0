@@ -1,0 +1,947 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casos de uso · labubot</title>
+<meta name="description" content="Diagrama UML de casos de uso de labubot multiusuario por Telegram y una ficha por caso.">
+<script>
+  (function () {
+    var flags = (location.hash + location.search).toLowerCase();
+    var root = document.documentElement;
+    if (flags.indexOf("dark") !== -1) root.setAttribute("data-theme", "dark");
+    else if (flags.indexOf("light") !== -1) root.setAttribute("data-theme", "light");
+    if (flags.indexOf("solo") !== -1) root.classList.add("solo");
+  })();
+</script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f4f5f2;
+    --surface: #ffffff;
+    --surface-2: #f7f9f8;
+    --ink: #1b2321;
+    --ink-2: #44504c;
+    --muted: #5f6b67;
+    --border: #d9dfdc;
+    --accent: #0e7f63;
+    --accent-soft: #e3f3ec;
+    --sys-fill: #fbfcfb;
+    --sys-stroke: #8a9792;
+    --uc-fill: #e7f5ef;
+    --uc-stroke: #1d8a69;
+    --uc-hover: #d4eee3;
+    --f2-fill: #f1f2f4;
+    --f2-stroke: #8b929c;
+    --f2-ink: #6b7380;
+    --ext-fill: #eef1f5;
+    --ext-stroke: #66717f;
+    --note-fill: #fff6d6;
+    --note-stroke: #c49a1c;
+    --include: #6a46d6;
+    --extend: #c2540a;
+    --green: #1fa34a;
+    --yellow: #e0a800;
+    --msg-bg: #eef6ff;
+    --msg-border: #c9dcf3;
+    --dot: #dfe4e1;
+    --mono: "JetBrains Mono", "Cascadia Code", Consolas, "SFMono-Regular", Menlo, monospace;
+    --sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0e1312;
+      --surface: #151c1a;
+      --surface-2: #1a2220;
+      --ink: #e4ebe8;
+      --ink-2: #aebbb6;
+      --muted: #93a29d;
+      --border: #2a3532;
+      --accent: #4fd1a5;
+      --accent-soft: #143229;
+      --sys-fill: #121917;
+      --sys-stroke: #52625c;
+      --uc-fill: #123228;
+      --uc-stroke: #3dbb8f;
+      --uc-hover: #174034;
+      --f2-fill: #1b2124;
+      --f2-stroke: #7d8691;
+      --f2-ink: #9aa3ad;
+      --ext-fill: #1c232c;
+      --ext-stroke: #7f8b99;
+      --note-fill: #2a2412;
+      --note-stroke: #a8862a;
+      --include: #a58bff;
+      --extend: #ff9a4d;
+      --green: #34c26b;
+      --yellow: #f2c230;
+      --msg-bg: #16222f;
+      --msg-border: #2a3b50;
+      --dot: #1f2826;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0e1312;
+    --surface: #151c1a;
+    --surface-2: #1a2220;
+    --ink: #e4ebe8;
+    --ink-2: #aebbb6;
+    --muted: #93a29d;
+    --border: #2a3532;
+    --accent: #4fd1a5;
+    --accent-soft: #143229;
+    --sys-fill: #121917;
+    --sys-stroke: #52625c;
+    --uc-fill: #123228;
+    --uc-stroke: #3dbb8f;
+    --uc-hover: #174034;
+    --f2-fill: #1b2124;
+    --f2-stroke: #7d8691;
+    --f2-ink: #9aa3ad;
+    --ext-fill: #1c232c;
+    --ext-stroke: #7f8b99;
+    --note-fill: #2a2412;
+    --note-stroke: #a8862a;
+    --include: #a58bff;
+    --extend: #ff9a4d;
+    --green: #34c26b;
+    --yellow: #f2c230;
+    --msg-bg: #16222f;
+    --msg-border: #2a3b50;
+    --dot: #1f2826;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 var(--sans);
+  }
+  .wrap { max-width: 1360px; margin: 0 auto; padding: 32px 24px 64px; }
+  .eyebrow {
+    font: 600 12px/1 var(--mono);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  h1 { font: 700 30px/1.15 var(--sans); margin: 0; letter-spacing: -.01em; }
+  .lead { color: var(--muted); max-width: 820px; margin: 12px 0 0; font-size: 16px; }
+  .theme { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+  .theme a {
+    font: 600 12px/1 var(--sans); color: var(--muted); text-decoration: none;
+    padding: 7px 12px; border-radius: 999px;
+  }
+  .theme a[aria-current="true"] { background: var(--accent-soft); color: var(--accent); }
+
+  .jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0 0; padding: 0; list-style: none; }
+  .jump a {
+    display: inline-block; font: 600 12px/1 var(--mono); color: var(--accent); text-decoration: none;
+    padding: 6px 9px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
+  }
+  .jump a:hover { border-color: var(--accent); }
+  .uc-card dd a, .uc-card li a { color: var(--accent); text-underline-offset: 2px; }
+
+  figure.diagram {
+    margin: 24px 0 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  .scroll { overflow-x: auto; }
+  svg.ucd { display: block; width: 100%; height: auto; min-width: 960px; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center;
+    margin: 14px 4px 2px; padding-top: 14px; border-top: 1px solid var(--border);
+    font: 13px/1.3 var(--sans); color: var(--muted);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .legend svg { flex: none; }
+
+  /* SVG */
+  .sys { fill: var(--sys-fill); stroke: var(--sys-stroke); stroke-width: 1.5; }
+  .sys-title { font: 700 19px var(--sans); fill: var(--ink); }
+  .uc { fill: var(--uc-fill); stroke: var(--uc-stroke); stroke-width: 1.6; transition: fill .15s; }
+  .uc.f2 { fill: var(--f2-fill); stroke: var(--f2-stroke); stroke-dasharray: 7 5; }
+  .uc-link { cursor: pointer; }
+  .uc-link:hover .uc { fill: var(--uc-hover); stroke-width: 2.4; }
+  .uc-link:focus-visible .uc { stroke-width: 3; }
+  .uc-id { font: 700 11px var(--mono); fill: var(--accent); text-anchor: middle; letter-spacing: .03em; }
+  .uc-id.f2 { fill: var(--f2-ink); }
+  .uc-name { font: 600 14.5px var(--sans); fill: var(--ink); text-anchor: middle; }
+  .uc-ext { font: italic 11.5px var(--sans); fill: var(--muted); text-anchor: middle; }
+  .uc-sep { stroke: var(--uc-stroke); stroke-width: 1; opacity: .55; }
+  .dot-g, .dot-y { font-size: 17px; }
+  .dot-g { fill: var(--green); }
+  .dot-y { fill: var(--yellow); }
+  .assoc { stroke: var(--ink-2); stroke-width: 1.4; }
+  .assoc.f2 { stroke: var(--f2-stroke); }
+  .gen { stroke: var(--ink-2); stroke-width: 1.5; }
+  .mk-gen { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.5; stroke-linejoin: round; }
+  .rel-line { stroke-width: 1.6; stroke-dasharray: 7 5; fill: none; }
+  .rel-line.include { stroke: var(--include); }
+  .rel-line.extend { stroke: var(--extend); }
+  .mk-include { fill: none; stroke: var(--include); stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; }
+  .mk-extend { fill: none; stroke: var(--extend); stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; }
+  .rel-bg { fill: var(--sys-fill); }
+  .rel-label { font: 600 12px var(--mono); text-anchor: middle; }
+  .rel-label.include { fill: var(--include); }
+  .rel-label.extend { fill: var(--extend); }
+  .actor-head { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+  .actor-fig { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+  .actor-label { font: 700 15px var(--sans); fill: var(--ink); text-anchor: middle; }
+  .clock-box { fill: var(--surface); stroke: var(--ink); stroke-width: 1.6; }
+  .clock-face { fill: none; stroke: var(--ink); stroke-width: 1.8; }
+  .clock-hands { fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; }
+  .stereo { font: 11px var(--mono); fill: var(--muted); text-anchor: middle; }
+  .sub { font: 11px var(--mono); fill: var(--muted); text-anchor: middle; }
+  .ext-box { fill: var(--ext-fill); stroke: var(--ext-stroke); stroke-width: 1.5; }
+  .ext-name { font: 700 14.5px var(--sans); fill: var(--ink); text-anchor: middle; }
+  .note-box { fill: var(--note-fill); stroke: var(--note-stroke); stroke-width: 1.3; }
+  .note-fold { fill: none; stroke: var(--note-stroke); stroke-width: 1.3; }
+  .note-text { font: 12.5px var(--sans); fill: var(--ink); }
+  .note-link { stroke: var(--note-stroke); stroke-width: 1.3; stroke-dasharray: 4 4; }
+
+  /* secciones */
+  section { margin-top: 44px; }
+  h2 { font: 700 21px/1.25 var(--sans); margin: 0 0 6px; }
+  .section-lead { color: var(--muted); margin: 0 0 18px; max-width: 860px; }
+
+  .actors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .actor-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+  }
+  .actor-card h3 { font: 700 15px/1.3 var(--sans); margin: 0 0 4px; }
+  .actor-card .kind { font: 11px/1 var(--mono); color: var(--muted); margin: 0 0 8px; }
+  .actor-card p { margin: 0; font-size: 14px; color: var(--ink-2); }
+
+  .rules {
+    background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    border-radius: 10px; padding: 14px 18px 14px 34px; margin: 0;
+  }
+  .rules li { margin: 4px 0; font-size: 14px; }
+
+  .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .uc-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px 16px;
+    scroll-margin-top: 16px;
+  }
+  .uc-card:target { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .uc-card.f2 { border-style: dashed; }
+  .uc-card header { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 10px; margin-bottom: 12px; }
+  .uc-card .id {
+    font: 700 12px/1 var(--mono); color: var(--accent); background: var(--accent-soft);
+    padding: 5px 7px; border-radius: 5px;
+  }
+  .uc-card h3 { font: 700 17px/1.3 var(--sans); margin: 0; }
+  .tag {
+    font: 600 11px/1 var(--mono); color: var(--f2-ink); border: 1px dashed var(--f2-stroke);
+    padding: 4px 7px; border-radius: 5px;
+  }
+  .uc-card dl { display: grid; grid-template-columns: 112px 1fr; gap: 6px 12px; margin: 0; font-size: 14px; }
+  .uc-card dt { color: var(--muted); font-weight: 600; }
+  .uc-card dd { margin: 0; }
+  .uc-card h4 {
+    font: 600 12px/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+    margin: 16px 0 8px;
+  }
+  .uc-card ol, .uc-card ul { margin: 0; padding-left: 22px; font-size: 14px; }
+  .uc-card li { margin: 5px 0; }
+  .uc-card .result { margin-top: 14px; }
+  .alt { margin-top: 2px; }
+  .alt ul { list-style: none; padding-left: 0; }
+  .alt li { padding-left: 16px; position: relative; }
+  .alt li::before { content: "↳"; position: absolute; left: 0; color: var(--extend); }
+  code {
+    font: 12.5px/1.4 var(--mono); background: var(--surface-2); border: 1px solid var(--border);
+    padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; font-variant-ligatures: none;
+  }
+  .msg {
+    display: inline-block; white-space: pre-line; background: var(--msg-bg); border: 1px solid var(--msg-border);
+    border-radius: 10px 10px 10px 3px; padding: 4px 9px; margin: 3px 0 1px; font-size: 13.5px; line-height: 1.45;
+  }
+  .btn {
+    display: inline-block; font: 600 12.5px/1.2 var(--sans); white-space: nowrap;
+    border: 1px solid var(--border); background: var(--surface-2); border-radius: 6px; padding: 2px 7px;
+  }
+  .btn small { font: 11px var(--mono); color: var(--muted); margin-left: 4px; }
+
+  .chat {
+    list-style: none; margin: 0; padding: 12px 14px; display: grid; gap: 6px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+  }
+  .uc-card .chat { padding-left: 14px; }
+  .chat li { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+  .chat .msg { margin: 0; max-width: 100%; }
+  .chat .msg.head { font-weight: 600; }
+  .chat .msg.quiet { border-style: dashed; background: var(--surface); }
+  .chat .const { font: 11px/1.3 var(--mono); color: var(--muted); }
+  .uc-card.wide { grid-column: 1 / -1; }
+  .cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 36px; }
+  .cols > div > :first-child { margin-top: 0; }
+  .mini-wrap { overflow-x: auto; }
+  .mini { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .mini th, .mini td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .mini thead th { font: 600 11px/1.3 var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .mini thead th code { text-transform: none; letter-spacing: 0; }
+  .mini tbody th { font-weight: 600; white-space: nowrap; }
+  .mini .hit { color: var(--extend); font-weight: 600; }
+  .mini .cache { color: var(--accent); font-weight: 600; }
+  .mini .none { color: var(--muted); }
+  .ex-lead, .ex-note { margin: 0 0 8px; font-size: 14px; color: var(--ink-2); }
+  .ex-note { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+
+  footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
+
+  /* captura del diagrama solo: ?solo */
+  .solo body { width: 1560px; }
+  .solo .wrap { max-width: none; padding: 24px 20px 20px; }
+  .solo .lead, .solo .theme, .solo .jump, .solo section, .solo footer { display: none; }
+  .solo h1 { font-size: 26px; }
+  .solo figure.diagram { margin-top: 16px; }
+  .solo svg.ucd { width: 1480px; min-width: 0; }
+
+  @media (max-width: 980px) {
+    .cards { grid-template-columns: minmax(0, 1fr); }
+    .cols { grid-template-columns: minmax(0, 1fr); }
+    .cols > div + div > :first-child { margin-top: 16px; }
+    .actors { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 600px) {
+    .wrap { padding: 20px 16px 48px; }
+    h1 { font-size: 25px; }
+    .actors { grid-template-columns: 1fr; }
+    .uc-card { padding: 16px; }
+    .uc-card dl { grid-template-columns: 1fr; gap: 2px; }
+    .uc-card dd { margin-bottom: 6px; }
+    figure.diagram { padding: 10px; }
+    .mini th, .mini td { padding: 6px 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">labubot · Telegram multiusuario</p>
+    <div class="top">
+      <h1>Casos de uso</h1>
+      <nav class="theme" aria-label="Tema">
+        <a href="#" data-t="">Auto</a><a href="#light" data-t="light">Claro</a><a href="#dark" data-t="dark">Oscuro</a>
+      </nav>
+    </div>
+    <p class="lead">Quién hace qué cuando labubot pase a ser multiusuario: el Usuario configura sus alertas desde Telegram, el Admin aprueba los accesos y el Reloj dispara la corrida que, usuario por usuario, busca sus palabras clave, clasifica y le manda las ofertas agrupadas por palabra. Es un bot interno, de hasta 5 usuarios. Cada elipse lleva a su ficha.</p>
+    <ul class="jump">
+      <li><a href="#uc01">UC01</a></li><li><a href="#uc02">UC02</a></li><li><a href="#uc03">UC03</a></li>
+      <li><a href="#uc04">UC04</a></li><li><a href="#uc05">UC05</a></li><li><a href="#uc06">UC06</a></li>
+      <li><a href="#uc07">UC07</a></li><li><a href="#uc08">UC08</a></li><li><a href="#uc09">UC09</a></li>
+      <li><a href="#uc10">UC10</a></li><li><a href="#uc11">UC11</a></li>
+    </ul>
+  </header>
+
+  <figure class="diagram" id="diagrama">
+    <div class="scroll">
+  <svg class="ucd" viewBox="0 0 1480 1020" width="1480" height="1020" role="img" aria-labelledby="ucd-title ucd-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="ucd-title">Diagrama de casos de uso de labubot multiusuario</title>
+  <desc id="ucd-desc">Actores Usuario, Admin (especialización de Usuario) y Reloj/Scheduler a la izquierda; el sistema labubot con los casos UC01 a UC11 al centro; Telegram Bot API, Portales de empleo y OpenAI a la derecha. UC09 corre un usuario tras otro e incluye buscar en portales (por palabra, con caché), clasificar con OpenAI y UC08, que manda un bloque por palabra clave (sus ofertas o “No se encontraron coincidencias.”) y siempre un resumen sin sonido.</desc>
+  <defs>
+    <marker id="m-gen" viewBox="0 0 18 18" refX="17" refY="9" markerWidth="18" markerHeight="18" markerUnits="userSpaceOnUse" orient="auto">
+      <path class="mk-gen" d="M1,1 L17,9 L1,17 Z"/>
+    </marker>
+    <marker id="m-include" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+      <path class="mk-include" d="M1,1 L13,7 L1,13"/>
+    </marker>
+    <marker id="m-extend" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+      <path class="mk-extend" d="M1,1 L13,7 L1,13"/>
+    </marker>
+  </defs>
+  <rect class="sys" x="250" y="30" width="950" height="970" rx="14"/>
+    <text class="sys-title" x="272" y="60">labubot</text>
+  <g class="assocs"><line class="assoc" x1="162" y1="300" x2="310" y2="100"/>
+    <line class="assoc" x1="162" y1="300" x2="310" y2="180"/>
+    <line class="assoc" x1="162" y1="300" x2="295" y2="272"/>
+    <line class="assoc" x1="162" y1="300" x2="310" y2="364"/>
+    <line class="assoc f2" x1="162" y1="300" x2="310" y2="444"/>
+    <line class="assoc" x1="162" y1="300" x2="295" y2="524"/>
+    <line class="assoc" x1="162" y1="722" x2="310" y2="680"/>
+    <line class="assoc" x1="162" y1="722" x2="310" y2="760"/>
+    <line class="assoc" x1="210" y1="929" x2="650" y2="790"/>
+    <line class="assoc" x1="625" y1="524" x2="1250" y2="524"/>
+    <line class="assoc" x1="1180" y1="650" x2="1250" y2="650"/>
+    <line class="assoc" x1="1180" y1="920" x2="1250" y2="920"/></g>
+  <line class="gen" x1="125" y1="654" x2="125" y2="392" marker-end="url(#m-gen)"/>
+  <g class="rel extend">
+      <line class="rel-line extend" x1="790.9" y1="211" x2="595.1" y2="247.1" marker-end="url(#m-extend)"/>
+      <rect class="rel-bg" x="659" y="219.1" width="68" height="19" rx="4"/>
+      <text class="rel-label extend" x="693" y="233.1">«extend»</text>
+    </g>
+  <g class="rel extend">
+      <line class="rel-line extend" x1="765.7" y1="311.8" x2="608.4" y2="291.3" marker-end="url(#m-extend)"/>
+      <rect class="rel-bg" x="653" y="291.6" width="68" height="19" rx="4"/>
+      <text class="rel-label extend" x="687" y="305.6">«extend»</text>
+    </g>
+  <g class="rel include">
+      <line class="rel-line include" x1="758.3" y1="757.3" x2="497.3" y2="553.2" marker-end="url(#m-include)"/>
+      <rect class="rel-bg" x="657.4" y="695.5" width="68" height="19" rx="4"/>
+      <text class="rel-label include" x="691.4" y="709.5">«include»</text>
+    </g>
+  <g class="rel include">
+      <line class="rel-line include" x1="856.3" y1="758.5" x2="999.2" y2="678.5" marker-end="url(#m-include)"/>
+      <rect class="rel-bg" x="893.7" y="708.5" width="68" height="19" rx="4"/>
+      <text class="rel-label include" x="927.7" y="722.5">«include»</text>
+    </g>
+  <g class="rel include">
+      <line class="rel-line include" x1="859.9" y1="821.2" x2="995.9" y2="891.9" marker-end="url(#m-include)"/>
+      <rect class="rel-bg" x="893.9" y="846.5" width="68" height="19" rx="4"/>
+      <text class="rel-label include" x="927.9" y="860.5">«include»</text>
+    </g>
+  <a href="#uc01" class="uc-link"><title>UC01</title>
+      <ellipse class="uc" cx="460" cy="100" rx="150" ry="30"/>
+      <text class="uc-id" x="460" y="94">UC01 · /start</text>
+      <text class="uc-name" x="460" y="113">Solicitar acceso</text></a>
+  <a href="#uc03" class="uc-link"><title>UC03</title>
+      <ellipse class="uc" cx="460" cy="180" rx="150" ry="30"/>
+      <text class="uc-id" x="460" y="174">UC03 · /perfil</text>
+      <text class="uc-name" x="460" y="193">Cargar o reemplazar perfil</text></a>
+  <a href="#uc04" class="uc-link"><title>UC04</title>
+      <ellipse class="uc" cx="460" cy="272" rx="165" ry="42"/>
+      <text class="uc-id" x="460" y="255">UC04 · /settings</text>
+      <text class="uc-name" x="460" y="274">Ver configuración</text>
+      <line class="uc-sep" x1="335" y1="282" x2="585" y2="282"/>
+      <text class="uc-ext" x="460" y="297">puntos de extensión: Términos · Bloqueadas</text></a>
+  <a href="#uc07" class="uc-link"><title>UC07</title>
+      <ellipse class="uc" cx="460" cy="364" rx="150" ry="30"/>
+      <text class="uc-id" x="460" y="358">UC07 · /pausa · /reanudar</text>
+      <text class="uc-name" x="460" y="377">Pausar / reanudar alertas</text></a>
+  <a href="#uc11" class="uc-link"><title>UC11</title>
+      <ellipse class="uc f2" cx="460" cy="444" rx="150" ry="30"/>
+      <text class="uc-id f2" x="460" y="438">UC11 · /buscar · FASE 2</text>
+      <text class="uc-name" x="460" y="457">Buscar ahora</text></a>
+  <a href="#uc08" class="uc-link"><title>UC08</title>
+      <ellipse class="uc" cx="460" cy="524" rx="165" ry="30"/>
+      <text class="uc-id" x="460" y="518">UC08 · por palabra clave</text>
+      <text class="uc-name" x="460" y="537">Recibir ofertas <tspan class="dot-g">●</tspan><tspan class="dot-y">●</tspan> y resumen</text></a>
+  <a href="#uc02" class="uc-link"><title>UC02</title>
+      <ellipse class="uc" cx="460" cy="680" rx="150" ry="30"/>
+      <text class="uc-id" x="460" y="674">UC02 · approve · reject</text>
+      <text class="uc-name" x="460" y="693">Aprobar / rechazar solicitud</text></a>
+  <a href="#uc10" class="uc-link"><title>UC10</title>
+      <ellipse class="uc" cx="460" cy="760" rx="150" ry="30"/>
+      <text class="uc-id" x="460" y="754">UC10 · /usuarios</text>
+      <text class="uc-name" x="460" y="773">Listar usuarios</text></a>
+  <a href="#uc05" class="uc-link"><title>UC05</title>
+      <ellipse class="uc" cx="905" cy="190" rx="160" ry="30"/>
+      <text class="uc-id" x="905" y="184">UC05</text>
+      <text class="uc-name" x="905" y="203">Agregar / quitar términos</text></a>
+  <a href="#uc06" class="uc-link"><title>UC06</title>
+      <ellipse class="uc" cx="905" cy="330" rx="175" ry="30"/>
+      <text class="uc-id" x="905" y="324">UC06</text>
+      <text class="uc-name" x="905" y="343">Agregar / quitar palabras bloqueadas</text></a>
+  <a href="#uc09" class="uc-link"><title>UC09</title>
+      <ellipse class="uc" cx="800" cy="790" rx="150" ry="34"/>
+      <text class="uc-id" x="800" y="784">UC09 · un usuario tras otro</text>
+      <text class="uc-name" x="800" y="803">Ejecutar corrida horaria</text></a>
+  <a href="#uc09" class="uc-link"><title>incluido en UC09</title>
+      <ellipse class="uc inc" cx="1050" cy="650" rx="130" ry="30"/>
+      <text class="uc-name" x="1050" y="647">Buscar en portales</text>
+      <text class="uc-ext" x="1050" y="666">por palabra · con caché</text></a>
+  <a href="#uc09" class="uc-link"><title>incluido en UC09</title>
+      <ellipse class="uc inc" cx="1050" cy="920" rx="130" ry="30"/>
+      <text class="uc-name" x="1050" y="925">Clasificar con OpenAI</text></a>
+  <g class="actor">
+      <circle class="actor-head" cx="125" cy="252" r="15"/>
+      <path class="actor-fig" d="M125,267 V316 M97,282 H153 M125,316 L101,354 M125,316 L149,354"/>
+      <text class="actor-label" x="125" y="378">Usuario</text>
+    </g>
+  <g class="actor">
+      <circle class="actor-head" cx="125" cy="676" r="15"/>
+      <path class="actor-fig" d="M125,691 V740 M97,706 H153 M125,740 L101,778 M125,740 L149,778"/>
+      <text class="actor-label" x="125" y="802">Admin</text>
+    </g>
+  <g class="actor">
+      <rect class="clock-box" x="40" y="880" width="170" height="98" rx="8"/>
+      <circle class="clock-face" cx="125" cy="900" r="10"/>
+      <path class="clock-hands" d="M125,900 V893 M125,900 L130,903"/>
+      <text class="stereo" x="125" y="926">«actor»</text>
+      <text class="actor-label" x="125" y="946">Reloj / Scheduler</text>
+      <text class="sub" x="125" y="965">daemon.py · cada hora</text>
+    </g>
+  <g class="ext">
+      <rect class="ext-box" x="1250" y="489" width="190" height="70" rx="8"/>
+      <text class="stereo" x="1345" y="508">«sistema externo»</text>
+      <text class="ext-name" x="1345" y="529">Telegram Bot API</text>
+      <text class="sub" x="1345" y="547">webhook · Bot API</text>
+    </g>
+  <g class="ext">
+      <rect class="ext-box" x="1250" y="615" width="190" height="70" rx="8"/>
+      <text class="stereo" x="1345" y="634">«sistema externo»</text>
+      <text class="ext-name" x="1345" y="655">Portales de empleo</text>
+      <text class="sub" x="1345" y="673">11 sitios · solo HTTP</text>
+    </g>
+  <g class="ext">
+      <rect class="ext-box" x="1250" y="885" width="190" height="70" rx="8"/>
+      <text class="stereo" x="1345" y="904">«sistema externo»</text>
+      <text class="ext-name" x="1345" y="925">OpenAI</text>
+      <text class="sub" x="1345" y="943">Decisions API</text>
+    </g>
+  <g class="note">
+      <path class="note-box" d="M1232,262 H1442 L1458,278 V412 H1232 Z"/>
+      <path class="note-fold" d="M1442,262 V278 H1458"/>
+      <text class="note-text" x="1246" y="290">Telegram es el canal de todos</text>
+      <text class="note-text" x="1246" y="309">los casos de Usuario y Admin:</text>
+      <text class="note-text" x="1246" y="328">los mensajes y botones entran</text>
+      <text class="note-text" x="1246" y="347">por el webhook; las respuestas</text>
+      <text class="note-text" x="1246" y="366">salen por la Bot API (sendMessage,</text>
+      <text class="note-text" x="1246" y="385">editMessageText, getFile…).</text>
+      <line class="note-link" x1="1345" y1="412" x2="1345" y2="489"/>
+    </g>
+</svg>
+    </div>
+    <figcaption class="legend">
+      <span><svg width="20" height="28" viewBox="0 0 20 28" aria-hidden="true"><circle cx="10" cy="5" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10,9 V18 M3,12 H17 M10,18 L4,26 M10,18 L16,26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Actor</span>
+      <span><svg width="40" height="20" viewBox="0 0 40 20" aria-hidden="true"><ellipse cx="20" cy="10" rx="18" ry="8" class="uc"/></svg>Caso de uso</span>
+      <span><svg width="40" height="20" viewBox="0 0 40 20" aria-hidden="true"><ellipse cx="20" cy="10" rx="18" ry="8" class="uc f2"/></svg>Fase 2</span>
+      <span><svg width="40" height="20" viewBox="0 0 40 20" aria-hidden="true"><rect x="2" y="3" width="36" height="14" rx="3" class="ext-box"/></svg>Sistema externo</span>
+      <span><svg width="40" height="12" viewBox="0 0 40 12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" class="assoc"/></svg>Asociación</span>
+      <span><svg width="44" height="18" viewBox="0 0 44 18" aria-hidden="true"><line x1="2" y1="9" x2="30" y2="9" class="gen"/><path d="M29,2 L42,9 L29,16 Z" class="mk-gen"/></svg>Generalización (Admin es un Usuario)</span>
+      <span><svg width="44" height="14" viewBox="0 0 44 14" aria-hidden="true"><line x1="2" y1="7" x2="40" y2="7" class="rel-line include"/><path d="M33,2 L41,7 L33,12" class="mk-include"/></svg>«include»: siempre lo ejecuta</span>
+      <span><svg width="44" height="14" viewBox="0 0 44 14" aria-hidden="true"><line x1="2" y1="7" x2="40" y2="7" class="rel-line extend"/><path d="M33,2 L41,7 L33,12" class="mk-extend"/></svg>«extend»: lo agrega si el usuario elige</span>
+    </figcaption>
+  </figure>
+
+  <section aria-labelledby="actores">
+    <h2 id="actores">Actores</h2>
+    <p class="section-lead">Tres actores que inician casos y tres sistemas externos que labubot usa. Telegram no es un actor que decida nada: es el canal por donde pasa toda la conversación.</p>
+    <div class="actors">
+      <article class="actor-card">
+        <h3>Usuario</h3>
+        <p class="kind">actor principal · humano</p>
+        <p>Cualquiera con Telegram que le escriba al bot en privado. Pide acceso con <code>/start</code>; una vez aprobado carga su CV y maneja sus términos, palabras bloqueadas y alertas.</p>
+      </article>
+      <article class="actor-card">
+        <h3>Admin</h3>
+        <p class="kind">especialización de Usuario · <code>ADMIN_CHAT_ID</code></p>
+        <p>Hereda todos los casos del Usuario y suma dos: aprobar o rechazar solicitudes y listar usuarios. Su <code>/start</code> lo deja <code>active</code> directo.</p>
+      </article>
+      <article class="actor-card">
+        <h3>Reloj / Scheduler</h3>
+        <p class="kind">actor no humano · <code>daemon.py</code></p>
+        <p>Dispara la corrida al arrancar el worker y después cada hora (<code>schedule</code>). En Fase 2 lo reemplaza Huey con <code>SqliteHuey</code> y un solo worker.</p>
+      </article>
+      <article class="actor-card">
+        <h3>Telegram Bot API</h3>
+        <p class="kind">sistema externo</p>
+        <p>Entra por <code>POST /telegram/webhook</code> (con <code>secret_token</code>); sale por <code>Driver.post_json()</code> y <code>get()</code>: <code>sendMessage</code>, <code>editMessageText</code>, <code>answerCallbackQuery</code>, <code>getFile</code>.</p>
+      </article>
+      <article class="actor-card">
+        <h3>Portales de empleo</h3>
+        <p class="kind">sistema externo · 11 sitios · solo HTTP</p>
+        <p>LinkedIn, Computrabajo, GetOnBoard, Himalayas, Talent, Indeed, Workable, Bumeran, EmpleosIT, Jobicy y WeWorkRemotely. Se busca usuario por usuario, pero cada <code>(portal, palabra)</code> se pide una sola vez por corrida: el resto sale de la caché.</p>
+      </article>
+      <article class="actor-card">
+        <h3>OpenAI</h3>
+        <p class="kind">sistema externo · Decisions API</p>
+        <p>Una llamada por (usuario, oferta): el veredicto depende del perfil de cada uno. Devuelve <code>green</code>, <code>yellow</code> o <code>red</code>.</p>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="reglas">
+    <h2 id="reglas">Reglas que valen para todos los casos</h2>
+    <ul class="rules">
+      <li>Solo chats privados (<code>chat.type == "private"</code>): ahí <code>chat.id == from.id</code> y es el <code>chat_id</code> del usuario. Los grupos se ignoran.</li>
+      <li>El webhook valida <code>X-Telegram-Bot-Api-Secret-Token</code> (si no coincide, 403) y contesta 200 <code>{"ok": true}</code> rápido siempre: si no, Telegram reintenta el mismo update.</li>
+      <li>Usuarios <code>pending</code> o <code>rejected</code> no pueden usar nada más que <code>/start</code>: a cualquier otro mensaje se les contesta lo mismo que a su <code>/start</code> (<code>STILL_PENDING</code> o <code>REJECTED</code>). Un usuario <code>blocked</code> que escribe cualquier cosa se atiende como su <code>/start</code>: vuelve a <code>active</code> con <code>BACK_AGAIN</code>.</li>
+      <li>Un comando a mitad de un estado (<code>awaiting_*</code>) lo cancela y se atiende el comando. Un texto sin estado (<code>state = ''</code>) recibe <code>UNKNOWN</code>: <span class="msg">No entendí. Usá /settings para ver tu configuración o /ayuda.</span></li>
+      <li>Todo botón se contesta con <code>answerCallbackQuery</code>; si no, queda “cargando”.</li>
+      <li>Lo que sale hacia Telegram pasa por el <code>Driver</code>: FastAPI solo recibe.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="fichas">
+    <h2 id="fichas">Fichas</h2>
+    <p class="section-lead">Una por caso de uso, con los nombres del contrato: comandos, botones con su <code>callback_data</code>, estados (<code>UserStatus</code>, <code>ChatState</code>) y textos de <code>src/telegram/constants.py</code>.</p>
+    <div class="cards">
+      <article class="uc-card" id="uc01">
+        <header><span class="id">UC01</span><h3>Solicitar acceso</h3><code>/start</code></header>
+        <dl>
+          <dt>Actor</dt><dd>Usuario (cualquiera con Telegram).</dd>
+          <dt>Disparador</dt><dd>Manda <code>/start</code> en un chat privado con el bot.</dd>
+          <dt>Precondición</dt><dd>Chat privado y sin fila en <code>users</code> para su <code>chat_id</code>.</dd>
+        </dl>
+        <h4>Flujo principal</h4>
+        <ol>
+          <li>Telegram hace <code>POST /telegram/webhook</code>; <code>webhook.py</code> valida el secreto y despacha a <code>handlers.on_message</code>.</li>
+          <li><code>Users.register</code> crea la fila con <code>status = pending</code>, <code>first_name</code>, <code>username</code> y <code>created_at</code>.</li>
+          <li>Le contesta <code>WELCOME_PENDING</code>: <span class="msg">👋 Hola {first_name}. Soy labubot: busco ofertas en 11 portales y te mando las que encajan con tu perfil.
+Tu solicitud quedó pendiente: te aviso cuando la apruebe el admin.</span></li>
+          <li>Al admin (<code>ADMIN_CHAT_ID</code>) le llega <code>ADMIN_REQUEST</code> con <code>approval_keyboard(chat_id)</code>: <span class="msg">🆕 Solicitud de acceso
+{first_name} (@{username})
+chat_id {chat_id}</span><br><span class="btn">✅ Aprobar<small>approve:{chat_id}</small></span> <span class="btn">❌ Rechazar<small>reject:{chat_id}</small></span></li>
+          <li>El endpoint devuelve 200 <code>{"ok": true}</code>.</li>
+        </ol>
+        <dl class="result"><dt>Resultado</dt><dd>Queda <code>pending</code>: solo puede usar <code>/start</code> hasta que el admin decida (UC02).</dd></dl>
+        <div class="alt">
+          <h4>Flujo alternativo</h4>
+          <ul>
+            <li>Ya existe (<code>Users.register</code> solo le actualiza <code>first_name</code> y <code>username</code>): <code>pending</code> → <code>STILL_PENDING</code> <span class="msg">⏳ Tu solicitud sigue pendiente.</span>; <code>rejected</code> → <code>REJECTED</code> <span class="msg">No tenés acceso a este bot.</span>; <code>active</code> o <code>paused</code> → <code>BACK_AGAIN</code> sin cambiar nada; <code>blocked</code> → vuelve a <code>active</code> y recibe <code>BACK_AGAIN</code> <span class="msg">👋 ¡Volviste! Las alertas siguen como las dejaste.</span></li>
+            <li>Es el admin (<code>chat_id == ADMIN_CHAT_ID</code>) y no existe: queda <code>active</code> directo, con <code>Users.seed_defaults</code> y <code>APPROVED</code>, sin solicitud. Si ya existe (lo crea <code>migrate.py</code>), es un <code>/start</code> más: <code>BACK_AGAIN</code>.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="uc-card" id="uc02">
+        <header><span class="id">UC02</span><h3>Aprobar / rechazar solicitud</h3></header>
+        <dl>
+          <dt>Actor</dt><dd>Admin.</dd>
+          <dt>Disparador</dt><dd>Toca <span class="btn">✅ Aprobar</span> o <span class="btn">❌ Rechazar</span> en el mensaje <code>ADMIN_REQUEST</code>.</dd>
+          <dt>Precondición</dt><dd>El <code>callback_query</code> viene de <code>from.id == ADMIN_CHAT_ID</code> y el solicitante está <code>pending</code>.</dd>
+        </dl>
+        <h4>Flujo principal</h4>
+        <ol>
+          <li>Llega <code>approve:{chat_id}</code> a <code>handlers.on_callback</code>; se contesta <code>answerCallbackQuery</code>.</li>
+          <li><code>Users.set_status(chat_id, active)</code> completa <code>approved_at</code>; <code>Users.seed_defaults</code> le copia <code>DEFAULT_TERMS</code> y <code>DEFAULT_BLOCKED_TITLE_WORDS</code>.</li>
+          <li><code>editMessageText</code> deja el mensaje del admin en <span class="msg">✅ Aprobada: {first_name} (@{username})</span>, sin botones.</li>
+          <li>Al usuario le llega <code>APPROVED</code>: <span class="msg">✅ ¡Listo, ya tenés acceso!
+Mandame tu CV con /perfil: lo uso para decidir qué ofertas te sirven.</span></li>
+        </ol>
+        <dl class="result"><dt>Resultado</dt><dd>Usuario <code>active</code> sin perfil: no entra en la corrida hasta que cargue el CV (UC03).</dd></dl>
+        <div class="alt">
+          <h4>Flujo alternativo</h4>
+          <ul>
+            <li><code>reject:{chat_id}</code> → <code>status = rejected</code> (terminal) y el mensaje del admin queda <span class="msg">❌ Rechazada: {first_name} (@{username})</span>, sin botones. Si el usuario vuelve a mandar <code>/start</code>, recibe <code>REJECTED</code>.</li>
+            <li>Un <code>approve</code> / <code>reject</code> que no viene del admin: solo <code>answerCallbackQuery</code>, no cambia nada.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="uc-card" id="uc03">
+        <header><span class="id">UC03</span><h3>Cargar o reemplazar perfil</h3><code>/perfil</code></header>
+        <dl>
+          <dt>Actor</dt><dd>Usuario.</dd>
+          <dt>Disparador</dt><dd><code>/perfil</code> o el botón <span class="btn">📄 Perfil<small>profile</small></span> del panel.</dd>
+          <dt>Precondición</dt><dd><code>status</code> <code>active</code> o <code>paused</code>.</dd>
+        </dl>
+        <h4>Flujo principal</h4>
+        <ol>
+          <li><code>users.state = awaiting_profile</code> y contesta <code>ASK_PROFILE</code>: <span class="msg">📄 Mandame tu perfil como texto o como archivo .md / .txt. Reemplaza al anterior.</span></li>
+          <li>El usuario manda el CV como texto o como documento <code>.md</code> / <code>.txt</code>.</li>
+          <li>Si es documento: <code>Telegram.download_file(file_id)</code> hace <code>getFile</code> y después <code>GET https://api.telegram.org/file/bot{token}/{file_path}</code>, por el <code>Driver</code>.</li>
+          <li><code>Users.set_profile</code> guarda el texto en <code>users.profile</code> y <code>state</code> vuelve a <code>''</code> (<code>IDLE</code>).</li>
+          <li>Contesta <code>PROFILE_SAVED</code>: <span class="msg">📄 Perfil guardado ({chars} caracteres). Desde la próxima corrida te mando ofertas.</span></li>
+        </ol>
+        <dl class="result"><dt>Resultado</dt><dd>Con <code>profile != ''</code> y <code>active</code> entra en <code>Users.active()</code>: la próxima corrida ya clasifica para él.</dd></dl>
+        <div class="alt">
+          <h4>Flujo alternativo</h4>
+          <ul>
+            <li>CV pegado como texto de más de 4096 caracteres (hoy <code>perfil.md</code> tiene 7.922 caracteres, 8.058 bytes): Telegram lo parte en varios mensajes: solo el primero quedaría como perfil y los demás, ya sin estado, recibirían <code>UNKNOWN</code>. Por eso <code>ASK_PROFILE</code> ofrece el archivo.</li>
+            <li>Documento que no es <code>.md</code> ni <code>.txt</code>: no se guarda, se repite <code>ASK_PROFILE</code> y <code>state</code> sigue en <code>awaiting_profile</code>.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="uc-card" id="uc04">
+        <header><span class="id">UC04</span><h3>Ver configuración</h3><code>/settings</code></header>
+        <dl>
+          <dt>Actor</dt><dd>Usuario.</dd>
+          <dt>Disparador</dt><dd><code>/settings</code>, o <span class="btn">⬅ Volver<small>menu</small></span> desde una lista.</dd>
+          <dt>Precondición</dt><dd><code>status</code> <code>active</code> o <code>paused</code>.</dd>
+        </dl>
+        <h4>Flujo principal</h4>
+        <ol>
+          <li>Lee <code>Users.get</code> (perfil y estado), <code>Users.terms</code> y <code>Users.blocked_words</code> para los contadores.</li>
+          <li>Manda <code>SETTINGS_PANEL</code> con los contadores en el texto y los botones de <code>settings_keyboard(user)</code> (sin <code>counts</code>: ver <a href="diseno.md">diseno.md</a>, anexo 1): <span class="msg">⚙️ Tu configuración
+Términos: {terms} · Bloqueadas: {blocked} · Perfil: {profile_mark} · Alertas: {alerts}</span><br><span class="btn">🔎 Términos<small>terms</small></span> <span class="btn">🚫 Bloqueadas<small>blocked</small></span> <span class="btn">📄 Perfil<small>profile</small></span> <span class="btn">⏸ Pausar<small>pause</small></span> o <span class="btn">▶️ Reanudar<small>resume</small></span></li>
+          <li>Cada botón se contesta con <code>answerCallbackQuery</code> y navega con <code>editMessageText</code> sobre el mismo mensaje.</li>
+          <li><code>terms</code> / <code>blocked</code> muestran la lista separada por “ · ” con <code>list_keyboard(kind)</code>: <span class="btn">➕ Agregar</span> <span class="btn">➖ Quitar</span> <span class="btn">⬅ Volver<small>menu</small></span></li>
+          <li><code>profile</code> lleva a UC03; <code>pause</code> / <code>resume</code> cambian el estado (UC07) y redibujan el panel con el botón contrario.</li>
+        </ol>
+        <dl class="result">
+          <dt>Resultado</dt><dd>Un solo panel que se edita al navegar: no llena el chat de mensajes.</dd>
+          <dt>Extensión</dt><dd>Términos → UC05 · Bloqueadas → UC06.</dd>
+        </dl>
+        <div class="alt">
+          <h4>Flujo alternativo</h4>
+          <ul>
+            <li>Lo pide alguien <code>pending</code> o <code>rejected</code>: no ve el panel; recibe <code>STILL_PENDING</code> o <code>REJECTED</code>.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="uc-card" id="uc05">
+        <header><span class="id">UC05</span><h3>Agregar / quitar términos</h3><span class="tag">«extend» UC04</span></header>
+        <dl>
+          <dt>Actor</dt><dd>Usuario.</dd>
+          <dt>Disparador</dt><dd>En el panel, <span class="btn">🔎 Términos<small>terms</small></span> y después <span class="btn">➕ Agregar<small>terms:add</small></span> o <span class="btn">➖ Quitar<small>terms:remove</small></span>.</dd>
+          <dt>Precondición</dt><dd>Panel abierto (UC04); <code>active</code> o <code>paused</code>.</dd>
+        </dl>
+        <h4>Flujo principal</h4>
+        <ol>
+          <li><code>answerCallbackQuery</code>; <code>users.state = awaiting_terms_add</code> (o <code>awaiting_terms_remove</code>).</li>
+          <li>El panel se edita a <code>ASK_LIST</code> con <code>cancel_keyboard()</code>: <span class="msg">Mandame los términos separados por coma.</span> <span class="btn">✖ Cancelar<small>cancel</small></span></li>
+          <li>El usuario manda, por ejemplo, <span class="msg">django, data engineer</span></li>
+          <li>Se parte por coma, se recorta y se pasa a minúsculas; <code>Users.add_terms</code> (o <code>remove_terms</code>); <code>state</code> vuelve a <code>''</code>.</li>
+          <li>Contesta <code>ADDED</code> <span class="msg">Agregados: {items}. Ahora tenés {count}.</span> o <code>REMOVED</code> <span class="msg">Quitados: {items}. Ahora tenés {count}.</span></li>
+        </ol>
+        <dl class="result"><dt>Resultado</dt><dd>Desde la próxima corrida se busca con estos términos (sus palabras clave) y cada uno tiene su bloque en UC08, con sus ofertas o “No se encontraron coincidencias.”, y su línea en el resumen. Un término quitado deja de buscarse para él.</dd></dl>
+        <div class="alt">
+          <h4>Flujo alternativo</h4>
+          <ul>
+            <li><span class="btn">✖ Cancelar<small>cancel</small></span>: <code>state</code> vuelve a <code>''</code> y el mensaje vuelve al panel sin cambios.</li>
+            <li>Manda un comando en vez de la lista: el estado se cancela y se atiende el comando.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="uc-card" id="uc06">
+        <header><span class="id">UC06</span><h3>Agregar / quitar palabras bloqueadas</h3><span class="tag">«extend» UC04</span></header>
+        <dl>
+          <dt>Actor</dt><dd>Usuario.</dd>
+          <dt>Disparador</dt><dd>En el panel, <span class="btn">🚫 Bloqueadas<small>blocked</small></span> y después <span class="btn">➕ Agregar<small>blocked:add</small></span> o <span class="btn">➖ Quitar<small>blocked:remove</small></span>.</dd>
+          <dt>Precondición</dt><dd>Panel abierto (UC04); <code>active</code> o <code>paused</code>.</dd>
+        </dl>
+        <h4>Flujo principal</h4>
+        <ol>
+          <li><code>answerCallbackQuery</code>; <code>users.state = awaiting_blocked_add</code> (o <code>awaiting_blocked_remove</code>).</li>
+          <li>El panel se edita a <code>ASK_LIST</code> con <code>cancel_keyboard()</code>: <span class="msg">Mandame las palabras separadas por coma.</span> <span class="btn">✖ Cancelar<small>cancel</small></span></li>
+          <li>El usuario manda, por ejemplo, <span class="msg">wordpress, qa</span></li>
+          <li>Se parte por coma, se recorta y se pasa a minúsculas; <code>Users.add_blocked_words</code> (o <code>remove_blocked_words</code>); <code>state</code> vuelve a <code>''</code>.</li>
+          <li>Contesta <code>ADDED</code> o <code>REMOVED</code> con el total.</li>
+        </ol>
+        <dl class="result"><dt>Resultado</dt><dd>En la corrida, si el título en minúsculas contiene una de sus palabras, esa oferta no se le clasifica: no gasta LLM.</dd></dl>
+        <div class="alt">
+          <h4>Flujo alternativo</h4>
+          <ul>
+            <li><span class="btn">✖ Cancelar<small>cancel</small></span>: <code>state</code> vuelve a <code>''</code> y el mensaje vuelve al panel sin cambios.</li>
+            <li>Manda un comando en vez de la lista: el estado se cancela y se atiende el comando.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="uc-card wide" id="uc07">
+        <header><span class="id">UC07</span><h3>Pausar / reanudar alertas</h3><code>/pausa</code><code>/reanudar</code></header>
+        <div class="cols"><div>
+        <dl>
+          <dt>Actor</dt><dd>Usuario.</dd>
+          <dt>Disparador</dt><dd><code>/pausa</code> o <code>/reanudar</code>, o <span class="btn">⏸ Pausar<small>pause</small></span> / <span class="btn">▶️ Reanudar<small>resume</small></span> en el panel.</dd>
+          <dt>Precondición</dt><dd><code>active</code> para pausar; <code>paused</code> para reanudar.</dd>
+        </dl>
+        <h4>Flujo principal</h4>
+        <ol>
+          <li><code>/pausa</code> → <code>Users.set_status(chat_id, paused)</code>.</li>
+          <li>Contesta <code>PAUSED</code>: <span class="msg">⏸ Alertas pausadas. Usá /reanudar cuando quieras volver.</span> Si vino del botón <code>pause</code>, en lugar de eso se redibuja el panel con <span class="btn">▶️ Reanudar</span>.</li>
+          <li>Mientras está <code>paused</code>, <code>Users.active()</code> no lo devuelve: la corrida no busca sus términos ni gasta LLM en él.</li>
+          <li><code>/reanudar</code> → <code>Users.set_status(chat_id, active)</code> y <code>RESUMED</code>: <span class="msg">▶️ Alertas activas de nuevo.</span> Si vino del botón <code>resume</code>, en lugar de eso el panel vuelve a mostrar <span class="btn">⏸ Pausar</span>.</li>
+        </ol>
+        </div><div>
+        <dl class="result"><dt>Resultado</dt><dd>Corta o devuelve las alertas sin perder términos, bloqueadas ni perfil. No hay tanda acumulada: al volver se evalúa lo que los portales muestren en ese momento.</dd></dl>
+        <div class="alt">
+          <h4>Flujo alternativo</h4>
+          <ul>
+            <li>Reanuda sin perfil cargado: queda <code>active</code> pero no recibe nada hasta cargarlo con <code>/perfil</code> (<code>Users.active()</code> pide <code>profile != ''</code>).</li>
+          </ul>
+        </div>
+        </div></div>
+      </article>
+
+      <article class="uc-card wide" id="uc08">
+        <header><span class="id">UC08</span><h3>Recibir ofertas 🟢🟡 por palabra y resumen</h3></header>
+        <div class="cols"><div>
+        <dl>
+          <dt>Actor</dt><dd>Usuario. Lo inicia el sistema: es el final de <code>_run_user</code> en UC09, una vez por usuario.</dd>
+          <dt>Disparador</dt><dd>Terminó de clasificar <em>sus</em> ofertas nuevas de esta corrida.</dd>
+          <dt>Precondición</dt><dd><code>active</code> con perfil y <code>_run_user</code> ya clasificó lo suyo: cada veredicto está en <code>deliveries</code> (<code>Deliveries.add(chat_id, url, light, term)</code>) con <code>sent_at</code> <code>NULL</code>, y sus 🟢🟡 están en <code>groups</code>, por palabra (<code>None</code> = “Otros portales”). Cada grupo arranca con sus pendientes de corridas anteriores (sus filas de <code>Deliveries.pending()</code>, por <code>deliveries.term</code>) y sigue con las recién clasificadas, cada una bajo la palabra que le tocó en UC09. <code>keywords</code> son sus palabras más la de alguna pendiente que ya quitó, en orden alfabético, y <code>started</code> es la hora en que arrancó su <code>_run_user</code>.</dd>
+        </dl>
+        <h4>Flujo principal</h4>
+        <ol>
+          <li><code>_send_by_keyword(telegram, deliveries, chat_id, keywords, groups)</code> recorre <code>keywords</code> en orden alfabético, como están guardadas (en minúsculas): un bloque por palabra, haya traído algo o no.</li>
+          <li>Palabra con 🟢🟡: el encabezado <code>KEYWORD_HEADER</code> con <code>Telegram.send_message(chat_id, header)</code> <span class="msg">Búsqueda palabra "{term}":</span> y debajo un mensaje <code>OFFER</code> por oferta, verdes primero y después amarillas: <code>Telegram.send_offer(chat_id, offer, light)</code> con <code>EMOJIS[light]</code> <span class="msg">{emoji} {title}
+{url}</span> y enseguida <code>Deliveries.mark_sent(chat_id, url)</code>. Estos suenan como cualquier mensaje.</li>
+          <li>Palabra sin 🟢🟡: un solo mensaje, el encabezado y <code>NO_MATCHES</code> en el renglón de abajo, con <code>send_message(chat_id, text, silent=True)</code> → <code>sendMessage</code> con <code>disable_notification: true</code>, que llega sin hacer sonar el celular: <span class="msg">Búsqueda palabra "{term}":
+No se encontraron coincidencias.</span></li>
+          <li>Después de la última palabra, “Otros portales” (las ofertas sin palabra, <code>term</code> <code>None</code>), solo si tiene 🟢🟡: <code>OTHER_PORTALS_HEADER</code> <span class="msg">Otros portales:</span> y sus ofertas, igual que una palabra. Si no trajo nada no se manda: no es una búsqueda del usuario.</li>
+          <li><code>_send_summary(telegram, chat_id, keywords, groups, started)</code>: siempre, un solo mensaje con <code>silent=True</code> (el último del ejemplo).</li>
+          <li><code>PAUSE</code> = 1 s antes de cada mensaje, bloques sin coincidencias y resumen incluidos: <code>send_offer</code> la espera adentro y, antes de los demás, <code>main.py</code> hace <code>time.sleep(PAUSE)</code>. La Bot API pide no pasar de uno por segundo por chat.</li>
+        </ol>
+        <h4>Cómo se arma el resumen</h4>
+        <ul>
+          <li><code>SUMMARY_TITLE</code> <code>"Resumen corrida ({start} - {end}):"</code>, en hora local <code>HH:MM</code>: <code>start</code> es <code>started</code>, cuando arrancó la corrida de ese usuario (el segundo arranca cuando termina el primero); <code>end</code>, cuando sale el resumen.</li>
+          <li>Una línea por palabra, en el mismo orden que los bloques. Con 🟢🟡, <code>SUMMARY_LINE</code> <code>"{term}: {counts}"</code>: las verdes, las amarillas o las dos separadas por “ - ”, con <code>SUMMARY_GREENS</code> (“1 verde encontrado” / “{count} verdes encontrados”) y <code>SUMMARY_YELLOWS</code> (“1 amarillo encontrado” / “{count} amarillos encontrados”); <code>_count_text</code> elige el singular o el plural. Sin ninguna, <code>SUMMARY_EMPTY</code> <code>"{term}: No encontramos coincidencias"</code>.</li>
+          <li>“Otros portales” (<code>OTHER_PORTALS</code>) suma su línea al final solo si trajo 🟢🟡.</li>
+          <li>Una coincidencia es una 🟢🟡 que se le manda en esta corrida bajo esa palabra, pendientes incluidas. Las 🔴 y lo ya visto no cuentan: una palabra con nuevas, pero todas 🔴, queda igual que una que no trajo nada.</li>
+        </ul>
+        </div><div>
+        <h4>Ejemplo: así le llega</h4>
+        <p class="ex-lead">Un usuario con tres palabras (<code>developer</code>, <code>django</code>, <code>python</code>) en la corrida de las 14:00; es el primero, así que la suya arranca a las 14:00. <code>developer</code> no trajo 🟢🟡; “Otros portales” trajo una amarilla.</p>
+        <ol class="chat" aria-label="Mensajes de una corrida, en orden">
+          <li><span class="msg quiet">Búsqueda palabra "developer":
+No se encontraron coincidencias.</span><span class="const">KEYWORD_HEADER + NO_MATCHES · silent=True</span></li>
+          <li><span class="msg head">Búsqueda palabra "django":</span><span class="const">KEYWORD_HEADER</span></li>
+          <li><span class="msg">🟡 Desarrollador/a Django Ssr
+https://www.getonbrd.com/jobs/…</span><span class="const">OFFER</span></li>
+          <li><span class="msg">🟡 Programador/a Python-Django
+https://www.linkedin.com/jobs/view/…</span><span class="const">OFFER</span></li>
+          <li><span class="msg head">Búsqueda palabra "python":</span><span class="const">KEYWORD_HEADER</span></li>
+          <li><span class="msg">🟢 Python Engineer · remoto LATAM
+https://www.linkedin.com/jobs/view/…</span><span class="const">OFFER</span></li>
+          <li><span class="msg">🟡 Ingeniero/a Python para automatización
+https://www.getonbrd.com/jobs/…</span><span class="const">OFFER</span></li>
+          <li><span class="msg head">Otros portales:</span><span class="const">OTHER_PORTALS_HEADER</span></li>
+          <li><span class="msg">🟡 Data Engineer Jr
+https://www.bumeran.com.ar/empleos/…</span><span class="const">OFFER</span></li>
+          <li><span class="msg quiet">Resumen corrida (14:00 - 14:23):
+developer: No encontramos coincidencias
+django: 2 amarillos encontrados
+python: 1 verde encontrado - 1 amarillo encontrado
+Otros portales: 1 amarillo encontrado</span><span class="const">SUMMARY_* · silent=True</span></li>
+        </ol>
+        <p class="ex-note">Diez mensajes, cada uno con su <code>PAUSE</code> de 1 s antes. Los de borde punteado, el bloque sin coincidencias y el resumen, llegan sin sonido; el resto, con notificación normal.</p>
+        <dl class="result"><dt>Resultado</dt><dd>Cada palabra tiene su bloque, en orden: con sus ofertas, cada una en su mensaje y ninguna dos veces (PK <code>chat_id, url</code>), o con “No se encontraron coincidencias.” sin sonido. Las 🔴 quedan en <code>deliveries</code> y no se mandan. El resumen llega siempre y no suena: dice que la corrida anduvo, cuándo empezó y terminó la suya y qué rindió cada palabra.</dd></dl>
+        <div class="alt">
+          <h4>Flujo alternativo</h4>
+          <ul>
+            <li>Ninguna palabra trajo 🟢🟡 ni hay pendientes de antes: un bloque “No se encontraron coincidencias.” por palabra, sin “Otros portales”, y el resumen con todas en “No encontramos coincidencias”. Todo sin sonido: con las 22 palabras de la semilla son 23 mensajes que no suenan.</li>
+            <li>Una pendiente de una palabra que ya quitó: esa palabra entra en <code>keywords</code>, en su lugar alfabético, con su bloque y su línea en el resumen.</li>
+            <li>Una palabra cuya única 🟢🟡 es una pendiente de antes: lleva su encabezado con esa oferta y su línea la cuenta, porque se le manda en esta corrida.</li>
+            <li>Telegram contesta 403 (bloqueó el bot): el <code>Driver</code> lanza <code>LabubotForbiddenError</code>, <code>_run_user</code> lo atrapa y hace <code>Users.set_status(chat_id, blocked)</code>; no se le manda nada más (ni los bloques que faltaban ni el resumen) y la corrida sigue con el próximo usuario. Lo que no llegó queda con <code>sent_at</code> <code>NULL</code> y le llega con su grupo si vuelve con <code>/start</code>.</li>
+            <li>Otro error al mandar (un 429 de Telegram, la red): la corrida se corta y <code>daemon.run</code> lo loguea; lo que no salió queda con <code>sent_at</code> <code>NULL</code> y la próxima corrida lo manda dentro de su grupo, por <code>deliveries.term</code>.</li>
+          </ul>
+        </div>
+        </div></div>
+      </article>
+
+      <article class="uc-card wide" id="uc09">
+        <header><span class="id">UC09</span><h3>Ejecutar corrida horaria</h3><span class="tag">un usuario tras otro</span></header>
+        <div class="cols"><div>
+        <dl>
+          <dt>Actor</dt><dd>Reloj / Scheduler: <code>daemon.py</code> con <code>schedule.every().hour.do(run)</code>.</dd>
+          <dt>Disparador</dt><dd>Al arrancar el worker y después cada hora.</dd>
+          <dt>Precondición</dt><dd>El worker está corriendo y <code>labubot.db</code> existe (<code>migrate.py</code>).</dd>
+        </dl>
+        <h4>Flujo principal</h4>
+        <ol>
+          <li><code>main()</code> anota la hora de arranque (<code>started</code>, para el nombre del <code>.json</code> y el <code>.csv</code>), abre <code>connect(settings.db_path)</code> y arma el <code>Driver</code>, los 11 portales en un <code>dict</code> por nombre de clase y una caché vacía: <code>searches: dict[tuple[str, str], dict[str, str]] = {}</code>, de <code>(nombre de la clase del portal, palabra)</code> a <code>{url: título}</code>. Vive en memoria y solo dura esta corrida.</li>
+          <li>Recorre <code>Users.active()</code> por orden de alta y llama a <code>_run_user(conn, telegram, portals, searches, user)</code> con cada usuario, de a uno y sin hilos. Cada uno anota a qué hora arranca la suya (<code>started</code>, el <code>{start}</code> de su resumen en UC08) y corre su búsqueda completa con <em>sus</em> palabras clave (<code>Users.terms</code>, orden alfabético), <em>sus</em> bloqueadas y <em>su</em> perfil.</li>
+          <li><strong>«include» Buscar en portales</strong>: <code>_search_user(portals, searches, terms) -&gt; dict[str, Found]</code>. LinkedIn, Computrabajo, GetOnBoard, Himalayas, Talent, Indeed y Workable, palabra por palabra; Bumeran, EmpleosIT, Jobicy y WeWorkRemotely, sin búsqueda y una sola vez por corrida, con clave <code>(portal, "")</code>. Si un usuario anterior ya pidió ese <code>(portal, palabra)</code> en esta corrida, se reusa sin pedir.</li>
+          <li>Palabra de cada oferta (<code>Found</code>, TypedDict de <code>src/schemas/job.py</code>: <code>title</code>, <code>term</code>, <code>portal</code>): en los portales con búsqueda, la primera palabra del usuario, en orden alfabético, cuya búsqueda la trajo; en los sin búsqueda, la primera contenida en el título en minúsculas (<code>_word_in_title</code>) o, si ninguna, “Otros portales” (<code>term = None</code>). Cada url aparece una sola vez por usuario.</li>
+          <li>Sus pendientes de corridas anteriores (<code>Deliveries.pending()</code>, las filas de su <code>chat_id</code>) arrancan cada grupo según su <code>term</code>.</li>
+          <li>Por url se saltea, sin bajar nada, lo que ya tiene delivery para él (<code>Deliveries.exists</code>) y lo que tiene una de <em>sus</em> palabras bloqueadas en el título (<code>_word_in_title</code>): no gasta LLM.</li>
+          <li>Descripción una sola vez para siempre: <code>Offers.get(url)</code> o, si no está, <code>description(url)</code> de la instancia que la encontró (<code>Found.portal</code>) + <code>Offers.add</code>. Vacía, se guarda igual (no se vuelve a pedir) y se saltea.</li>
+          <li><strong>«include» Clasificar con OpenAI</strong>: <code>Classifier(user["profile"])</code>, de a una oferta; cada veredicto va a <code>Deliveries.add(chat_id, url, light, term)</code> con commit inmediato y, si no es 🔴, a su grupo. Clasifica todo lo del usuario y recién después manda: el primer mensaje le llega ~35 s después.</li>
+          <li><strong>«include» UC08</strong>: con <code>keywords</code> (sus palabras más la de alguna pendiente que ya quitó, en orden alfabético), <code>_send_by_keyword(telegram, deliveries, chat_id, keywords, groups)</code>, un bloque por palabra, y <code>_send_summary(telegram, chat_id, keywords, groups, started)</code>, el resumen sin sonido; un 403 en cualquiera de los dos lo atrapa <code>_run_user</code>. Recién ahí pasa al usuario siguiente, que arranca su <code>started</code> en ese momento.</li>
+          <li>Con todos hechos, <code>_save_results(rows, started)</code>: <code>resultados/AAAA-MM-DD_HHMM.json</code> con cada oferta clasificada una sola vez, sumada entre usuarios, y <code>.csv</code> con <code>chat_id, term, light, title, url</code> de todo lo clasificado.</li>
+        </ol>
+        </div><div>
+        <h4>Ejemplo: la caché con dos usuarios</h4>
+        <p class="ex-lead">El 1 se dio de alta antes, así que corre primero. Los dos tienen <code>python</code>.</p>
+        <div class="mini-wrap">
+          <table class="mini">
+            <thead><tr><th scope="col">Clave en <code>searches</code></th><th scope="col">Usuario 1</th><th scope="col">Usuario 2</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>("LinkedIn", "python")</code></th><td class="hit">la pide</td><td class="cache">caché, 0 pedidos</td></tr>
+              <tr><th scope="row"><code>("LinkedIn", "fastapi")</code></th><td class="hit">la pide</td><td class="none">no es suya</td></tr>
+              <tr><th scope="row"><code>("LinkedIn", "django")</code></th><td class="none">no es suya</td><td class="hit">la pide</td></tr>
+              <tr><th scope="row"><code>("Bumeran", "")</code></th><td class="hit">la pide</td><td class="cache">caché, 0 pedidos</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="ex-note">Igual con los otros seis portales con búsqueda y los otros tres sin búsqueda. Las descripciones que bajó el 1 tampoco se piden para el 2 (están en <code>offers</code>), pero cada uno clasifica contra su perfil: el LLM sí se paga por usuario.</p>
+        <dl class="result">
+          <dt>Resultado</dt><dd>A cada usuario le llegan solo ofertas de <em>sus</em> palabras, más las de los portales sin búsqueda, evaluadas contra <em>su</em> perfil. El primero paga el scraping (10 a 25 min según los logs del 28/10) y los siguientes sacan casi todo de la caché; cada usuario suma ~50 llamadas al LLM por corrida. Con hasta 5 usuarios de palabras parecidas (al aprobarlo se le siembran las mismas 22) son ~15 a 30 min: entra en la hora. El orden es el de alta: el admin siempre recibe primero.</dd>
+          <dt>Sin hilos</dt><dd>En paralelo serían hasta 5 búsquedas a la vez a LinkedIn desde la misma IP, que hoy ya contesta 429 en el 11 % a 18 % de los pedidos con una sola.</dd>
+          <dt>Riesgo</dt><dd>Indeed y Workable dejan el <code>OR</code> de todos los términos, que no deja saber qué palabra trajo cada oferta: suman hasta 22 pedidos más por portal y corrida, acotados por la caché. Si empiezan a dar 429, se vuelve al <code>OR</code> y la palabra se atribuye por título, como en los portales sin búsqueda.</dd>
+        </dl>
+        <div class="alt">
+          <h4>Flujo alternativo</h4>
+          <ul>
+            <li>Sin usuarios activos: termina sin scrapear.</li>
+            <li>Un usuario contesta 403 al mandarle (UC08): pasa a <code>blocked</code> y la corrida sigue con el próximo. Sus filas del <code>.csv</code> quedan: sus clasificaciones de esta corrida ya se pagaron.</li>
+            <li>Un portal falla (429 o red): no corta nada. La búsqueda queda “cortada” en el log con lo que alcanzó a traer, y una descripción que no vino se guarda vacía y se saltea, como hoy.</li>
+            <li>Usuario nuevo: su primera corrida clasifica todo lo de las últimas 24 h (~445 llamadas, ~3,5 a 5 min de LLM), que esperan los que vienen después.</li>
+            <li>Palabras muy distintas entre usuarios: son varios scrapings casi enteros y la corrida puede pasar de la hora. <code>schedule</code> cuenta la hora desde que termina, así que no se enciman: la siguiente arranca más tarde.</li>
+            <li>La corrida se corta (un 429 de Telegram, un error de OpenAI o de red al hablar con Telegram u OpenAI): <code>daemon.run</code> lo deja en <code>logs/app.log</code>; lo clasificado ya quedó en la base y no se vuelve a pagar, pero no se escriben el <code>.json</code> ni el <code>.csv</code> de esa corrida. Los usuarios que no llegaron a correr esperan a la próxima hora, con la caché vacía otra vez.</li>
+          </ul>
+        </div>
+        </div></div>
+      </article>
+
+      <article class="uc-card" id="uc10">
+        <header><span class="id">UC10</span><h3>Listar usuarios</h3><code>/usuarios</code></header>
+        <dl>
+          <dt>Actor</dt><dd>Admin.</dd>
+          <dt>Disparador</dt><dd><code>/usuarios</code>: solo aparece en su menú (<code>setMyCommands</code> con <code>BotCommandScopeChat</code> del admin).</dd>
+          <dt>Precondición</dt><dd><code>chat_id == ADMIN_CHAT_ID</code>.</dd>
+        </dl>
+        <h4>Flujo principal</h4>
+        <ol>
+          <li><code>Users.all()</code> trae a todos.</li>
+          <li>Arma <code>USERS_HEADER</code> y una <code>USER_LINE</code> por usuario: <code>first_name</code> y <code>@username</code> arriba, el estado en castellano (<code>STATUS_LABELS</code>) y el <code>chat_id</code> abajo.</li>
+          <li>La manda con <code>sendMessage</code>.</li>
+        </ol>
+        <dl class="result"><dt>Resultado</dt><dd>El admin ve quién está <code>pending</code>, <code>active</code>, <code>paused</code>, <code>rejected</code> o <code>blocked</code>.</dd></dl>
+        <div class="alt">
+          <h4>Flujo alternativo</h4>
+          <ul>
+            <li>Lo escribe otro usuario: para él no es un comando y recibe <code>UNKNOWN</code> <span class="msg">No entendí. Usá /settings para ver tu configuración o /ayuda.</span></li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="uc-card f2" id="uc11">
+        <header><span class="id">UC11</span><h3>Buscar ahora</h3><code>/buscar</code><span class="tag">Fase 2</span></header>
+        <dl>
+          <dt>Actor</dt><dd>Usuario.</dd>
+          <dt>Disparador</dt><dd><code>/buscar</code>.</dd>
+          <dt>Precondición</dt><dd>Fase 2 desplegada (F5 en <a href="tareas.md">tareas.md</a>): Huey con <code>SqliteHuey</code> en lugar de <code>schedule</code>, dentro de <code>daemon.py</code>. Usuario <code>active</code> con perfil.</dd>
+        </dl>
+        <h4>Flujo principal</h4>
+        <ol>
+          <li>El webhook encola <code>run_for(chat_id)</code> (de <code>daemon</code>), le avisa que quedó encolada y contesta 200 enseguida.</li>
+          <li>El único worker de Huey la toma cuando termina lo que esté corriendo: serializa porque dos scrapes a la vez son más 429 de LinkedIn.</li>
+          <li>Corre <code>main([chat_id])</code>: el mismo loop de UC09 (<code>_run_user</code>) solo para él, con <code>searches</code> vacía. Repite el scraping entero de sus palabras: 10 a 25 min con las 22 de la semilla.</li>
+          <li>Le llegan sus bloques por palabra y el resumen sin sonido, como en UC08.</li>
+        </ol>
+        <dl class="result"><dt>Resultado</dt><dd>No tiene que esperar a la próxima hora.</dd></dl>
+        <div class="alt">
+          <h4>Flujo alternativo</h4>
+          <ul>
+            <li>Hay una corrida en curso (la horaria u otro <code>/buscar</code>): la suya queda en cola detrás.</li>
+          </ul>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <footer>Nombres, comandos, botones, estados y textos según el contrato de diseño de labubot multiusuario (octubre 2026), con los cambios del 31/10 (corrida por usuario con caché y envío por palabra clave) y el formato de los mensajes del 1/11: un bloque por palabra, con sus ofertas o “No se encontraron coincidencias.” sin sonido, y siempre el resumen, también sin sonido. El resto del diseño está en los demás documentos de <code>docs/telegram/</code>.</footer>
+</div>
+<script>
+  (function () {
+    var links = document.querySelectorAll(".theme a");
+    function paint() {
+      var current = document.documentElement.getAttribute("data-theme") || "";
+      links.forEach(function (a) { a.setAttribute("aria-current", a.getAttribute("data-t") === current ? "true" : "false"); });
+    }
+    links.forEach(function (a) {
+      a.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        var t = a.getAttribute("data-t");
+        if (t) document.documentElement.setAttribute("data-theme", t);
+        else document.documentElement.removeAttribute("data-theme");
+        history.replaceState(null, "", t ? "#" + t : location.pathname + location.search);
+        paint();
+      });
+    });
+    paint();
+  })();
+</script>
+</body>
+</html>
