@@ -57,8 +57,8 @@ búsqueda por usuario activo, uno tras otro, con una caché de búsquedas en mem
 - `src/config/settings.py` el `.env` y el log. Los términos y las bloqueadas son
   de cada usuario y viven en `labubot.db`: no hay listas de búsqueda en el código.
 - En la raíz, además: `migrate.py` (se corre una vez) y `set_webhook.py` (una vez
-  por deploy). `deploy/` tiene las unidades systemd (api, worker y el túnel
-  ngrok), `ngrok.yml`, el Caddyfile alternativo y la rotación de logs.
+  por deploy). La configuración del servidor (systemd, ngrok, logrotate) está en
+  `docs/telegram/despliegue.md`.
 
 **Solo HTTP.** Nada de Playwright, Selenium ni navegador headless.
 

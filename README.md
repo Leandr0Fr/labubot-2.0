@@ -221,7 +221,6 @@ daemon.py                   worker: corre main() al arrancar y después cada hor
 api.py                      FastAPI: monta el webhook de Telegram
 migrate.py                  una vez: crea labubot.db desde la versión de un chat (perfil.md, vistas.txt y sus listas)
 set_webhook.py              una vez por deploy: registra el webhook y el menú de comandos
-deploy/                     unidades de systemd (api, worker y túnel ngrok), ngrok.yml, Caddyfile y logrotate
 src/
   config/
     settings.py             .env (pydantic-settings) y el log en logs/app.log
@@ -310,7 +309,7 @@ alcanza. El paso a paso está en
   (`<nombre>.ngrok-free.dev`): Telegram solo llama a un webhook por HTTPS, y así
   no hace falta comprar un dominio ni abrir puertos. uvicorn escucha solo en
   `127.0.0.1:8000`. Con dominio propio, la alternativa es Caddy con HTTPS
-  automático (`deploy/Caddyfile`).
+  automático.
 - **systemd** levanta `labubot-api`, `labubot-worker` y `labubot-ngrok` y los
   reinicia si se caen.
 - **Python 3.14**, como en la PC (en Ubuntu, con `uv python install 3.14`).

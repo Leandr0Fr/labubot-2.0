@@ -2,8 +2,9 @@
 
 El paso a paso para dejar labubot corriendo en un VPS Ubuntu 24.04 con el webhook
 de Telegram detrás de un túnel de **ngrok** con dominio fijo y gratis. No hace
-falta comprar un dominio ni abrir puertos. Los archivos que se copian al servidor
-están en [`deploy/`](../../deploy/).
+falta comprar un dominio ni abrir puertos. Los archivos de configuración del
+servidor (las unidades de systemd, el túnel y la rotación de logs) se crean en
+cada paso, con el contenido que está acá.
 
 ```text
 Telegram ──HTTPS──▶ ngrok (<nombre>.ngrok-free.dev) ──▶ labubot-ngrok ──▶ uvicorn 127.0.0.1:8000 (labubot-api)
@@ -118,10 +119,46 @@ Comprobá: `sqlite3 labubot.db "SELECT status, length(profile) FROM users"` →
 ## 5. api y worker
 
 ```bash
-sudo cp deploy/labubot-api.service deploy/labubot-worker.service /etc/systemd/system/
+sudo tee /etc/systemd/system/labubot-api.service >/dev/null <<'EOF'
+[Unit]
+Description=labubot api: webhook de Telegram
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=labubot
+WorkingDirectory=/home/labubot/labubot
+ExecStart=/home/labubot/labubot/.venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo tee /etc/systemd/system/labubot-worker.service >/dev/null <<'EOF'
+[Unit]
+Description=labubot worker: corrida horaria
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=labubot
+WorkingDirectory=/home/labubot/labubot
+ExecStart=/home/labubot/labubot/.venv/bin/python daemon.py
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 sudo systemctl daemon-reload
 sudo systemctl enable --now labubot-api
 ```
+
+`WorkingDirectory` importa: `labubot.db`, `logs/` y `resultados/` van por ruta
+relativa.
 
 Comprobá: `systemctl is-active labubot-api` → `active`;
 `sudo ss -tlnp | grep 8000` → solo `127.0.0.1:8000`;
@@ -137,11 +174,35 @@ curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/tru
 echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" | sudo tee /etc/apt/sources.list.d/ngrok.list
 sudo apt update && sudo apt install -y ngrok
 
-mkdir -p ~/.config/ngrok && cp deploy/ngrok.yml ~/.config/ngrok/ngrok.yml
+mkdir -p ~/.config/ngrok
+tee ~/.config/ngrok/ngrok.yml >/dev/null <<'EOF'
+version: 3
+agent:
+  authtoken: <AUTHTOKEN>
+endpoints:
+  - name: labubot
+    url: https://<nombre>.ngrok-free.dev
+    upstream:
+      url: http://127.0.0.1:8000
+EOF
 chmod 600 ~/.config/ngrok/ngrok.yml && nano ~/.config/ngrok/ngrok.yml   # authtoken y dominio
 ngrok config check --config ~/.config/ngrok/ngrok.yml
 
-sudo cp deploy/labubot-ngrok.service /etc/systemd/system/
+sudo tee /etc/systemd/system/labubot-ngrok.service >/dev/null <<'EOF'
+[Unit]
+Description=labubot túnel: ngrok con el dominio fijo hacia la api
+After=network-online.target labubot-api.service
+Wants=network-online.target
+
+[Service]
+User=labubot
+ExecStart=ngrok start --all --config /home/labubot/.config/ngrok/ngrok.yml --log stdout
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
 sudo systemctl daemon-reload && sudo systemctl enable --now labubot-ngrok
 ```
 
@@ -193,7 +254,18 @@ de contraseñas, no con los backups: la base tiene los CV de los usuarios.
 Rotación semanal de `app.log`:
 
 ```bash
-sudo cp deploy/logrotate.conf /etc/logrotate.d/labubot
+# copytruncate: los dos procesos tienen app.log abierto.
+sudo tee /etc/logrotate.d/labubot >/dev/null <<'EOF'
+/home/labubot/labubot/logs/app.log {
+	weekly
+	rotate 8
+	compress
+	missingok
+	notifempty
+	copytruncate
+	su labubot labubot
+}
+EOF
 sudo logrotate -f /etc/logrotate.d/labubot   # aparece logs/app.log.1.gz
 ```
 
@@ -253,8 +325,18 @@ tercero para el tráfico.
 1. Registro `A` del dominio → IP del VPS (en Cloudflare, sin proxy).
 2. `sudo ufw allow 80,443/tcp`.
 3. Caddy desde su repo apt oficial (caddyserver.com/docs/install; el de Ubuntu es viejo).
-4. Editar el dominio en [`deploy/Caddyfile`](../../deploy/Caddyfile),
-   `sudo cp deploy/Caddyfile /etc/caddy/Caddyfile` y `sudo systemctl reload caddy`.
-   Solo pasa `/telegram/webhook`; el resto contesta 404.
+4. `/etc/caddy/Caddyfile`, con tu dominio, y `sudo systemctl reload caddy`. Solo
+   pasa `/telegram/webhook`; el resto contesta 404:
+
+   ```caddy
+   labubot.duckdns.org {
+   	handle /telegram/webhook {
+   		reverse_proxy 127.0.0.1:8000
+   	}
+   	handle {
+   		respond 404
+   	}
+   }
+   ```
 5. `WEBHOOK_URL=https://<dominio>/telegram/webhook`, sin `labubot-ngrok`, y
    `set_webhook.py` como en el paso 7.
