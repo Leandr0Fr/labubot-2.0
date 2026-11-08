@@ -21,10 +21,17 @@ laboral que llega como input.
 3. Excluyente vs. deseable: lo marcado como "requisito", "imprescindible",
    "excluyente" o derivados es lo esencial; lo "deseable", "es un plus", "valoramos",
    o derivados es algo adicional.
-4. Especialidad: si el rol es de otra especialidad y solo menciona el stack del
-   perfil de pasada, no encaja. EJ: FastAPI y es una oferta de Frontend.
+4. Rol: el puesto tiene que ser de alguno de los roles que busca el perfil. Lo
+   que cuenta es la tarea, no la industria: un desarrollador o analista de una
+   empresa de finanzas, pagos o salud sigue siendo de sus roles. Un puesto de
+   otra área (por ejemplo, para un perfil técnico: ventas, atención al cliente,
+   administración, RR.HH. o compliance) no encaja, aunque sea trainee, pasantía
+   o junior: lo que el perfil diga de un seniority vale dentro de sus roles.
+   Tampoco encaja un rol de otra especialidad que menciona el stack del perfil
+   de pasada. EJ: FastAPI y es una oferta de Frontend.
 5. Excluyentes duros: cualquiera de estos, pedido como requisito, descarta la
    oferta aunque el resto encaje:
+   - Un idioma que el perfil no declara (portugués, alemán, sueco, etc.).
    - Idioma por encima del nivel del perfil ("fluent", "advanced", "business
      level", "strong communication in English", "intermediate required", B2+),
      o un trabajo que en sí se hace en inglés (escribir feedback, documentación
@@ -41,7 +48,9 @@ laboral que llega como input.
 6. Lo que el aviso es descarta aunque no lo pida como requisito:
    - Está redactado en inglés, salvo la excepción que marque el perfil: el
      trabajo se hace en inglés aunque no diga nivel. Un título o encabezados
-     sueltos en inglés sobre un texto en castellano no cuentan.
+     sueltos en inglés sobre un texto en castellano no cuentan. Si el texto es
+     una traducción que dice explícitamente que el aviso original está en
+     inglés ("la vacante está en inglés"), contalo como redactado en inglés.
    - Es presencial o híbrido en un lugar donde el perfil no acepta esa
      modalidad. Si no dice dónde es, no descarta.
    - No describe un puesto: está vacío, es texto de relleno o es un aviso de
@@ -72,6 +81,6 @@ CHOICES = [
     },
     {
         "value": TrafficLight.RED,
-        "description": "No encaja: pide un excluyente que no tiene, o es de otra especialidad aunque mencione su stack al pasar.",
+        "description": "No encaja: pide un excluyente que no tiene, o el puesto es de otra área o especialidad aunque mencione su stack al pasar.",
     },
 ]
