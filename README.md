@@ -97,11 +97,14 @@ llegan ofertas.
 
 | Comando | Qué hace |
 |---|---|
-| `/start` | Pide acceso, o reactiva el bot si lo había bloqueado |
+| `/start` | Pide acceso; si ya tiene acceso y CV, arranca una búsqueda para él (o lo reactiva si había bloqueado el bot) |
 | `/settings` | Panel con sus palabras clave, sus bloqueadas, su perfil y la pausa |
-| `/perfil` | Carga o reemplaza su CV |
+| `/perfil` | Muestra su CV actual y le pide uno nuevo para reemplazarlo |
+| `/permitido python, django` | Suma términos de búsqueda sin pasar por `/settings` |
+| `/bloquear php, wordpress` | Suma palabras bloqueadas sin pasar por `/settings` |
 | `/template` | Manda una plantilla en Markdown para armar el CV, con las secciones que más pesan al clasificar |
 | `/pausa` · `/reanudar` | Deja de recibir ofertas, o vuelve a recibirlas |
+| `/clear` | Borra los mensajes del chat de las últimas 48 h (Telegram no deja borrar los más viejos) |
 | `/ayuda` | Qué hace el bot y cómo usarlo |
 | `/usuarios` | Solo el admin: todos los usuarios, con su estado y su `chat_id` |
 
@@ -206,7 +209,11 @@ y una corrida por hora no hacen falta.
 - **api** (`api.py`, FastAPI): recibe lo que los usuarios escriben. Telegram lo
   manda por webhook y el endpoint valida el secreto
   (`X-Telegram-Bot-Api-Secret-Token`).
-- **worker** (`daemon.py`): corre `main()` al arrancar y después cada hora.
+- **worker** (`daemon.py`): corre la búsqueda de cada usuario en su propio hilo, al
+  arrancar, cada hora y cada vez que alguien manda `/start` (el webhook anota el
+  pedido en `search_requests` y el worker lo toma a los pocos segundos). Cada usuario
+  va a su ritmo, sin esperar a los demás; el mismo usuario nunca corre dos veces a la
+  vez.
 
 Telegram se maneja a mano, sin `python-telegram-bot` ni `aiogram`, porque traen
 su propio cliente HTTP. FastAPI solo recibe: todo lo que sale hacia la Bot API
@@ -217,7 +224,7 @@ leer lo que vuelve.
 
 ```
 main.py                     la corrida: usuario por usuario
-daemon.py                   worker: corre main() al arrancar y después cada hora
+daemon.py                   worker: un hilo por usuario, al arrancar, cada hora y con cada /start
 api.py                      FastAPI: monta el webhook de Telegram
 migrate.py                  una vez: crea labubot.db desde la versión de un chat (perfil.md, vistas.txt y sus listas)
 set_webhook.py              una vez por deploy: registra el webhook y el menú de comandos
@@ -341,8 +348,8 @@ python set_webhook.py    # registra el webhook y el menú de comandos en Telegra
 Para el bot:
 
 1. Hablale a [@BotFather](https://t.me/BotFather), `/newbot`, y el token que te
-   da va en `TELEGRAM_TOKEN`. Con `/setuserpic` le cargás el logo
-   (`docs/telegram/logo/labubot-640.png`).
+   da va en `TELEGRAM_TOKEN`. Con `/setname` y `/setuserpic` le ponés el nombre
+   y el logo (`docs/telegram/logo/labubot-640.png`); el bot real ya los tiene.
 2. Tu `chat_id` va en `ADMIN_CHAT_ID`: sos quien aprueba las altas. Mandale un
    mensaje al bot y buscalo en `https://api.telegram.org/bot<token>/getUpdates`
    (con el webhook apagado; si no, Telegram contesta 409).

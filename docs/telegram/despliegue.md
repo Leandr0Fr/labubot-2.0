@@ -12,9 +12,9 @@ Telegram ──HTTPS──▶ ngrok (<nombre>.ngrok-free.dev) ──▶ labubot-
                                        labubot-worker (daemon.py, cada hora) ──┴──▶ labubot.db (WAL)
 ```
 
-Son tres servicios systemd: `labubot-api` (el webhook), `labubot-worker` (la
-corrida horaria) y `labubot-ngrok` (el túnel). La api y el worker comparten
-`labubot.db`.
+Son tres servicios systemd: `labubot-api` (el webhook), `labubot-worker` (las
+corridas: cada hora y cuando alguien manda `/start`) y `labubot-ngrok` (el
+túnel). La api y el worker comparten `labubot.db`.
 
 **Por qué ngrok.** El plan gratis da un dominio fijo por cuenta
 (`<nombre>.ngrok-free.dev`, o `.ngrok-free.app` en cuentas viejas): `set_webhook.py`
@@ -138,7 +138,7 @@ EOF
 
 sudo tee /etc/systemd/system/labubot-worker.service >/dev/null <<'EOF'
 [Unit]
-Description=labubot worker: corrida horaria
+Description=labubot worker: corridas cada hora y con /start
 After=network-online.target
 Wants=network-online.target
 
@@ -280,8 +280,9 @@ Dónde mirar:
 
 ## 10. Avatar
 
-Una sola vez, en @BotFather: `/setuserpic`, elegir el bot real y mandar
-[`logo/labubot-640.png`](logo/labubot-640.png) como foto.
+Ya está hecho: el nombre y la foto quedan en Telegram, no en el servidor, así que
+mudarse al VPS no los cambia. Si hiciera falta de nuevo: @BotFather → `/setuserpic`
+→ [`logo/labubot-640.png`](logo/labubot-640.png) como foto.
 
 ## 11. Prueba de reinicio
 

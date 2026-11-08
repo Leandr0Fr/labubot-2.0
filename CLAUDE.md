@@ -22,8 +22,10 @@ puro y las evalúa con un LLM contra el perfil de cada usuario del bot.
 ## Arquitectura
 
 Dos procesos sobre `labubot.db` (SQLite en modo WAL): `api.py` recibe a Telegram
-por webhook (FastAPI + uvicorn) y `daemon.py` corre `main()` cada hora: una
-búsqueda por usuario activo, uno tras otro, con una caché de búsquedas en memoria.
+por webhook (FastAPI + uvicorn) y `daemon.py` corre `main(chat_id)` de cada usuario
+activo en su propio hilo, al arrancar y cada hora. Un `/start` anota un pedido en
+`search_requests` y el worker lanza el hilo de ese usuario. `python main.py` sin
+argumentos corre a todos uno tras otro, con una caché de búsquedas en memoria.
 
 - `src/driver/` es el ÚNICO que toca httpx. `Driver.get()` y `Driver.post_json()`
   reciben una URL y devuelven lo que vuelve (429, 403 y otros errores como
@@ -47,7 +49,8 @@ búsqueda por usuario activo, uno tras otro, con una caché de búsquedas en mem
   url) y `Deliveries` (qué se evaluó y se mandó a cada usuario, y con qué palabra).
 - `src/schemas/` los TypedDicts del dominio (`Offer`, `Found`, `User`) y del
   Update de Telegram, sin lógica.
-- `src/enums/` `TrafficLight`, `UserStatus` y `ChatState`.
+- `src/enums/` `TrafficLight`, `UserStatus`, `ChatState`, `Command` (los comandos) y
+  `Callback` (el `callback_data` de los botones): nada de strings sueltos en los `case`.
 - `src/exceptions/` `LabubotError` y sus hijas: `LabubotRequestError`,
   `LabubotRateLimitError` (429) y `LabubotForbiddenError` (403; en Telegram, el
   usuario bloqueó el bot).

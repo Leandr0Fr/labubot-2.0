@@ -87,11 +87,16 @@ Lucía es una usuaria ficticia. Las pantallas usan el tema oscuro de Android.
 
 ![Logo de labubot](logo/labubot-512.png)
 
-labubot = «laburo» + «bot». La elegida es la **C, «b» con semáforo**: el asta de
-la «b» es un semáforo en rojo, amarillo y verde, los colores con los que el bot
-pinta cada oferta. Es la que mejor se lee a 40 px recortada en círculo, que es
-como Telegram muestra el avatar. Las otras dos (un bot con lupa y un maletín con
-cara de bot) están en [`logo/index.html`](logo/index.html). Se carga una vez con
+labubot = «laburo» + «bot». El logo es la **D, un robot con casco de obra** (pedido
+del usuario el 07/11): casco amarillo, ojos verdes como el 🟢 de las ofertas que
+encajan y orejas rojas, sobre azul pizarra para que el círculo se despegue del modo
+oscuro de Telegram. Salió de un concurso de tres variantes juzgadas a 640 px y a
+40 px recortadas en círculo, que es como Telegram muestra el avatar. La anterior,
+la **C, «b» con semáforo**, quedó en [`logo/propuesta-c.svg`](logo/propuesta-c.svg),
+y las primeras tres propuestas en [`logo/index.html`](logo/index.html).
+
+Está cargado en el bot real (`@fr_labu_bot`), con el nombre "labubot", por la Bot
+API (`setMyProfilePhoto`, con la foto en JPG, y `setMyName`). También se puede con
 @BotFather → `/setuserpic` → [`logo/labubot-640.png`](logo/labubot-640.png).
 
 ## Base de datos
@@ -123,6 +128,11 @@ Lo que el código hace distinto de `diseno.md` y `tareas.md`, o que esos documen
 | I14 | Sin `src/config/search.py` ni `Users.seed_defaults` (pedido del usuario, 07/11): los usuarios nuevos arrancan con términos y bloqueadas vacíos y `APPROVED` les pide cargarlos en `/settings`. Las 22 y 32 de la versión de un chat viven en `migrate.py` (`ADMIN_TERMS`, `ADMIN_BLOCKED_WORDS`), que se las carga al admin | Son configuración de cada usuario: no corresponde una lista en el código |
 | I15 | Revisión KISS (pedido del usuario, 07/11): `Classifier.classify(offer)` devuelve el color de una oferta (sin lista ni dict por url); `Telegram.send_message` no devuelve el `message_id` (nadie lo usaba); `ASK_TERMS` y `ASK_BLOCKED` son los textos completos (sin `ASK_LIST`); el resumen usa `SUMMARY_GREEN`/`SUMMARY_GREENS` y `SUMMARY_YELLOW`/`SUMMARY_YELLOWS` (sin tuplas ni `_count_text`); `portals` es un dict literal; "Otros portales" se decide una vez, en `keywords`; sin `src/telegram/__init__.py`, sin el TypedDict `Update` (no se usaba) y sin try/finally en `migrate.py` y `set_webhook.py`, que corren una vez | Menos código y nada que haya que descifrar; el comportamiento es el mismo |
 | I16 | Segunda revisión (pedido del usuario, 07/11): `connect()` y `Telegram.set_webhook()` leen `DB_PATH`, `WEBHOOK_URL` y `WEBHOOK_SECRET` de settings, sin parámetros; sin las columnas `users.approved_at` y `offers.fetched_at`, que se escribían y nadie leía (en una base ya creada, `ALTER TABLE users DROP COLUMN approved_at` y `ALTER TABLE offers DROP COLUMN fetched_at`; `bdd.html` todavía las dibuja); `on_callback` usa un solo `chat_id` y `_approve_or_reject` (antes `_decide`) recibe lo que ya calculó; `RESULTS_DIR`, `WITHOUT_SEARCH` y `HUB` pasan a `src/constants/run.py`, y `START_ONLY`, `INPUT_SEPARATOR` y `SUMMARY_SEPARATOR` a `src/telegram/constants.py`; en `main.py`, `_search_user` pasa a `_search_terms`, y `found`, `job`, `groups` y `rows` a `listings`, `listing`, `matches` y `verdicts`; las funciones auxiliares van al final de cada archivo | Parámetros que siempre recibían lo mismo, columnas sin lectura, constantes fuera de su archivo y nombres que no decían qué son |
+| I17 | `/perfil` y el botón 📄 Perfil, si ya hay un CV, lo muestran (`PROFILE_CURRENT` y el CV en mensajes de hasta 4096 unidades UTF-16, partidos por renglones, con una pausa entre uno y otro) y terminan con un botón ✏️ Reemplazar (`profile:replace`): recién al tocarlo el bot espera el nuevo. Sin CV, lo piden como antes. `PROFILE_SAVED` ya no muestra la cantidad de caracteres (pedido del usuario, 07/11) | Poder leer el CV; si el bot quedara esperando el reemplazo, el próximo texto que se escriba pisaría el CV |
+| I18 | `/start` de un usuario activo con CV pide una búsqueda: el webhook la anota en la tabla `search_requests` y el worker (`daemon.py`) la toma cada 5 s. Reemplaza a F5 (Huey y `/buscar`) (pedido del usuario, 07/11) | Que no haya que esperar a la hora siguiente, sin sumar Huey ni otra dependencia |
+| I19 | El worker corre la búsqueda de cada usuario en su propio hilo (`main(chat_id)`), al arrancar, cada hora y con cada `/start`; un mismo usuario nunca corre dos veces a la vez. Reemplaza a D4 (uno tras otro con caché compartida): `python main.py` a mano sigue corriendo a todos en serie con la caché. Los resultados llevan segundos y el `chat_id` en el nombre (pedido del usuario, 07/11) | Que cada usuario reciba lo suyo a su ritmo, sin esperar a los demás. El costo: búsquedas en paralelo desde la misma IP (más 429 de LinkedIn) y sin caché entre usuarios; si los 429 se vuelven seguidos, la salida es un tope de hilos |
+| I20 | `/clear` borra los mensajes del chat (los del bot y los del usuario: en un privado el bot puede borrar los dos) de las últimas 48 h, de a 100 con `deleteMessages`, del más nuevo al más viejo; los ids de un chat son correlativos, así que no hace falta guardarlos. Los comandos y el `callback_data` de los botones son enums (`Command`, `Callback`) (pedidos del usuario, 07/11) | Dejar el chat limpio; Telegram no deja borrar lo que tiene más de 48 h |
+| I21 | `/permitido <términos>` y `/bloquear <palabras>` suman a las listas sin pasar por `/settings`, separadas por coma como en el panel; sin palabras, contestan cómo se usan. Como todo cambio de listas, rige desde la próxima búsqueda de ese usuario (probado con un cambio a mitad de corrida). `/pausa` con las alertas ya pausadas y `/reanudar` con las alertas activas lo avisan en lugar de repetir la acción (pedidos del usuario, 07/11) | Más rápido que entrar al panel; que el bot diga en qué estado estás |
 
 Quedan resueltas las preguntas abiertas de la versión anterior de esta página: la vista
 previa del link (I4), `offers.url` (I5), el 403 del `APPROVED` a un pending (la solicitud
@@ -137,4 +147,3 @@ sin `counts`, como dice el anexo de [`diseno.md`](diseno.md)).
    archivos, el 403 al bloquear el bot).
 2. **T2.7:** `python migrate.py` contra `labubot.db` y el daemon local con la base.
 3. **VPS:** la prueba de IP de [`vps.md`](vps.md) §7 y, si pasa, [`despliegue.md`](despliegue.md).
-4. **Logo:** confirmar la C o elegir otra de [`logo/index.html`](logo/index.html) antes de cargarlo con @BotFather.
