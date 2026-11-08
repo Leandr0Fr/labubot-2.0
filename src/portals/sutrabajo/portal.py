@@ -8,6 +8,7 @@ from src.config.settings import settings
 from src.driver.http import Driver
 from src.exceptions.exceptions import LabubotError
 from src.portals.sutrabajo.constants import (
+    ARGENTINA_SECTION,
     FIELDS,
     JOBS_PER_PAGE,
     SEARCH_URL,
@@ -32,7 +33,8 @@ class SuTrabajo:
         Trae url y título de las ofertas recientes de Argentina y de remoto.
 
         Sin término: es de primer empleo y cada sección publica unas 45 por
-        día. Filtra el LLM.
+        día. Filtra el LLM. Solo se guarda la reescritura de la sección de
+        Argentina, la única que SuTrabajo ya filtra para el país.
         Returns:
             dict[str, str]: url del sitio de origen : título.
         """
@@ -57,7 +59,8 @@ class SuTrabajo:
                 offers = extract_offers(raw)
                 for offer in offers:
                     jobs[offer["url"]] = offer["title"]
-                    self.descriptions[offer["url"]] = offer["description"]
+                    if section == ARGENTINA_SECTION:
+                        self.descriptions[offer["url"]] = offer["description"]
                 # Pedir una página de más da 400, no una lista vacía.
                 if len(offers) < JOBS_PER_PAGE:
                     break
@@ -65,10 +68,11 @@ class SuTrabajo:
 
     def description(self, url: str) -> str:
         """
-        Devuelve la descripción que ya trajo la búsqueda.
+        Devuelve la reescritura que ya trajo la búsqueda, si es de la sección de Argentina.
         Args:
             url: URL de la oferta, tal como la devuelve `search()`.
         Returns:
-            str: La descripción en texto plano.
+            str: La descripción en texto plano. Vacía si es de la sección remoto:
+            sin el aviso original no se sabe si aceptan Argentina.
         """
-        return self.descriptions[url]
+        return self.descriptions.get(url, "")

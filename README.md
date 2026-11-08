@@ -65,6 +65,18 @@ otros sitios, con el título y la descripción reescritos en español. Se guarda
 url del aviso original, así que lo que ya trajo LinkedIn no se repite, y suma
 avisos de LinkedIn que `jobs-guest` no devuelve.
 
+La reescritura traduce y pierde el idioma y el país del original, así que antes
+de clasificar se verifica (`HUB_ORIGINS` en `src/constants/run.py`):
+
+- Si el original es de `ar.linkedin.com`, `ar.computrabajo.com` o
+  `ar.talent.com`, se baja con ese portal y el LLM evalúa el aviso real. La url
+  se guarda sin los `utm_*`, así que una oferta que también trajo LinkedIn no se
+  repite.
+- Si no, o si ese portal no la puede servir, solo se usa la reescritura de la
+  sección `/argentina/`, que SuTrabajo ya filtra para el país. Lo de `/remoto/`
+  sin verificar se descarta: son bolsas internacionales (Himalayas, Greenhouse,
+  Workday…) casi siempre en inglés y solo para EE. UU. o Europa.
+
 ### Ubicación
 
 Se busca en todo el país: el remoto vale desde cualquier provincia, y lo
@@ -79,8 +91,9 @@ un solo request, así que se resuelve después de buscar:
   modalidad (el listado guest de LinkedIn ignora `f_WT`). La anteponen a la
   descripción como `Ubicación: …` y decide el LLM con la regla del perfil:
   una ciudad del interior puede ser un remoto.
-- **SuTrabajo** se pide por sección, `/argentina/` y `/remoto/`, y la ubicación
-  ya viene dentro de su descripción.
+- **SuTrabajo** se pide por sección, `/argentina/` y `/remoto/`; la ubicación
+  sale del aviso original o, si no se puede leer, de su reescritura de
+  `/argentina/`.
 
 `LOCATION` y `HOURS` son las mismas para todos los usuarios.
 

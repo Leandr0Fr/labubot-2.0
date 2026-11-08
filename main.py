@@ -9,9 +9,10 @@ from collections import Counter
 from datetime import datetime
 from html import escape
 from typing import Any
+from urllib.parse import urlsplit
 
 from src.classifier.openai import Classifier
-from src.constants.run import HUB, RESULTS_DIR, WITHOUT_SEARCH
+from src.constants.run import HUB, HUB_ORIGINS, RESULTS_DIR, WITHOUT_SEARCH
 from src.db.database import connect
 from src.db.offers import Deliveries, Offers
 from src.db.users import Users
@@ -114,9 +115,11 @@ def _run_user(
     Busca las palabras de un usuario, clasifica lo nuevo y le manda 🟢🟡 y el resumen.
 
     También manda las 🟢🟡 que quedaron sin enviar, aunque su palabra ya no esté.
-    Una descripción guardada del hub se vuelve a bajar si la oferta llega por su
-    portal original, porque el hub la reescribe y pierde datos. Si el usuario
-    bloqueó el bot, pasa a blocked.
+    El hub reescribe y pierde datos: una oferta suya se lee con el portal de su
+    sitio de origen si está en HUB_ORIGINS, y si ese portal no la puede servir,
+    con la reescritura (solo la de Argentina). Lo guardado del hub nunca se toma
+    de la caché: se vuelve a pedir, así la corrida siguiente reintenta el
+    original. Si el usuario bloqueó el bot, pasa a blocked.
     Args:
         conn: La conexión de la corrida.
         telegram: El cliente de la Bot API.
@@ -154,10 +157,16 @@ def _run_user(
             blocked_by_title += 1
             continue
         offer = Offer(title=listing["title"], description="", url=url)
+        reader = listing["portal"]
+        if reader == HUB:
+            reader = HUB_ORIGINS.get(urlsplit(url).netloc, HUB)
         cached = cache.get(url)
-        if cached is None or (cached["portal"] == HUB and listing["portal"] != HUB):
-            offer["description"] = portals[listing["portal"]].description(url)
-            cache.add(offer, listing["portal"])
+        if cached is None or cached["portal"] == HUB:
+            offer["description"] = portals[reader].description(url)
+            if not offer["description"] and reader != listing["portal"]:
+                reader = HUB
+                offer["description"] = portals[HUB].description(url)
+            cache.add(offer, reader)
         else:
             offer["description"] = cached["description"]
         if not offer["description"]:
@@ -172,7 +181,7 @@ def _run_user(
     logger.info(
         f"{user['first_name']}: {len(verdicts)} ofertas nuevas; salteadas: "
         f"{already_seen} ya vistas, {blocked_by_title} por título, "
-        f"{no_description} sin descripción"
+        f"{no_description} sin descripción o sin verificar"
     )
     logger.info(
         f"{user['first_name']}: clasificadas {colors[TrafficLight.GREEN]} verdes, "
