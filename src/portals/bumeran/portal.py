@@ -27,6 +27,7 @@ class Bumeran:
     """Ofertas de Bumeran y de ZonaJobs, que comparten índice y API."""
 
     def __init__(self, driver: Driver) -> None:
+        """Recibe el driver con el que hace todos los pedidos."""
         self.driver = driver
 
     def search(self) -> dict[str, str]:
@@ -74,7 +75,6 @@ class Bumeran:
             o Bumeran no la pudo servir.
         """
         job_id = url.rsplit("/", 1)[1].removesuffix(".html")
-        # Los avisos rotos tardan ~25 s y contestan 500.
         try:
             raw = self.driver.get(
                 DETAIL_URL.format(job_id=job_id),

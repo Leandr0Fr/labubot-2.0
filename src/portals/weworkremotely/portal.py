@@ -17,6 +17,7 @@ class WeWorkRemotely:
     """Ofertas remotas de back-end y full-stack de We Work Remotely, por RSS."""
 
     def __init__(self, driver: Driver) -> None:
+        """Recibe el driver y arranca sin descripciones: las guarda `search()`."""
         self.driver = driver
         self.descriptions: dict[str, str] = {}
 

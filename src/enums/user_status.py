@@ -5,7 +5,7 @@ from enum import StrEnum
 
 class UserStatus(StrEnum):
     """
-    Cinco estados.
+    El estado de un usuario, tal como se guarda en users.status.
     PENDING: Pidió acceso y espera al admin.
     ACTIVE: Recibe ofertas, si ya cargó el perfil.
     PAUSED: Pausó las alertas con /pausa.

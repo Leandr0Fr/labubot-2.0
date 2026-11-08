@@ -27,7 +27,6 @@ class Document(TypedDict):
     file_name: NotRequired[str]
 
 
-# "from" es palabra reservada: solo entra con la sintaxis funcional.
 Message = TypedDict(
     "Message",
     {
@@ -38,6 +37,7 @@ Message = TypedDict(
         "document": NotRequired[Document],
     },
 )
+"""Un mensaje; va con la sintaxis funcional porque "from" es palabra reservada."""
 
 CallbackQuery = TypedDict(
     "CallbackQuery",
@@ -47,3 +47,8 @@ CallbackQuery = TypedDict(
         "data": NotRequired[str],
     },
 )
+"""
+El toque de un botón.
+message: El mensaje que tiene el botón.
+data: El callback_data del botón (ver Callback).
+"""

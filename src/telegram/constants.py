@@ -37,12 +37,9 @@ ADMIN_COMMANDS = [
     {"command": Command.USERS, "description": "Usuarios y su estado"},
 ]
 COMMAND_PREFIX = "/"
-# Separa la acción del chat_id en el callback_data de Aprobar y Rechazar.
 CALLBACK_SEPARATOR = ":"
-# El único tipo de chat que atiende el bot: en un grupo se mezclarían perfiles.
 PRIVATE_CHAT = "private"
 
-# Botones: texto que se ve; el callback_data lo arma keyboards.py.
 BUTTON_TERMS = "🔎 Términos"
 BUTTON_BLOCKED = "🚫 Bloqueadas"
 BUTTON_PROFILE = "📄 Perfil"
@@ -78,7 +75,6 @@ APPROVED = (
     "Después cargá en /settings los términos que querés buscar y las palabras "
     "que descartan una oferta por el título."
 )
-# Telegram no siempre manda el @.
 NO_USERNAME = "-"
 
 ASK_PROFILE = (
@@ -107,13 +103,11 @@ LIST_SEPARATOR = " · "
 EMPTY_LIST = "—"
 ASK_TERMS = "Mandame los términos separados por coma."
 ASK_BLOCKED = "Mandame las palabras separadas por coma."
-# Separa los ítems que piden ASK_TERMS y ASK_BLOCKED.
 INPUT_SEPARATOR = ","
 ADDED = "Agregados: {items}. Ahora tenés {count}."
 REMOVED = "Quitados: {items}. Ahora tenés {count}."
 ALLOW_USAGE = "Escribí los términos después del comando, separados por coma: /permitido python, django"
 BLOCK_USAGE = "Escribí las palabras después del comando, separadas por coma: /bloquear php, wordpress"
-# Lo que dicen ADDED y REMOVED si no cambió nada.
 NONE_CHANGED = "ninguno"
 
 PAUSED = "⏸ Alertas pausadas. Usá /reanudar cuando quieras volver."
@@ -123,7 +117,6 @@ CHAT_CLEARED = (
 )
 # deleteMessages acepta hasta 100 ids por llamada.
 DELETE_BATCH = 100
-# Cuántos mensajes para atrás mira /clear: más de 48 h de bloques y resúmenes.
 CLEAR_LOOKBACK = 3000
 RESUMED = "▶️ Alertas activas de nuevo."
 ALREADY_PAUSED = (
@@ -207,7 +200,6 @@ Relación de dependencia o contractor, en pesos o en USD.
 - Puestos de liderazgo o gestión de equipos.
 """
 
-# Con estos estados, cualquier mensaje se contesta como un /start.
 START_ONLY = (UserStatus.PENDING, UserStatus.REJECTED, UserStatus.BLOCKED)
 
 USERS_HEADER = "👥 Usuarios ({count})"

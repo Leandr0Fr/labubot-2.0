@@ -36,7 +36,7 @@ def extract_description(html: str) -> str:
     """
     Extrae la ubicación y la descripción de la página de una oferta.
     Args:
-        html: HTML devuelto por jobPosting/{id}.
+        html: Página de la oferta (/jobs/view/...).
     Returns:
         str: Ubicación en la primera línea y descripción, en texto plano.
     """

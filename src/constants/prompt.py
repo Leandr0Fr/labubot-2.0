@@ -1,4 +1,9 @@
-"""La pregunta que compara una oferta contra el CV."""
+"""
+El prompt que compara una oferta contra el CV.
+INSTRUCTIONS: Las reglas, con el CV en {cv}.
+OFFER_BLOCK: El input de cada oferta, con {title} y {description}.
+CHOICES: Los tres colores que puede elegir el modelo, con qué significa cada uno.
+"""
 
 from src.enums.traffic_light import TrafficLight
 

@@ -27,13 +27,14 @@ def webhook(
     Recibe un update de Telegram y lo atiende antes de contestar.
 
     Es def y no async def: el Driver es sincrónico y FastAPI lo corre en su threadpool.
+    Solo atiende mensajes de chats privados: en un grupo se mezclarían perfiles.
     Args:
         update: El Update tal como lo manda Telegram, sin validar (un 422 haría
             que Telegram lo reintente).
         x_telegram_bot_api_secret_token: El secret_token registrado con setWebhook.
     Returns:
-        dict[str, bool]: Siempre {"ok": True}; con un error, Telegram reintentaría
-        el mismo update.
+        dict[str, bool]: Siempre {"ok": True}, aunque falle el handler; con un
+        error, Telegram reintentaría el mismo update.
     Raises:
         HTTPException: 403 si el secreto falta o no coincide.
     """

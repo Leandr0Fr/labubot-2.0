@@ -21,12 +21,16 @@ class Workable:
     """Ofertas de Workable en Argentina (con sede o remoto), por su API JSON."""
 
     def __init__(self, driver: Driver) -> None:
+        """Recibe el driver y arranca sin descripciones: las guarda `search()`."""
         self.driver = driver
         self.descriptions: dict[str, str] = {}
 
     def search(self, keywords: str) -> dict[str, str]:
         """
         Trae url y título de las ofertas recientes de un término.
+
+        Workable filtra por días enteros: se pide lo que cubre la ventana y se
+        recorta por hora.
         Args:
             keywords: Un término; si tiene espacios, se busca como frase.
         Returns:
@@ -36,8 +40,6 @@ class Workable:
         if " " in keywords:
             query = f'"{keywords}"'
         since = datetime.now(UTC) - timedelta(hours=settings.hours)
-        # Filtra en días calendario: se pide lo que cubre la ventana y se recorta
-        # con `since`.
         days = math.ceil(settings.hours / 24)
         params = {
             "query": query,

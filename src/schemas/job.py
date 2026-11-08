@@ -5,9 +5,9 @@ from typing import TypedDict
 
 class Offer(TypedDict):
     """
-    Oferta.
-    Title: Titulo de la oferta.
-    description: Detalle de la oferta.
+    Una oferta con su descripción, tal como se clasifica y se manda.
+    title: Título de la oferta.
+    description: Detalle de la oferta; '' si el portal no la dio.
     url: URL de la oferta.
     """
 

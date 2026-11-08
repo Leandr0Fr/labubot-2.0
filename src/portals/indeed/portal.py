@@ -23,6 +23,7 @@ class Indeed:
     """Ofertas de Indeed Argentina, por la API que usa su app de iPhone."""
 
     def __init__(self, driver: Driver) -> None:
+        """Recibe el driver y arranca sin descripciones: las guarda `search()`."""
         self.driver = driver
         self.descriptions: dict[str, str] = {}
 
@@ -40,7 +41,6 @@ class Indeed:
         jobs: dict[str, str] = {}
         cursor = None
         while True:
-            # La primera página va sin cursor.
             cursor_arg = ""
             if cursor:
                 cursor_arg = f"cursor: {json.dumps(cursor)}"

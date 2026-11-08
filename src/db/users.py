@@ -1,4 +1,4 @@
-"""Los usuarios del bot: estado, perfil, términos y palabras bloqueadas."""
+"""Los usuarios: estado, perfil, términos, palabras bloqueadas y búsquedas pedidas."""
 
 import sqlite3
 
@@ -9,9 +9,14 @@ from src.schemas.user import User
 
 
 class Users:
-    """Lee y escribe users, user_terms y user_blocked_words."""
+    """Lee y escribe users, user_terms, user_blocked_words y search_requests."""
 
     def __init__(self, conn: sqlite3.Connection) -> None:
+        """
+        Trabaja sobre una conexión ya abierta.
+        Args:
+            conn: La de connect().
+        """
         self.conn = conn
 
     def get(self, chat_id: int) -> User | None:

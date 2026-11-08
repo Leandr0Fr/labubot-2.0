@@ -28,7 +28,7 @@ class Classifier:
 
     def classify(self, offer: Offer) -> TrafficLight:
         """
-        Le pregunta a Decisions de qué color es una oferta.
+        Le pregunta al modelo, por la Decisions API, de qué color es una oferta.
         Args:
             offer: Título, descripción y url de la oferta.
         Returns:

@@ -20,6 +20,7 @@ class Computrabajo:
     """Ofertas de ar.computrabajo.com: el listado y el detalle públicos, en HTML."""
 
     def __init__(self, driver: Driver) -> None:
+        """Recibe el driver con el que hace todos los pedidos."""
         self.driver = driver
 
     def search(self, keywords: str) -> dict[str, str]:
@@ -32,7 +33,6 @@ class Computrabajo:
         """
         slug = keywords.lower().replace(" ", "-")
         url = SEARCH_URL.format(slug=slug)
-        # El bucket más chico que cubre la ventana; si ninguno alcanza, sin filtro.
         params = {}
         for hours, pubdate in RECENCY_BUCKETS.items():
             if hours >= settings.hours:
@@ -48,7 +48,6 @@ class Computrabajo:
                 logger.warning(f"Búsqueda '{keywords}' cortada: {error}")
                 break
             page_jobs = extract_job_cards(list_offers_html)
-            # Pasada la última, el sitio devuelve una página sin ofertas.
             if page_jobs is None:
                 break
             jobs.update(page_jobs)

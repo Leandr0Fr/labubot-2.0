@@ -11,6 +11,5 @@ SEL_JOB_TITLE = 'h2[class*="JobCard_title__"]'
 
 DESCRIPTION_LABEL = "Descripción del trabajo"
 
-# Viene como "Empresa • lugar".
 SEL_DETAIL_LOCATION = 'span[class*="styles_jobLocation__"]'
 COMPANY_SEPARATOR = "•"

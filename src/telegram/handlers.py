@@ -77,10 +77,15 @@ from src.telegram.keyboards import (
 def on_message(conn: sqlite3.Connection, telegram: Telegram, message: Message) -> None:
     """
     Contesta un mensaje privado según el comando o lo que espera el bot.
+
+    A un usuario nuevo, pendiente, rechazado o que bloqueó el bot, cualquier
+    mensaje se le contesta como un /start. "/settings@labubot_bot" vale como /settings.
     Args:
         conn: La conexión que abrió el webhook para este update.
         telegram: El cliente de la Bot API.
         message: El mensaje, tal como vino en el update.
+    Raises:
+        LabubotError: Si falla una llamada a la Bot API.
     """
     users = Users(conn)
     chat_id = message["chat"]["id"]
@@ -90,7 +95,6 @@ def on_message(conn: sqlite3.Connection, telegram: Telegram, message: Message) -
     arguments = ""
     if text.startswith(COMMAND_PREFIX):
         words = text.split(maxsplit=1)
-        # "/settings@labubot_bot" también es /settings.
         command = words[0].split("@")[0].removeprefix(COMMAND_PREFIX)
         if len(words) > 1:
             arguments = words[1]
@@ -137,10 +141,14 @@ def on_callback(
 ) -> None:
     """
     Atiende un botón: el panel, pedir una lista, pausa, o aprobar/rechazar.
+
+    Los botones de quien no tiene acceso se ignoran.
     Args:
         conn: La conexión que abrió el webhook para este update.
         telegram: El cliente de la Bot API.
         callback: El callback_query, tal como vino en el update.
+    Raises:
+        LabubotError: Si falla una llamada a la Bot API.
     """
     # Primero: si después falla un edit, el botón no queda "cargando".
     telegram.answer_callback(callback["id"])
@@ -198,6 +206,9 @@ def _handle_start(
 ) -> None:
     """
     Da de alta o saluda según cómo estaba el usuario antes de este mensaje.
+
+    Un activo, o uno que había bloqueado el bot, queda activo y, si ya cargó el
+    CV, se le encola una búsqueda.
     Args:
         users: El repositorio de usuarios.
         telegram: El cliente de la Bot API.
@@ -234,7 +245,6 @@ def _handle_start(
         case UserStatus.PAUSED:
             telegram.send_message(chat_id, BACK_AGAIN)
         case _:
-            # Active, o blocked que vuelve: si ya cargó el CV, arranca a buscar.
             users.set_status(chat_id, UserStatus.ACTIVE)
             if not user["profile"]:
                 telegram.send_message(chat_id, BACK_AGAIN)
@@ -308,6 +318,9 @@ def _handle_command(
 def _save_profile(users: Users, telegram: Telegram, message: Message) -> None:
     """
     Guarda el CV que llegó como texto o como archivo .md / .txt.
+
+    Si no trae texto (una foto, un sticker, un .pdf), lo vuelve a pedir en vez de
+    guardar un perfil vacío que dejaría al usuario fuera de la corrida.
     Args:
         users: El repositorio de usuarios.
         telegram: El cliente de la Bot API.
@@ -318,8 +331,6 @@ def _save_profile(users: Users, telegram: Telegram, message: Message) -> None:
     document = message.get("document")
     if document and document.get("file_name", "").lower().endswith(PROFILE_EXTENSIONS):
         profile = telegram.download_file(document["file_id"])
-    # Una foto, un sticker o un .pdf dejarían el perfil vacío y al usuario
-    # fuera de la corrida sin aviso.
     if not profile.strip():
         telegram.send_message(chat_id, ASK_PROFILE)
         return
@@ -337,6 +348,8 @@ def _approve_or_reject(
 ) -> None:
     """
     Aprueba o rechaza una solicitud, si la decide el admin y sigue pendiente.
+
+    Así un botón viejo no aprueba dos veces ni reactiva a un rechazado.
     Args:
         users: El repositorio de usuarios.
         telegram: El cliente de la Bot API.
@@ -348,7 +361,6 @@ def _approve_or_reject(
         return
     action, applicant_id = callback_data.split(CALLBACK_SEPARATOR)
     applicant = users.get(int(applicant_id))
-    # Un botón viejo no aprueba dos veces ni reactiva a un rechazado.
     if applicant is None or applicant["status"] != UserStatus.PENDING:
         return
     first_name = applicant["first_name"]
@@ -461,6 +473,8 @@ def _users_text(users: Users) -> str:
 def _show_profile(users: Users, telegram: Telegram, user: User) -> None:
     """
     Muestra el CV cargado con un botón para reemplazarlo; sin CV, lo pide.
+
+    Con CV no queda esperando el reemplazo: lo que el usuario escriba después no lo pisa.
     Args:
         users: El repositorio de usuarios.
         telegram: El cliente de la Bot API.
@@ -471,7 +485,6 @@ def _show_profile(users: Users, telegram: Telegram, user: User) -> None:
         users.set_state(chat_id, ChatState.AWAITING_PROFILE)
         telegram.send_message(chat_id, ASK_PROFILE, cancel_keyboard())
         return
-    # Sin esperar el reemplazo: leerlo y seguir escribiendo no tiene que pisarlo.
     telegram.send_message(chat_id, PROFILE_CURRENT)
     for part in _split_message(user["profile"]):
         time.sleep(PAUSE)
@@ -482,14 +495,18 @@ def _show_profile(users: Users, telegram: Telegram, user: User) -> None:
 
 def _clear_chat(telegram: Telegram, chat_id: int, last_message_id: int) -> None:
     """
-    Borra los mensajes del chat, del /clear para atrás, de a tandas.
+    Borra los últimos CLEAR_LOOKBACK mensajes del chat, del /clear para atrás.
+
+    Los ids de un chat son correlativos: va por tandas de DELETE_BATCH, de lo más
+    nuevo a lo más viejo, así lo reciente se borra aunque falle una tanda vieja.
+    CLEAR_LOOKBACK cubre más de las 48 h que Telegram deja borrar.
     Args:
         telegram: El cliente de la Bot API.
         chat_id: El chat del usuario.
         last_message_id: El mensaje del /clear.
+    Raises:
+        LabubotError: Si Telegram rechaza una tanda o falla la red.
     """
-    # Los ids de un chat son correlativos; de lo más nuevo a lo más viejo, así lo
-    # reciente se borra aunque una tanda vieja falle.
     end = last_message_id + 1
     oldest = max(1, end - CLEAR_LOOKBACK)
     while end > oldest:
@@ -501,6 +518,9 @@ def _clear_chat(telegram: Telegram, chat_id: int, last_message_id: int) -> None:
 def _split_message(text: str) -> list[str]:
     """
     Parte un texto largo en mensajes que entran en Telegram, por renglones.
+
+    Un renglón que solo ya no entra se corta en pedazos de medio MESSAGE_LIMIT
+    caracteres, que en UTF-16 nunca pasan el tope.
     Args:
         text: El texto, por ejemplo un CV.
     Returns:
@@ -513,7 +533,6 @@ def _split_message(text: str) -> list[str]:
             if current.strip():
                 parts.append(current)
             current = ""
-        # Un renglón que solo ya no entra se corta; medio tope nunca pasa en UTF-16.
         while _utf16_len(line) > MESSAGE_LIMIT:
             parts.append(line[: MESSAGE_LIMIT // 2])
             line = line[MESSAGE_LIMIT // 2 :]

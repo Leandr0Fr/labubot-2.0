@@ -1,6 +1,4 @@
-"""
-LABUBOT 2.0
-"""
+"""La corrida: busca ofertas, las clasifica y le manda a cada usuario sus 🟢🟡."""
 
 import csv
 import json
@@ -57,6 +55,9 @@ logger = logging.getLogger(__name__)
 def main(chat_id: int | None = None) -> None:
     """
     Una corrida: a cada usuario activo, uno tras otro, le busca y le manda 🟢🟡.
+
+    Cada (portal, palabra) se pide una sola vez para todos, el /start pendiente de
+    cada usuario se da por cumplido y los veredictos quedan en RESULTS_DIR.
     Args:
         chat_id: Solo ese usuario (el worker corre uno por hilo); None = todos los activos.
     """
@@ -90,14 +91,12 @@ def main(chat_id: int | None = None) -> None:
             "SuTrabajo": SuTrabajo(driver),
             "WeWorkRemotely": WeWorkRemotely(driver),
         }
-        # (portal, palabra) -> {url: título}: lo que un usuario anterior ya buscó.
         searches: dict[tuple[str, str], dict[str, str]] = {}
         telegram = Telegram(driver)
 
         verdicts = []
         for user in active:
             verdicts.extend(_run_user(conn, telegram, portals, searches, user))
-            # Si había pedido búsqueda con /start, esta corrida ya se la hizo.
             users.remove_search_request(user["chat_id"])
         _save_results(verdicts, started, chat_id)
     finally:
@@ -114,6 +113,11 @@ def _run_user(
 ) -> list[list]:
     """
     Busca las palabras de un usuario, clasifica lo nuevo y le manda 🟢🟡 y el resumen.
+
+    También manda las 🟢🟡 que quedaron sin enviar, aunque su palabra ya no esté.
+    Una descripción guardada del hub se vuelve a bajar si la oferta llega por su
+    portal original, porque el hub la reescribe y pierde datos. Si el usuario
+    bloqueó el bot, pasa a blocked.
     Args:
         conn: La conexión de la corrida.
         telegram: El cliente de la Bot API.
@@ -132,7 +136,6 @@ def _run_user(
     blocked_words = users.blocked_words(chat_id)
     listings = _search_terms(portals, searches, terms)
 
-    # Las 🟢🟡 por palabra (None = otros portales), empezando por las pendientes.
     matches: dict[str | None, list[tuple[Offer, TrafficLight]]] = {}
     for row in deliveries.pending(chat_id):
         offer = Offer(title=row["title"], description="", url=row["url"])
@@ -153,8 +156,6 @@ def _run_user(
             continue
         offer = Offer(title=listing["title"], description="", url=url)
         cached = cache.get(url)
-        # La reescritura del hub pierde datos (como dónde se acepta remoto):
-        # si la oferta llega también por su portal de origen, se baja el original.
         if cached is None or (cached["portal"] == HUB and listing["portal"] != HUB):
             offer["description"] = portals[listing["portal"]].description(url)
             cache.add(offer, listing["portal"])
@@ -179,13 +180,11 @@ def _run_user(
         f"{colors[TrafficLight.YELLOW]} amarillas, {colors[TrafficLight.RED]} rojas"
     )
 
-    # Una pendiente de una palabra que ya quitó sale igual, en su lugar alfabético.
     keywords: list[str | None] = list(terms)
     for term in matches:
         if term is not None and term not in keywords:
             keywords.append(term)
     keywords.sort()
-    # Otros portales no es una búsqueda del usuario: va al final y solo si trajo algo.
     if None in matches:
         keywords.append(None)
 
@@ -207,6 +206,8 @@ def _search_terms(
 ) -> dict[str, Found]:
     """
     Junta las ofertas de las palabras de un usuario, con la que trajo cada una.
+
+    Los portales sin búsqueda traen todo lo reciente y la palabra sale del título.
     Args:
         portals: Los portales de la corrida, por nombre de clase.
         searches: Lo ya buscado en esta corrida, por (portal, palabra); lo que
@@ -334,18 +335,17 @@ def _send_summary(
 
 def _save_results(verdicts: list[list], started: datetime, chat_id: int | None) -> None:
     """
-    Guarda lo clasificado en la corrida: el .json con cada oferta y el .csv con cada veredicto.
+    Guarda el .json con cada oferta, una sola vez, y el .csv con cada veredicto.
     Args:
         verdicts: chat_id, palabra, color y oferta de cada clasificación, de todos los usuarios.
         started: Cuándo arrancó la corrida; da el nombre de los dos archivos.
-        chat_id: El usuario de la corrida, si era de uno solo; va en el nombre.
+        chat_id: El usuario de la corrida, si era de uno solo; va en el nombre para
+            que las corridas en paralelo, que arrancan juntas, no se pisen.
     """
-    # Una oferta clasificada para dos usuarios va una sola vez al .json.
     offers: dict[str, Offer] = {}
     for _chat_id, _term, _light, offer in verdicts:
         offers[offer["url"]] = offer
     RESULTS_DIR.mkdir(exist_ok=True)
-    # Las búsquedas de cada usuario corren en paralelo y arrancan juntas.
     name = f"{started:%Y-%m-%d_%H%M%S}"
     if chat_id is not None:
         name = f"{name}_{chat_id}"

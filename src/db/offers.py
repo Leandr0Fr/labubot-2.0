@@ -8,9 +8,14 @@ from src.schemas.job import Offer
 
 
 class Offers:
-    """Caché de descripciones: cada url se baja una sola vez, para todos."""
+    """Caché de descripciones: una bajada por url para todos, aunque venga vacía."""
 
     def __init__(self, conn: sqlite3.Connection) -> None:
+        """
+        Trabaja sobre una conexión ya abierta.
+        Args:
+            conn: La de connect().
+        """
         self.conn = conn
 
     def get(self, url: str) -> sqlite3.Row | None:
@@ -45,6 +50,11 @@ class Deliveries:
     """Qué se evaluó para cada usuario, con qué color y palabra, y si ya le llegó."""
 
     def __init__(self, conn: sqlite3.Connection) -> None:
+        """
+        Trabaja sobre una conexión ya abierta.
+        Args:
+            conn: La de connect().
+        """
         self.conn = conn
 
     def exists(self, chat_id: int, url: str) -> bool:
@@ -65,7 +75,7 @@ class Deliveries:
         self, chat_id: int, url: str, light: TrafficLight | None, term: str | None
     ) -> None:
         """
-        Anota el veredicto y la palabra que la trajo.
+        Anota el veredicto y la palabra que la trajo, si no estaba anotada.
         Args:
             chat_id: Su chat privado con el bot.
             url: URL de la oferta, sin query.
@@ -94,7 +104,7 @@ class Deliveries:
 
     def pending(self, chat_id: int) -> list[sqlite3.Row]:
         """
-        Sus verdes y amarillas que todavía no llegaron.
+        Sus verdes y amarillas que todavía no llegaron, para reintentar el envío.
         Args:
             chat_id: Su chat privado con el bot.
         Returns:

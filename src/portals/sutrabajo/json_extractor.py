@@ -19,8 +19,7 @@ def extract_offers(raw: str) -> list[Offer]:
     offers: list[Offer] = []
     for job in json.loads(raw):
         content = BeautifulSoup(job["content"]["rendered"], "html.parser")
-        # Desde el primer <div> es plantilla, y su ubicación dice Colombia
-        # aunque la oferta sea de otro país.
+        # Desde el primer <div> es plantilla, con una ubicación falsa (Colombia).
         parts = []
         for node in content.find_all(recursive=False):
             if node.name == "div":

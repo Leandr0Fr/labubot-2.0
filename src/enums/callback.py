@@ -8,7 +8,7 @@ class Callback(StrEnum):
     Lo que Telegram devuelve cuando se toca un botón.
     TERMS / BLOCKED: Mostrar la lista de términos o de bloqueadas.
     TERMS_ADD / TERMS_REMOVE / BLOCKED_ADD / BLOCKED_REMOVE: Pedir qué agregar o quitar.
-    PROFILE: Mostrar el CV. PROFILE_REPLACE: Pedir el CV nuevo.
+    PROFILE / PROFILE_REPLACE: Mostrar el CV o pedir el nuevo.
     PAUSE / RESUME: Pausar o reanudar las alertas.
     MENU / CANCEL: Volver al panel.
     APPROVE / REJECT: Decidir una solicitud; van seguidos de ":" y el chat_id.

@@ -1,4 +1,8 @@
-"""Migración única: labubot.db desde la versión de un chat (perfil.md, vistas.txt y sus listas)."""
+"""
+Migración única de la versión de un chat a labubot.db.
+
+perfil.md, vistas.txt y sus listas de búsqueda pasan a ser del admin.
+"""
 
 import logging
 from pathlib import Path
@@ -12,7 +16,6 @@ from src.enums.user_status import UserStatus
 PROFILE_PATH = Path("perfil.md")
 SEEN_PATH = Path("vistas.txt")
 
-# Las listas de búsqueda que tenía la versión de un chat: pasan a ser las del admin.
 ADMIN_TERMS = [
     "python",
     "fastapi",
@@ -76,11 +79,14 @@ logger = logging.getLogger(__name__)
 
 
 def migrate() -> None:
-    """Crea al admin con perfil.md y sus listas, e importa vistas.txt como sus deliveries."""
+    """
+    Crea al admin con perfil.md y sus listas, e importa vistas.txt como sus deliveries.
+
+    Queda como "admin" y sin @ hasta que su primer /start trae los de Telegram.
+    """
     admin_chat_id = settings.admin_chat_id
     conn = connect()
     users = Users(conn)
-    # Su primer /start pone el nombre y el @ de verdad.
     users.register(admin_chat_id, None, "admin")
     users.set_status(admin_chat_id, UserStatus.ACTIVE)
     users.set_profile(admin_chat_id, PROFILE_PATH.read_text(encoding="utf-8"))

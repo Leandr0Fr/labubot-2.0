@@ -25,6 +25,7 @@ class EmpleosIT:
     """Ofertas de empleosit.com.ar, la bolsa argentina de puestos de sistemas."""
 
     def __init__(self, driver: Driver) -> None:
+        """Recibe el driver con el que hace todos los pedidos."""
         self.driver = driver
 
     def search(self) -> dict[str, str]:
@@ -91,6 +92,7 @@ class EmpleosIT:
             str: Lo que devuelva `Driver.get()`.
         Raises:
             LabubotRateLimitError: Si el sitio contestó 429.
+            LabubotForbiddenError: Si el sitio contestó 403.
             LabubotRequestError: Si la red falla o el sitio contesta otra cosa.
         """
         time.sleep(CRAWL_DELAY)

@@ -23,6 +23,7 @@ class LinkedIn:
     """Ofertas del endpoint `jobs-guest`: lo que ve un visitante deslogueado."""
 
     def __init__(self, driver: Driver) -> None:
+        """Recibe el driver con el que hace todos los pedidos."""
         self.driver = driver
 
     def search(self, keywords: str) -> dict[str, str]:
@@ -76,6 +77,9 @@ class LinkedIn:
     def _get(self, url: str, subject: str, params: dict[str, str] | None = None) -> str:
         """
         Pide la URL, reintentando si LinkedIn contesta 429 o deja colgado el pedido.
+
+        Los 429 y los cuelgues salen sueltos hasta con un navegador, y el pedido
+        siguiente pasa.
         Args:
             url: URL completa a pedir.
             subject: Cómo nombrar el recurso dentro del mensaje de error.
@@ -84,9 +88,9 @@ class LinkedIn:
             str: Lo que devuelva `Driver.get()`.
         Raises:
             LabubotRateLimitError: Si contestó 429 en el último intento.
+            LabubotForbiddenError: Si contestó 403 en el último intento.
             LabubotRequestError: Si el último intento falló por red u otro status.
         """
-        # 429 sueltos y timeouts, hasta a un navegador: el pedido siguiente pasa.
         for _ in range(RETRIES - 1):
             try:
                 return self.driver.get(url, subject, params)

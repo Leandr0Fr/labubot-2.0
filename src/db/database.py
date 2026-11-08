@@ -11,14 +11,15 @@ SCHEMA_PATH = Path(__file__).with_name("schema.sql")
 
 def connect() -> sqlite3.Connection:
     """
-    Abre la base de DB_PATH y crea las tablas que falten.
+    Abre la base de DB_PATH, en WAL y con foreign keys, y crea las tablas que falten.
+
+    Las foreign keys se prenden en cada conexión: SQLite no las guarda en la base.
     Returns:
         sqlite3.Connection: Con las filas como sqlite3.Row, por nombre de columna.
     """
     conn = sqlite3.connect(settings.db_path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
-    # Vienen apagadas en cada conexión nueva, aunque la base sea la misma.
     conn.execute("PRAGMA foreign_keys=ON")
     conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
     return conn

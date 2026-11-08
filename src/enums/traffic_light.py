@@ -5,9 +5,9 @@ from enum import StrEnum
 
 class TrafficLight(StrEnum):
     """
-    Tres colores.
-    GREEN: Oferta compatible
-    YELLOW: Oferta para revisar manualmente
+    El color que el LLM le pone a una oferta.
+    GREEN: Oferta compatible.
+    YELLOW: Oferta para revisar a mano.
     RED: Oferta no compatible.
     """
 

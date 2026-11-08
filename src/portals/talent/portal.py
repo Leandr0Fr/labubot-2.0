@@ -18,6 +18,7 @@ class Talent:
     """Ofertas de Talent.com Argentina, un agregador que levanta avisos de ATS."""
 
     def __init__(self, driver: Driver) -> None:
+        """Recibe el driver con el que hace todos los pedidos."""
         self.driver = driver
 
     def search(self, keywords: str) -> dict[str, str]:

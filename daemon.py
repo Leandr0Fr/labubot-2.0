@@ -14,18 +14,20 @@ from src.db.users import Users
 
 logger = logging.getLogger(__name__)
 
-# Los usuarios con una búsqueda en curso: nadie corre dos veces a la vez.
 running: set[int] = set()
 running_lock = threading.Lock()
 
 
 def daemon() -> None:
-    """Busca para todos al arrancar y cada hora, y para cada /start apenas llega."""
+    """
+    Busca para todos al arrancar y cada hora, y para cada /start apenas llega.
+
+    Un error de la base (por ejemplo, un lock) se loguea y no tumba al worker.
+    """
     logger.info("Daemon iniciado")
     _start_all()
     schedule.every().hour.do(_start_all)
     while True:
-        # Un lock o un error de la base no tiene que tumbar al worker.
         try:
             schedule.run_pending()
             conn = connect()
@@ -41,9 +43,11 @@ def daemon() -> None:
 
 def run(chat_id: int) -> None:
     """
-    La búsqueda de un usuario; si falla, deja el error en el log y las demás siguen.
+    Corre la búsqueda de un usuario; si falla, loguea el error y las demás siguen.
+
+    Al terminar, bien o mal, lo saca de running para que se pueda volver a lanzar.
     Args:
-        chat_id: El usuario.
+        chat_id: Chat privado del usuario.
     """
     logger.info(f"Arranca la búsqueda de {chat_id}")
     start = time.monotonic()
@@ -72,7 +76,7 @@ def _start(chat_id: int) -> None:
     """
     Lanza la búsqueda de un usuario en su propio hilo, si no tiene una en curso.
     Args:
-        chat_id: El usuario.
+        chat_id: Chat privado del usuario.
     """
     with running_lock:
         if chat_id in running:

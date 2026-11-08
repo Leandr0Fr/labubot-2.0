@@ -17,6 +17,7 @@ class Jobicy:
     """Ofertas remotas de Jobicy abiertas a Latinoamérica, por su API pública."""
 
     def __init__(self, driver: Driver) -> None:
+        """Recibe el driver y arranca sin descripciones: las guarda `search()`."""
         self.driver = driver
         self.descriptions: dict[str, str] = {}
 

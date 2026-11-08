@@ -20,6 +20,7 @@ def extract_job_cards(raw: str) -> dict[str, str] | None:
         raw: JSON devuelto por avisos/searchV2.
     Returns:
         dict[str, str] | None: url : título, o None si la página no traía ofertas.
+        Las que no traen ubicación también entran: no hay con qué descartarlas.
     """
     jobs = json.loads(raw)["content"]
     if not jobs:
@@ -29,7 +30,6 @@ def extract_job_cards(raw: str) -> dict[str, str] | None:
     for job in jobs:
         location = job["localizacion"]
         remote = job["modalidadTrabajo"] == REMOTE
-        # Sin ubicación no hay con qué descartarla.
         if location and not remote and not location.endswith(AMBA_PROVINCE):
             continue
         url = JOB_URL

@@ -2,13 +2,11 @@
 
 _BASE = "https://www.linkedin.com"
 
-# Devuelve un fragmento de <li>, no una página.
 SEARCH_URL = f"{_BASE}/jobs-guest/jobs/api/seeMoreJobPostings/search"
 
 JOBS_PER_PAGE = 10
 
-# Espera antes de reintentar. Medido sin pausa entre pedidos: ~18 % da 429 y
-# nunca más de 3 seguidos.
+# Medido sin pausa entre pedidos: ~18 % da 429, nunca más de 3 seguidos.
 PAUSE = 3.0
 RETRIES = 10
 

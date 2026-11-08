@@ -1,10 +1,8 @@
-"""
-Módulo de errores.
-"""
+"""Las excepciones propias de labubot."""
 
 
 class LabubotError(Exception):
-    """Error base."""
+    """Base de todas las excepciones de labubot."""
 
 
 class LabubotRequestError(LabubotError):
@@ -12,18 +10,8 @@ class LabubotRequestError(LabubotError):
 
 
 class LabubotRateLimitError(LabubotError):
-    """
-    El sitio devolvió 429.
-
-    No es un error de código: es la señal de que hay que bajar el ritmo.
-    A diferencia de un ban, se cura solo esperando. La excepción es OpenAI sin
-    créditos (`insufficient_quota`): también llega como 429 y ese no se cura.
-    """
+    """El sitio devolvió 429: hay que bajar el ritmo, y se cura esperando."""
 
 
 class LabubotForbiddenError(LabubotError):
-    """
-    El sitio devolvió 403.
-
-    En Telegram quiere decir que el usuario bloqueó el bot.
-    """
+    """El sitio devolvió 403; en Telegram, que el usuario bloqueó el bot."""

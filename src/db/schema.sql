@@ -1,46 +1,45 @@
--- labubot.db: lo que se recuerda entre corridas, compartido por la api (webhook) y el worker.
--- Fechas ISO 8601 en TEXT, UTC. Los PRAGMA van en connect().
+-- labubot.db, compartida por la api (webhook) y el worker. Los PRAGMA van en connect().
 
 CREATE TABLE IF NOT EXISTS users (
-  chat_id     INTEGER PRIMARY KEY,             -- chat privado = id del usuario de Telegram
-  username    TEXT,                            -- @usuario, puede faltar
+  chat_id     INTEGER PRIMARY KEY,
+  username    TEXT,
   first_name  TEXT NOT NULL,
-  status      TEXT NOT NULL DEFAULT 'pending', -- UserStatus: pending | active | paused | rejected | blocked
-  profile     TEXT NOT NULL DEFAULT '',        -- el CV; '' = todavía no lo cargó
-  state       TEXT NOT NULL DEFAULT '',        -- ChatState: qué espera el bot del próximo mensaje ('' = nada)
+  status      TEXT NOT NULL DEFAULT 'pending',
+  profile     TEXT NOT NULL DEFAULT '',
+  state       TEXT NOT NULL DEFAULT '',
   created_at  TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_terms (
   chat_id INTEGER NOT NULL REFERENCES users(chat_id) ON DELETE CASCADE,
-  term    TEXT NOT NULL,                       -- en minúsculas
+  term    TEXT NOT NULL,
   PRIMARY KEY (chat_id, term)
 );
 
 CREATE TABLE IF NOT EXISTS user_blocked_words (
   chat_id INTEGER NOT NULL REFERENCES users(chat_id) ON DELETE CASCADE,
-  word    TEXT NOT NULL,                       -- en minúsculas; se busca como substring del título en minúsculas
+  word    TEXT NOT NULL,
   PRIMARY KEY (chat_id, word)
 );
 
-CREATE TABLE IF NOT EXISTS offers (            -- caché compartida de descripciones: una bajada por url
-  url         TEXT PRIMARY KEY NOT NULL,       -- sin query
-  portal      TEXT NOT NULL,                   -- nombre de la clase: LinkedIn, Bumeran...
+CREATE TABLE IF NOT EXISTS offers (
+  url         TEXT PRIMARY KEY NOT NULL,
+  portal      TEXT NOT NULL,
   title       TEXT NOT NULL,
-  description TEXT NOT NULL                    -- '' si el portal no la dio (no se vuelve a pedir)
+  description TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS deliveries (        -- qué ya se evaluó para cada usuario
+CREATE TABLE IF NOT EXISTS deliveries (
   chat_id       INTEGER NOT NULL REFERENCES users(chat_id) ON DELETE CASCADE,
-  url           TEXT NOT NULL,                 -- sin FK a offers: las importadas de vistas.txt no tienen fila en offers
-  term          TEXT,                          -- palabra clave que la trajo; NULL = "Otros portales" o importada de vistas.txt
-  light         TEXT,                          -- TrafficLight: green | yellow | red; NULL = importada de vistas.txt
+  url           TEXT NOT NULL, -- sin FK a offers: las importadas de vistas.txt no tienen fila ahí
+  term          TEXT,
+  light         TEXT,
   classified_at TEXT NOT NULL,
-  sent_at       TEXT,                          -- NULL si es roja, importada, o si el envío falló (se reintenta)
+  sent_at       TEXT,
   PRIMARY KEY (chat_id, url)
 );
 
-CREATE TABLE IF NOT EXISTS search_requests (   -- búsquedas pedidas con /start, que corre el worker
+CREATE TABLE IF NOT EXISTS search_requests (
   chat_id      INTEGER PRIMARY KEY REFERENCES users(chat_id) ON DELETE CASCADE,
   requested_at TEXT NOT NULL
 );

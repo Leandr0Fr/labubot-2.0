@@ -23,6 +23,7 @@ class SuTrabajo:
     """Ofertas de SuTrabajo, un hub que republica avisos de LinkedIn y otros sitios."""
 
     def __init__(self, driver: Driver) -> None:
+        """Recibe el driver y arranca sin descripciones: las guarda `search()`."""
         self.driver = driver
         self.descriptions: dict[str, str] = {}
 

@@ -1,4 +1,4 @@
-"""Configuración de la aplicación y del log."""
+"""Configuración de la aplicación; importarlo deja el log armado en logs/app.log."""
 
 import logging
 from pathlib import Path
@@ -11,16 +11,16 @@ LOG_FILE = BASE_DIR / "logs" / "app.log"
 
 class Settings(BaseSettings):
     """
-    Variables de entorno:
-    - LOCATION: Ubicación tal como la escribe LinkedIn ("Argentina").
-    - HOURS: Ventana de publicación (24 = solo lo de hoy).
-    - LLM_API_KEY: Clave de OpenAI (platform.openai.com/api-keys).
-    - TELEGRAM_TOKEN: Token del bot, el que da @BotFather.
-    - ADMIN_CHAT_ID: Chat del admin: aprueba las altas y ve /usuarios.
-    - WEBHOOK_URL: URL pública a la que Telegram manda los updates.
-    - WEBHOOK_SECRET: Secreto que Telegram manda en cada update; vacío = rechaza todo.
-    - DB_PATH: Archivo SQLite que comparten la api y el worker.
-    - LOG_LEVEL: Nivel mínimo que se loguea (DEBUG suma cada término y oferta).
+    Configuración leída del entorno o de .env.
+    LOCATION: Ubicación para los portales que filtran por lugar ("Argentina").
+    HOURS: Ventana de publicación, en horas (24 = lo del último día).
+    LLM_API_KEY: Clave de OpenAI (platform.openai.com/api-keys).
+    TELEGRAM_TOKEN: Token del bot, el que da @BotFather.
+    ADMIN_CHAT_ID: Chat del admin: aprueba las altas y ve /usuarios.
+    WEBHOOK_URL: URL pública a la que Telegram manda los updates.
+    WEBHOOK_SECRET: Secreto que Telegram manda en cada update; vacío = rechaza todo.
+    DB_PATH: Archivo SQLite que comparten la api y el worker.
+    LOG_LEVEL: Nivel mínimo que se loguea (DEBUG suma cada término y oferta).
     """
 
     location: str = "Argentina"

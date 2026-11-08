@@ -27,6 +27,11 @@ class Telegram:
     """La Bot API por el Driver: un método por cada cosa que el bot hace hacia afuera."""
 
     def __init__(self, driver: Driver) -> None:
+        """
+        Guarda el Driver por el que salen todas las llamadas.
+        Args:
+            driver: El cliente HTTP.
+        """
         self.driver = driver
 
     def send_message(
@@ -38,9 +43,11 @@ class Telegram:
     ) -> None:
         """
         Manda un texto, con botones si vienen y sin sonido si silent.
+
+        Sin vista previa de links: cada oferta es un link y la tarjeta llenaría el chat.
         Args:
             chat_id: El chat al que va.
-            text: El texto, hasta 4096 caracteres.
+            text: El texto, hasta MESSAGE_LIMIT unidades UTF-16.
             keyboard: Un inline keyboard, como los arma keyboards.py.
             silent: True = la notificación llega sin sonido.
         Raises:
@@ -49,7 +56,6 @@ class Telegram:
             LabubotRequestError: Si el token no sirve, Telegram rechaza el
                 mensaje o falla la red.
         """
-        # Sin vista previa: cada oferta es un link y la tarjeta llena el chat.
         body: dict[str, Any] = {
             "chat_id": chat_id,
             "text": text,
@@ -72,8 +78,8 @@ class Telegram:
             text: El texto nuevo.
             keyboard: Los botones nuevos; sin botones, el mensaje los pierde.
         Raises:
-            LabubotRequestError: Si Telegram lo rechaza (por ejemplo, el texto
-                no cambió) o falla la red.
+            LabubotError: Si Telegram lo rechaza (por ejemplo, el texto no
+                cambió) o falla la red.
         """
         body: dict[str, Any] = {
             "chat_id": chat_id,
@@ -90,6 +96,8 @@ class Telegram:
         Args:
             chat_id: El chat.
             message_ids: Hasta DELETE_BATCH ids.
+        Raises:
+            LabubotError: Si Telegram rechaza la tanda o falla la red.
         """
         self._call("deleteMessages", {"chat_id": chat_id, "message_ids": message_ids})
 
@@ -98,6 +106,8 @@ class Telegram:
         Le avisa a Telegram que el botón se atendió, para que deje de mostrar "cargando".
         Args:
             callback_id: El id del callback_query.
+        Raises:
+            LabubotError: Si Telegram lo rechaza o falla la red.
         """
         self._call("answerCallbackQuery", {"callback_query_id": callback_id})
 
@@ -119,7 +129,11 @@ class Telegram:
         logger.debug(f"Enviada a {chat_id}: {offer['title']}")
 
     def set_commands(self) -> None:
-        """Publica el menú /: COMMANDS para todos y COMMANDS + ADMIN_COMMANDS en el chat del admin."""
+        """
+        Publica el menú /: COMMANDS para todos y COMMANDS + ADMIN_COMMANDS para el admin.
+        Raises:
+            LabubotError: Si Telegram lo rechaza o falla la red.
+        """
         self._call("setMyCommands", {"commands": COMMANDS})
         self._call(
             "setMyCommands",
@@ -130,7 +144,13 @@ class Telegram:
         )
 
     def set_webhook(self) -> None:
-        """Registra WEBHOOK_URL con WEBHOOK_SECRET, solo para message y callback_query."""
+        """
+        Registra WEBHOOK_URL con WEBHOOK_SECRET y descarta los updates pendientes.
+
+        Telegram solo manda updates de message y callback_query.
+        Raises:
+            LabubotError: Si Telegram lo rechaza o falla la red.
+        """
         self._call(
             "setWebhook",
             {
@@ -147,7 +167,9 @@ class Telegram:
         Args:
             file_id: El file_id del documento.
         Returns:
-            str: El contenido como texto UTF-8.
+            str: El contenido como texto; vacío si Telegram ya no lo tiene.
+        Raises:
+            LabubotError: Si Telegram rechaza el pedido o falla la red.
         """
         file = self._call("getFile", {"file_id": file_id})
         url = FILE_URL.format(
@@ -166,7 +188,8 @@ class Telegram:
         Raises:
             LabubotForbiddenError: Si Telegram contestó 403.
             LabubotRateLimitError: Si Telegram contestó 429.
-            LabubotRequestError: Si el token no sirve, otro status o falla la red.
+            LabubotRequestError: Si el token no sirve (Telegram da 404 y el Driver
+                devuelve vacío), otro status o falla la red.
         """
         # El subject nombra el método y nunca la URL, que lleva el token.
         raw = self.driver.post_json(
@@ -174,7 +197,6 @@ class Telegram:
             f"el {method} de Telegram",
             body,
         )
-        # Un token inválido da 404, y el Driver devuelve vacío en vez de fallar.
         if not raw:
             raise LabubotRequestError("Telegram no reconoce TELEGRAM_TOKEN")
         return json.loads(raw)["result"]

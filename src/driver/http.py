@@ -24,6 +24,7 @@ class Driver:
     """
 
     def __init__(self) -> None:
+        """Abre el cliente httpx: sigue redirects y se presenta como un navegador."""
         self.http = httpx.Client(
             timeout=HTTP_TIMEOUT,
             headers={
