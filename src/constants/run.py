@@ -8,3 +8,5 @@ RESULTS_DIR = Path("resultados")
 WITHOUT_SEARCH = ("Bumeran", "EmpleosIT", "Jobicy", "SuTrabajo", "WeWorkRemotely")
 # Republica avisos de otros sitios, reescritos, con la url del original.
 HUB = "SuTrabajo"
+# Cada cuánto el worker mira si alguien pidió una búsqueda con /start.
+SEARCH_POLL_SECONDS = 5

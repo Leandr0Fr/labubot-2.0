@@ -113,6 +113,44 @@ class Users:
             users.append(User(**row))
         return users
 
+    def request_search(self, chat_id: int) -> None:
+        """
+        Le pide al worker una búsqueda para este usuario.
+        Args:
+            chat_id: Su chat privado con el bot.
+        """
+        self.conn.execute(
+            "INSERT OR REPLACE INTO search_requests (chat_id, requested_at) "
+            "VALUES (?, ?)",
+            (chat_id, now()),
+        )
+        self.conn.commit()
+
+    def take_search_requests(self) -> list[int]:
+        """
+        Saca las búsquedas pedidas, para que el worker las corra.
+        Returns:
+            list[int]: Los chat_id que pidieron búsqueda; quedan borrados.
+        """
+        # En una sola sentencia: un pedido que entra mientras tanto no se pierde.
+        rows = self.conn.execute(
+            "DELETE FROM search_requests RETURNING chat_id"
+        ).fetchall()
+        self.conn.commit()
+        chat_ids = []
+        for row in rows:
+            chat_ids.append(row["chat_id"])
+        return chat_ids
+
+    def remove_search_request(self, chat_id: int) -> None:
+        """
+        Borra la búsqueda pedida por un usuario, si había una.
+        Args:
+            chat_id: Su chat privado con el bot.
+        """
+        self.conn.execute("DELETE FROM search_requests WHERE chat_id = ?", (chat_id,))
+        self.conn.commit()
+
     def terms(self, chat_id: int) -> list[str]:
         """
         Sus términos de búsqueda.

@@ -54,13 +54,24 @@ from src.telegram.constants import (
 logger = logging.getLogger(__name__)
 
 
-def main() -> None:
-    """Una corrida: a cada usuario activo, uno tras otro, le busca y le manda 🟢🟡."""
+def main(chat_id: int | None = None) -> None:
+    """
+    Una corrida: a cada usuario activo, uno tras otro, le busca y le manda 🟢🟡.
+    Args:
+        chat_id: Solo ese usuario (el worker corre uno por hilo); None = todos los activos.
+    """
     started = datetime.now()
     conn = connect()
     driver = Driver()
     try:
-        active = Users(conn).active()
+        users = Users(conn)
+        active = users.active()
+        if chat_id is not None:
+            selected = []
+            for user in active:
+                if user["chat_id"] == chat_id:
+                    selected.append(user)
+            active = selected
         if not active:
             logger.info("No hay usuarios activos")
             return
@@ -86,7 +97,9 @@ def main() -> None:
         verdicts = []
         for user in active:
             verdicts.extend(_run_user(conn, telegram, portals, searches, user))
-        _save_results(verdicts, started)
+            # Si había pedido búsqueda con /start, esta corrida ya se la hizo.
+            users.remove_search_request(user["chat_id"])
+        _save_results(verdicts, started, chat_id)
     finally:
         driver.close()
         conn.close()
@@ -319,19 +332,24 @@ def _send_summary(
     telegram.send_message(chat_id, "\n".join(lines), silent=True)
 
 
-def _save_results(verdicts: list[list], started: datetime) -> None:
+def _save_results(verdicts: list[list], started: datetime, chat_id: int | None) -> None:
     """
     Guarda lo clasificado en la corrida: el .json con cada oferta y el .csv con cada veredicto.
     Args:
         verdicts: chat_id, palabra, color y oferta de cada clasificación, de todos los usuarios.
         started: Cuándo arrancó la corrida; da el nombre de los dos archivos.
+        chat_id: El usuario de la corrida, si era de uno solo; va en el nombre.
     """
     # Una oferta clasificada para dos usuarios va una sola vez al .json.
     offers: dict[str, Offer] = {}
     for _chat_id, _term, _light, offer in verdicts:
         offers[offer["url"]] = offer
     RESULTS_DIR.mkdir(exist_ok=True)
-    path = RESULTS_DIR / f"{started:%Y-%m-%d_%H%M}.json"
+    # Las búsquedas de cada usuario corren en paralelo y arrancan juntas.
+    name = f"{started:%Y-%m-%d_%H%M%S}"
+    if chat_id is not None:
+        name = f"{name}_{chat_id}"
+    path = RESULTS_DIR / f"{name}.json"
     path.write_text(
         json.dumps(list(offers.values()), ensure_ascii=False, indent=2),
         encoding="utf-8",

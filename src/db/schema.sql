@@ -39,3 +39,8 @@ CREATE TABLE IF NOT EXISTS deliveries (        -- qué ya se evaluó para cada u
   sent_at       TEXT,                          -- NULL si es roja, importada, o si el envío falló (se reintenta)
   PRIMARY KEY (chat_id, url)
 );
+
+CREATE TABLE IF NOT EXISTS search_requests (   -- búsquedas pedidas con /start, que corre el worker
+  chat_id      INTEGER PRIMARY KEY REFERENCES users(chat_id) ON DELETE CASCADE,
+  requested_at TEXT NOT NULL
+);
