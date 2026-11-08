@@ -1,10 +1,13 @@
 """Lo que entra por el webhook: un mensaje o un botón, y qué contestarle."""
 
 import sqlite3
+import time
 
 from src.config.settings import settings
 from src.db.users import Users
+from src.enums.callback import Callback
 from src.enums.chat_state import ChatState
+from src.enums.command import Command
 from src.enums.user_status import UserStatus
 from src.schemas.telegram import CallbackQuery, Message
 from src.schemas.user import User
@@ -16,27 +19,41 @@ from src.telegram.constants import (
     ADMIN_REQUEST,
     ALERTS_ACTIVE,
     ALERTS_PAUSED,
+    ALLOW_USAGE,
+    ALREADY_ACTIVE,
+    ALREADY_PAUSED,
     APPROVED,
     ASK_BLOCKED,
     ASK_PROFILE,
     ASK_TERMS,
     BACK_AGAIN,
+    BLOCK_USAGE,
     BLOCKED_LIST,
+    CALLBACK_SEPARATOR,
+    CHAT_CLEARED,
+    CLEAR_LOOKBACK,
+    COMMAND_PREFIX,
+    DELETE_BATCH,
     EMPTY_LIST,
     HELP,
     INPUT_SEPARATOR,
     LIST_SEPARATOR,
+    MESSAGE_LIMIT,
     NO_USERNAME,
     NONE_CHANGED,
+    PAUSE,
     PAUSED,
+    PROFILE_CURRENT,
     PROFILE_EXTENSIONS,
     PROFILE_LOADED,
     PROFILE_MISSING,
+    PROFILE_REPLACE_HINT,
     PROFILE_SAVED,
     PROFILE_TEMPLATE,
     REJECTED,
     REMOVED,
     RESUMED,
+    SEARCH_QUEUED,
     SETTINGS_PANEL,
     START_ONLY,
     STATUS_LABELS,
@@ -52,6 +69,7 @@ from src.telegram.keyboards import (
     approval_keyboard,
     cancel_keyboard,
     list_keyboard,
+    replace_profile_keyboard,
     settings_keyboard,
 )
 
@@ -68,14 +86,23 @@ def on_message(conn: sqlite3.Connection, telegram: Telegram, message: Message) -
     chat_id = message["chat"]["id"]
     text = message.get("text", "").strip()
     user = users.get(chat_id)
+    command = None
+    arguments = ""
+    if text.startswith(COMMAND_PREFIX):
+        words = text.split(maxsplit=1)
+        # "/settings@labubot_bot" también es /settings.
+        command = words[0].split("@")[0].removeprefix(COMMAND_PREFIX)
+        if len(words) > 1:
+            arguments = words[1]
 
-    if text.startswith("/start") or user is None or user["status"] in START_ONLY:
+    if command == Command.START or user is None or user["status"] in START_ONLY:
         _handle_start(users, telegram, message, user)
         return
-    if text.startswith("/"):
+    if command is not None:
         users.set_state(chat_id, ChatState.IDLE)
-        # "/settings@labubot_bot" también es /settings.
-        _handle_command(users, telegram, user, text.split()[0].split("@")[0])
+        _handle_command(
+            users, telegram, user, command, arguments, message["message_id"]
+        )
         return
 
     match user["state"]:
@@ -102,9 +129,7 @@ def on_message(conn: sqlite3.Connection, telegram: Telegram, message: Message) -
             telegram.send_message(chat_id, UNKNOWN)
             return
     users.set_state(chat_id, ChatState.IDLE)
-    # Vacía si ya los tenía (o, al quitar, si no los tenía).
-    reply = template.format(items=", ".join(items) or NONE_CHANGED, count=count)
-    telegram.send_message(chat_id, reply)
+    telegram.send_message(chat_id, _changed_text(template, items, count))
 
 
 def on_callback(
@@ -124,7 +149,7 @@ def on_callback(
     chat_id = callback["message"]["chat"]["id"]
     message_id = callback["message"]["message_id"]
 
-    if callback_data.startswith(("approve:", "reject:")):
+    if callback_data.startswith((Callback.APPROVE, Callback.REJECT)):
         _approve_or_reject(users, telegram, chat_id, message_id, callback_data)
         return
 
@@ -132,34 +157,38 @@ def on_callback(
     if user is None or user["status"] in START_ONLY:
         return
     match callback_data:
-        case "terms":
+        case Callback.TERMS:
             text = _list_text(TERMS_LIST, users.terms(chat_id))
-            telegram.edit_message(chat_id, message_id, text, list_keyboard("terms"))
-        case "blocked":
+            keyboard = list_keyboard(Callback.TERMS_ADD, Callback.TERMS_REMOVE)
+            telegram.edit_message(chat_id, message_id, text, keyboard)
+        case Callback.BLOCKED:
             text = _list_text(BLOCKED_LIST, users.blocked_words(chat_id))
-            telegram.edit_message(chat_id, message_id, text, list_keyboard("blocked"))
-        case "terms:add":
+            keyboard = list_keyboard(Callback.BLOCKED_ADD, Callback.BLOCKED_REMOVE)
+            telegram.edit_message(chat_id, message_id, text, keyboard)
+        case Callback.TERMS_ADD:
             users.set_state(chat_id, ChatState.AWAITING_TERMS_ADD)
             telegram.edit_message(chat_id, message_id, ASK_TERMS, cancel_keyboard())
-        case "terms:remove":
+        case Callback.TERMS_REMOVE:
             users.set_state(chat_id, ChatState.AWAITING_TERMS_REMOVE)
             telegram.edit_message(chat_id, message_id, ASK_TERMS, cancel_keyboard())
-        case "blocked:add":
+        case Callback.BLOCKED_ADD:
             users.set_state(chat_id, ChatState.AWAITING_BLOCKED_ADD)
             telegram.edit_message(chat_id, message_id, ASK_BLOCKED, cancel_keyboard())
-        case "blocked:remove":
+        case Callback.BLOCKED_REMOVE:
             users.set_state(chat_id, ChatState.AWAITING_BLOCKED_REMOVE)
             telegram.edit_message(chat_id, message_id, ASK_BLOCKED, cancel_keyboard())
-        case "profile":
+        case Callback.PROFILE:
+            _show_profile(users, telegram, user)
+        case Callback.PROFILE_REPLACE:
             users.set_state(chat_id, ChatState.AWAITING_PROFILE)
             telegram.edit_message(chat_id, message_id, ASK_PROFILE, cancel_keyboard())
-        case "pause" | "resume":
+        case Callback.PAUSE | Callback.RESUME:
             status = UserStatus.PAUSED
-            if callback_data == "resume":
+            if callback_data == Callback.RESUME:
                 status = UserStatus.ACTIVE
             users.set_status(chat_id, status)
             _edit_panel(users, telegram, chat_id, message_id)
-        case "menu" | "cancel":
+        case Callback.MENU | Callback.CANCEL:
             users.set_state(chat_id, ChatState.IDLE)
             _edit_panel(users, telegram, chat_id, message_id)
 
@@ -202,43 +231,75 @@ def _handle_start(
             telegram.send_message(chat_id, STILL_PENDING)
         case UserStatus.REJECTED:
             telegram.send_message(chat_id, REJECTED)
-        case UserStatus.BLOCKED:
-            users.set_status(chat_id, UserStatus.ACTIVE)
+        case UserStatus.PAUSED:
             telegram.send_message(chat_id, BACK_AGAIN)
         case _:
-            telegram.send_message(chat_id, BACK_AGAIN)
+            # Active, o blocked que vuelve: si ya cargó el CV, arranca a buscar.
+            users.set_status(chat_id, UserStatus.ACTIVE)
+            if not user["profile"]:
+                telegram.send_message(chat_id, BACK_AGAIN)
+                return
+            users.request_search(chat_id)
+            telegram.send_message(chat_id, f"{BACK_AGAIN}\n{SEARCH_QUEUED}")
 
 
-def _handle_command(users: Users, telegram: Telegram, user: User, command: str) -> None:
+def _handle_command(
+    users: Users,
+    telegram: Telegram,
+    user: User,
+    command: str,
+    arguments: str,
+    message_id: int,
+) -> None:
     """
     Atiende un comando de un usuario active o paused.
     Args:
         users: El repositorio de usuarios.
         telegram: El cliente de la Bot API.
         user: El usuario que lo mandó.
-        command: El comando, como "/settings".
+        command: El comando sin la barra, como "settings".
+        arguments: Lo que vino después del comando; "" si nada.
+        message_id: El mensaje del comando; /clear borra de ahí para atrás.
     """
     chat_id = user["chat_id"]
     match command:
-        case "/settings":
+        case Command.SETTINGS:
             text, keyboard = _panel(users, user)
             telegram.send_message(chat_id, text, keyboard)
-        case "/perfil":
-            users.set_state(chat_id, ChatState.AWAITING_PROFILE)
-            telegram.send_message(chat_id, ASK_PROFILE)
-        case "/template":
+        case Command.PROFILE:
+            _show_profile(users, telegram, user)
+        case Command.ALLOW if not arguments:
+            telegram.send_message(chat_id, ALLOW_USAGE)
+        case Command.ALLOW:
+            items = users.add_terms(chat_id, arguments.split(INPUT_SEPARATOR))
+            count = len(users.terms(chat_id))
+            telegram.send_message(chat_id, _changed_text(ADDED, items, count))
+        case Command.BLOCK if not arguments:
+            telegram.send_message(chat_id, BLOCK_USAGE)
+        case Command.BLOCK:
+            items = users.add_blocked_words(chat_id, arguments.split(INPUT_SEPARATOR))
+            count = len(users.blocked_words(chat_id))
+            telegram.send_message(chat_id, _changed_text(ADDED, items, count))
+        case Command.TEMPLATE:
             telegram.send_message(chat_id, TEMPLATE_INTRO)
             # Sola en su mensaje, para copiarla o reenviarla entera.
             telegram.send_message(chat_id, PROFILE_TEMPLATE)
-        case "/pausa":
+        case Command.PAUSE if user["status"] == UserStatus.PAUSED:
+            telegram.send_message(chat_id, ALREADY_PAUSED)
+        case Command.PAUSE:
             users.set_status(chat_id, UserStatus.PAUSED)
             telegram.send_message(chat_id, PAUSED)
-        case "/reanudar":
+        case Command.RESUME if user["status"] == UserStatus.ACTIVE:
+            telegram.send_message(chat_id, ALREADY_ACTIVE)
+        case Command.RESUME:
             users.set_status(chat_id, UserStatus.ACTIVE)
             telegram.send_message(chat_id, RESUMED)
-        case "/ayuda":
+        case Command.HELP:
             telegram.send_message(chat_id, HELP)
-        case "/usuarios" if chat_id == settings.admin_chat_id:
+        case Command.CLEAR:
+            _clear_chat(telegram, chat_id, message_id)
+            telegram.send_message(chat_id, CHAT_CLEARED)
+        case Command.USERS if chat_id == settings.admin_chat_id:
             telegram.send_message(chat_id, _users_text(users))
         case _:
             telegram.send_message(chat_id, UNKNOWN)
@@ -264,7 +325,7 @@ def _save_profile(users: Users, telegram: Telegram, message: Message) -> None:
         return
     users.set_profile(chat_id, profile)
     users.set_state(chat_id, ChatState.IDLE)
-    telegram.send_message(chat_id, PROFILE_SAVED.format(chars=len(profile)))
+    telegram.send_message(chat_id, PROFILE_SAVED)
 
 
 def _approve_or_reject(
@@ -285,7 +346,7 @@ def _approve_or_reject(
     """
     if chat_id != settings.admin_chat_id:
         return
-    action, applicant_id = callback_data.split(":")
+    action, applicant_id = callback_data.split(CALLBACK_SEPARATOR)
     applicant = users.get(int(applicant_id))
     # Un botón viejo no aprueba dos veces ni reactiva a un rechazado.
     if applicant is None or applicant["status"] != UserStatus.PENDING:
@@ -293,7 +354,7 @@ def _approve_or_reject(
     first_name = applicant["first_name"]
     username = applicant["username"] or NO_USERNAME
 
-    if action == "approve":
+    if action == Callback.APPROVE:
         users.set_status(applicant["chat_id"], UserStatus.ACTIVE)
         text = ADMIN_APPROVED.format(first_name=first_name, username=username)
         telegram.edit_message(chat_id, message_id, text)
@@ -345,6 +406,19 @@ def _panel(users: Users, user: User) -> tuple[str, dict]:
     return text, settings_keyboard(user)
 
 
+def _changed_text(template: str, items: list[str], count: int) -> str:
+    """
+    La respuesta a un agregar o quitar de una lista.
+    Args:
+        template: ADDED o REMOVED.
+        items: Lo que cambió de verdad; vacía si ya los tenía (o, al quitar, si no).
+        count: Cuántos tiene ahora.
+    Returns:
+        str: Por ejemplo "Agregados: php, wordpress. Ahora tenés 34."
+    """
+    return template.format(items=", ".join(items) or NONE_CHANGED, count=count)
+
+
 def _list_text(template: str, items: list[str]) -> str:
     """
     Una lista del panel: el título con la cantidad y los ítems separados por " · ".
@@ -382,3 +456,79 @@ def _users_text(users: Users) -> str:
             )
         )
     return "\n\n".join(blocks)
+
+
+def _show_profile(users: Users, telegram: Telegram, user: User) -> None:
+    """
+    Muestra el CV cargado con un botón para reemplazarlo; sin CV, lo pide.
+    Args:
+        users: El repositorio de usuarios.
+        telegram: El cliente de la Bot API.
+        user: El usuario, con su perfil.
+    """
+    chat_id = user["chat_id"]
+    if not user["profile"]:
+        users.set_state(chat_id, ChatState.AWAITING_PROFILE)
+        telegram.send_message(chat_id, ASK_PROFILE, cancel_keyboard())
+        return
+    # Sin esperar el reemplazo: leerlo y seguir escribiendo no tiene que pisarlo.
+    telegram.send_message(chat_id, PROFILE_CURRENT)
+    for part in _split_message(user["profile"]):
+        time.sleep(PAUSE)
+        telegram.send_message(chat_id, part)
+    time.sleep(PAUSE)
+    telegram.send_message(chat_id, PROFILE_REPLACE_HINT, replace_profile_keyboard())
+
+
+def _clear_chat(telegram: Telegram, chat_id: int, last_message_id: int) -> None:
+    """
+    Borra los mensajes del chat, del /clear para atrás, de a tandas.
+    Args:
+        telegram: El cliente de la Bot API.
+        chat_id: El chat del usuario.
+        last_message_id: El mensaje del /clear.
+    """
+    # Los ids de un chat son correlativos; de lo más nuevo a lo más viejo, así lo
+    # reciente se borra aunque una tanda vieja falle.
+    end = last_message_id + 1
+    oldest = max(1, end - CLEAR_LOOKBACK)
+    while end > oldest:
+        start = max(oldest, end - DELETE_BATCH)
+        telegram.delete_messages(chat_id, list(range(start, end)))
+        end = start
+
+
+def _split_message(text: str) -> list[str]:
+    """
+    Parte un texto largo en mensajes que entran en Telegram, por renglones.
+    Args:
+        text: El texto, por ejemplo un CV.
+    Returns:
+        list[str]: Las partes, sin las que son solo espacios, que Telegram rechaza.
+    """
+    parts = []
+    current = ""
+    for line in text.splitlines(keepends=True):
+        if current and _utf16_len(current + line) > MESSAGE_LIMIT:
+            if current.strip():
+                parts.append(current)
+            current = ""
+        # Un renglón que solo ya no entra se corta; medio tope nunca pasa en UTF-16.
+        while _utf16_len(line) > MESSAGE_LIMIT:
+            parts.append(line[: MESSAGE_LIMIT // 2])
+            line = line[MESSAGE_LIMIT // 2 :]
+        current += line
+    if current.strip():
+        parts.append(current)
+    return parts
+
+
+def _utf16_len(text: str) -> int:
+    """
+    El largo de un texto como lo cuenta Telegram.
+    Args:
+        text: El texto.
+    Returns:
+        int: Unidades UTF-16: un emoji cuenta 2.
+    """
+    return len(text.encode("utf-16-le")) // 2

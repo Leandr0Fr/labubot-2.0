@@ -20,7 +20,6 @@ from src.telegram.constants import (
     PAUSE,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -84,6 +83,15 @@ class Telegram:
         if keyboard:
             body["reply_markup"] = keyboard
         self._call("editMessageText", body)
+
+    def delete_messages(self, chat_id: int, message_ids: list[int]) -> None:
+        """
+        Borra mensajes de un chat; los que no existen o ya no se pueden borrar se saltean.
+        Args:
+            chat_id: El chat.
+            message_ids: Hasta DELETE_BATCH ids.
+        """
+        self._call("deleteMessages", {"chat_id": chat_id, "message_ids": message_ids})
 
     def answer_callback(self, callback_id: str) -> None:
         """

@@ -5,11 +5,11 @@ import secrets
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Header, HTTPException
-
 from src.config.settings import settings
 from src.db.database import connect
 from src.driver.http import Driver
 from src.telegram.bot import Telegram
+from src.telegram.constants import PRIVATE_CHAT
 from src.telegram.handlers import on_callback, on_message
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ def webhook(
 
     conn = connect()
     try:
-        if "message" in update and update["message"]["chat"]["type"] == "private":
+        if "message" in update and update["message"]["chat"]["type"] == PRIVATE_CHAT:
             on_message(conn, telegram, update["message"])
         if "callback_query" in update:
             on_callback(conn, telegram, update["callback_query"])

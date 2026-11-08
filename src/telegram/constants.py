@@ -1,5 +1,6 @@
 """Constantes de Telegram: la Bot API, los comandos, los botones y los textos del bot."""
 
+from src.enums.command import Command
 from src.enums.traffic_light import TrafficLight
 from src.enums.user_status import UserStatus
 
@@ -15,17 +16,31 @@ EMOJIS = {
 }
 
 COMMANDS = [
-    {"command": "start", "description": "Pedir acceso o reactivar el bot"},
-    {"command": "settings", "description": "Términos, bloqueadas y perfil"},
-    {"command": "perfil", "description": "Cargar o reemplazar tu CV"},
-    {"command": "template", "description": "Plantilla para armar tu CV"},
-    {"command": "pausa", "description": "Pausar las alertas"},
-    {"command": "reanudar", "description": "Volver a recibir alertas"},
-    {"command": "ayuda", "description": "Qué hace el bot y cómo usarlo"},
+    {"command": Command.START, "description": "Pedir acceso o buscar ofertas ya"},
+    {"command": Command.SETTINGS, "description": "Términos, bloqueadas y perfil"},
+    {"command": Command.PROFILE, "description": "Ver o reemplazar tu CV"},
+    {
+        "command": Command.ALLOW,
+        "description": "Sumar términos: /permitido python, django",
+    },
+    {
+        "command": Command.BLOCK,
+        "description": "Bloquear palabras: /bloquear php, wordpress",
+    },
+    {"command": Command.TEMPLATE, "description": "Plantilla para armar tu CV"},
+    {"command": Command.PAUSE, "description": "Pausar las alertas"},
+    {"command": Command.RESUME, "description": "Volver a recibir alertas"},
+    {"command": Command.CLEAR, "description": "Borrar los mensajes del chat"},
+    {"command": Command.HELP, "description": "Qué hace el bot y cómo usarlo"},
 ]
 ADMIN_COMMANDS = [
-    {"command": "usuarios", "description": "Usuarios y su estado"},
+    {"command": Command.USERS, "description": "Usuarios y su estado"},
 ]
+COMMAND_PREFIX = "/"
+# Separa la acción del chat_id en el callback_data de Aprobar y Rechazar.
+CALLBACK_SEPARATOR = ":"
+# El único tipo de chat que atiende el bot: en un grupo se mezclarían perfiles.
+PRIVATE_CHAT = "private"
 
 # Botones: texto que se ve; el callback_data lo arma keyboards.py.
 BUTTON_TERMS = "🔎 Términos"
@@ -37,6 +52,7 @@ BUTTON_ADD = "➕ Agregar"
 BUTTON_REMOVE = "➖ Quitar"
 BUTTON_BACK = "⬅ Volver"
 BUTTON_CANCEL = "✖ Cancelar"
+BUTTON_REPLACE = "✏️ Reemplazar"
 BUTTON_APPROVE = "✅ Aprobar"
 BUTTON_REJECT = "❌ Rechazar"
 
@@ -48,6 +64,10 @@ WELCOME_PENDING = (
 STILL_PENDING = "⏳ Tu solicitud sigue pendiente."
 REJECTED = "No tenés acceso a este bot."
 BACK_AGAIN = "👋 ¡Volviste! Las alertas siguen como las dejaste."
+SEARCH_QUEUED = (
+    "🔎 Arranco una búsqueda para vos: cuando termine te llegan las ofertas y "
+    "el resumen."
+)
 ADMIN_REQUEST = "🆕 Solicitud de acceso\n{first_name} (@{username})\nchat_id {chat_id}"
 ADMIN_APPROVED = "✅ Aprobada: {first_name} (@{username})"
 ADMIN_REJECTED = "❌ Rechazada: {first_name} (@{username})"
@@ -65,7 +85,11 @@ ASK_PROFILE = (
     "📄 Mandame tu perfil como texto o como archivo .md / .txt. Reemplaza al anterior.\n"
     "¿No sabés cómo armarlo? Mirá /template."
 )
-PROFILE_SAVED = "📄 Perfil guardado ({chars} caracteres). Desde la próxima corrida te mando ofertas."
+PROFILE_CURRENT = "📄 Este es tu perfil actual:"
+PROFILE_REPLACE_HINT = "Para cambiarlo, tocá ✏️ Reemplazar."
+# La Bot API corta en 4096, contados en UTF-16: un emoji ocupa 2.
+MESSAGE_LIMIT = 4096
+PROFILE_SAVED = "📄 Perfil guardado. Lo podés leer con /perfil; mandá /start para buscar ofertas ya."
 PROFILE_EXTENSIONS = (".md", ".txt")
 
 SETTINGS_PANEL = (
@@ -87,21 +111,40 @@ ASK_BLOCKED = "Mandame las palabras separadas por coma."
 INPUT_SEPARATOR = ","
 ADDED = "Agregados: {items}. Ahora tenés {count}."
 REMOVED = "Quitados: {items}. Ahora tenés {count}."
+ALLOW_USAGE = "Escribí los términos después del comando, separados por coma: /permitido python, django"
+BLOCK_USAGE = "Escribí las palabras después del comando, separadas por coma: /bloquear php, wordpress"
 # Lo que dicen ADDED y REMOVED si no cambió nada.
 NONE_CHANGED = "ninguno"
 
 PAUSED = "⏸ Alertas pausadas. Usá /reanudar cuando quieras volver."
+CHAT_CLEARED = (
+    "🧹 Listo: borré los mensajes de las últimas 48 h. Los más viejos Telegram no "
+    "deja borrarlos."
+)
+# deleteMessages acepta hasta 100 ids por llamada.
+DELETE_BATCH = 100
+# Cuántos mensajes para atrás mira /clear: más de 48 h de bloques y resúmenes.
+CLEAR_LOOKBACK = 3000
 RESUMED = "▶️ Alertas activas de nuevo."
+ALREADY_PAUSED = (
+    "⏸ Tus alertas ya estaban pausadas. Usá /reanudar cuando quieras volver."
+)
+ALREADY_ACTIVE = "▶️ Tus alertas ya están activas."
 UNKNOWN = "No entendí. Usá /settings para ver tu configuración o /ayuda."
 HELP = (
-    "🤖 labubot busca cada hora ofertas en 12 portales con tus términos, las "
-    "compara con tu CV y te manda las que sirven: 🟢 encaja · 🟡 puede servir.\n"
+    "🤖 labubot busca ofertas en 12 portales con tus términos, cada hora y cuando "
+    "mandás /start. Las compara con tu CV y te manda las que sirven: "
+    "🟢 encaja · 🟡 puede servir.\n"
     "Te llega un bloque por término y, al final, el resumen de la corrida.\n\n"
     "/settings Términos, bloqueadas y perfil\n"
-    "/perfil Cargar o reemplazar tu CV\n"
+    "/permitido python, django Sumar términos de búsqueda\n"
+    "/bloquear php, wordpress Sumar palabras bloqueadas\n"
+    "/start Buscar ofertas ya\n"
+    "/perfil Ver o reemplazar tu CV\n"
     "/template Plantilla para armar tu CV\n"
     "/pausa Pausar las alertas\n"
     "/reanudar Volver a recibir alertas\n"
+    "/clear Borrar los mensajes del chat (últimas 48 h)\n"
     "/ayuda Este mensaje\n\n"
     "El CV funciona mejor en Markdown y con: seniority, stack, idiomas (tu nivel "
     "de inglés), modalidad (dónde aceptás presencial o híbrido) y lo que no querés: "
