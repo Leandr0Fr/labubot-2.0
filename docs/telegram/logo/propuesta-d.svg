@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>labubot: robot con casco de obra</title>
+  <rect x="0" y="0" width="512" height="512" fill="#2c3e54"/>
+  <g transform="translate(0 6)">
+    <!-- orejas -->
+    <rect x="76" y="282" width="48" height="72" rx="16" fill="#ff3b30" stroke="#18222e" stroke-width="14"/>
+    <rect x="388" y="282" width="48" height="72" rx="16" fill="#ff3b30" stroke="#18222e" stroke-width="14"/>
+    <!-- cabeza -->
+    <rect x="110" y="210" width="292" height="228" rx="54" fill="#e9eef3" stroke="#18222e" stroke-width="14"/>
+    <!-- visor y ojos -->
+    <rect x="140" y="262" width="232" height="112" rx="40" fill="#18222e"/>
+    <circle cx="200" cy="318" r="40" fill="#34c759"/>
+    <circle cx="312" cy="318" r="40" fill="#34c759"/>
+    <circle cx="186" cy="304" r="12" fill="#ffffff"/>
+    <circle cx="298" cy="304" r="12" fill="#ffffff"/>
+    <!-- boca -->
+    <rect x="208" y="390" width="96" height="24" rx="12" fill="#18222e"/>
+    <!-- casco: cúpula, cresta y ala -->
+    <path d="M96 224 A160 154 0 0 1 416 224 Z" fill="#ffcc00" stroke="#18222e" stroke-width="14" stroke-linejoin="round"/>
+    <path d="M224 224 L224 78 Q256 56 288 78 L288 224 Z" fill="#ffd36b" stroke="#18222e" stroke-width="14" stroke-linejoin="round"/>
+    <rect x="72" y="204" width="368" height="46" rx="23" fill="#ffcc00" stroke="#18222e" stroke-width="14"/>
+  </g>
+</svg>
