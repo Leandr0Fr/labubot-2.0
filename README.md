@@ -114,30 +114,31 @@ en vez de mandar mensajes nuevos: 🔎 Términos, 🚫 Bloqueadas, 📄 Perfil y
 coma. Los usuarios nuevos arrancan con las dos listas vacías: el mensaje de
 aprobación les pide cargarlas.
 
-**Qué llega en cada corrida.** Un bloque por cada palabra clave, en orden
-alfabético. Si encontró algo, un encabezado y después cada oferta en su propio
-mensaje, las verdes primero. Si no, un solo mensaje que lo dice. Al final, siempre,
-el resumen de la corrida:
+**Qué llega en cada corrida.** Un bloque por cada palabra clave que trajo 🟢 o 🟡,
+en orden alfabético: un encabezado y después cada oferta en su propio mensaje
+(para poder reenviarla o borrarla sola), las verdes primero. Cada oferta muestra
+el título en negrita y, abajo, el sitio de origen como link, sin la url cruda. Al
+final, siempre, el resumen de la corrida:
 
 ```
-Búsqueda palabra "python":
+🔎 python
 🟢 Desarrollador Python Backend (FastAPI)
-https://ar.linkedin.com/jobs/view/…
+   ar.linkedin.com
 🟡 Analista Programador Python Jr
-https://ar.computrabajo.com/ofertas-de-trabajo/…
+   ar.computrabajo.com
 
-Búsqueda palabra "developer":
-No se encontraron coincidencias.
+📋 Resumen · 14:00 a 14:23
+120 ofertas nuevas: 🟢 1 · 🟡 3 · 🔴 116
 
-Resumen corrida (14:00 - 14:23):
-python: 1 verde encontrado - 1 amarillo encontrado
-developer: No encontramos coincidencias
-django: 2 amarillos encontrados
+django: 🟡 2
+python: 🟢 1 · 🟡 1
+
+Sin coincidencias: backend, developer, fastapi
 ```
 
-Solo suenan las ofertas. Los bloques sin resultados y el resumen llegan **sin
-sonido** (`disable_notification`): con 22 palabras son unos 23 mensajes por
-corrida aunque no haya nada, y no tienen que hacer sonar el celular cada hora.
+Las palabras sin resultados no mandan mensaje: quedan juntas en el último renglón
+del resumen. Solo suenan las ofertas; el resumen llega **sin sonido**
+(`disable_notification`), para no hacer sonar el celular cada hora.
 
 Una coincidencia es una 🟢 o 🟡 que te llega en esa corrida; las rojas y las ya
 vistas no cuentan. Una oferta aparece una sola vez, en la primera de tus palabras

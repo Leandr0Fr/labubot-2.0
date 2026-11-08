@@ -7,6 +7,7 @@ import sqlite3
 import time
 from collections import Counter
 from datetime import datetime
+from html import escape
 from typing import Any
 
 from src.classifier.openai import Classifier
@@ -35,17 +36,15 @@ from src.schemas.user import User
 from src.telegram.bot import Telegram
 from src.telegram.constants import (
     KEYWORD_HEADER,
-    NO_MATCHES,
     OTHER_PORTALS,
     OTHER_PORTALS_HEADER,
     PAUSE,
     SUMMARY_EMPTY,
-    SUMMARY_GREEN,
     SUMMARY_GREENS,
     SUMMARY_LINE,
     SUMMARY_SEPARATOR,
     SUMMARY_TITLE,
-    SUMMARY_YELLOW,
+    SUMMARY_TOTAL,
     SUMMARY_YELLOWS,
 )
 
@@ -190,7 +189,7 @@ def _run_user(
 
     try:
         sent = _send_by_keyword(telegram, deliveries, chat_id, keywords, matches)
-        _send_summary(telegram, chat_id, keywords, matches, started)
+        _send_summary(telegram, chat_id, keywords, matches, colors, started)
     except LabubotForbiddenError:
         logger.warning(f"El chat {chat_id} bloqueó el bot: pasa a blocked")
         users.set_status(chat_id, UserStatus.BLOCKED)
@@ -250,7 +249,9 @@ def _send_by_keyword(
     matches: dict[str | None, list[tuple[Offer, TrafficLight]]],
 ) -> int:
     """
-    Manda un bloque por palabra: el encabezado y sus 🟢🟡, o que no hubo coincidencias.
+    Manda un bloque por palabra con 🟢🟡: el encabezado y cada oferta en su mensaje.
+
+    Las palabras sin coincidencias no mandan nada: aparecen solo en el resumen.
     Args:
         telegram: El cliente de la Bot API.
         deliveries: Las entregas, para anotar cada envío.
@@ -264,14 +265,13 @@ def _send_by_keyword(
     """
     sent = 0
     for term in keywords:
+        if term not in matches:
+            continue
         header = OTHER_PORTALS_HEADER
         if term is not None:
-            header = KEYWORD_HEADER.format(term=term)
+            header = KEYWORD_HEADER.format(term=escape(term))
         time.sleep(PAUSE)
-        if term not in matches:
-            telegram.send_message(chat_id, f"{header}\n{NO_MATCHES}", silent=True)
-            continue
-        telegram.send_message(chat_id, header)
+        telegram.send_message(chat_id, header, html=True)
         for color in (TrafficLight.GREEN, TrafficLight.YELLOW):
             for offer, light in matches[term]:
                 if light != color:
@@ -287,26 +287,31 @@ def _send_summary(
     chat_id: int,
     keywords: list[str | None],
     matches: dict[str | None, list[tuple[Offer, TrafficLight]]],
+    colors: Counter[TrafficLight],
     started: datetime,
 ) -> None:
     """
-    Manda sin sonido cuántas 🟢 y 🟡 trajo cada palabra en esta corrida.
+    Manda sin sonido el resumen: el total por color y cuántas 🟢🟡 trajo cada palabra.
+
+    Las palabras sin coincidencias van juntas en un solo renglón, al final.
     Args:
         telegram: El cliente de la Bot API.
         chat_id: El chat del usuario.
         keywords: Sus palabras en orden alfabético; None = otros portales, al final.
         matches: Las 🟢🟡 que se le mandaron, por palabra; None = otros portales.
+        colors: Cuántas ofertas nuevas de cada color se clasificaron en esta corrida.
         started: Cuándo arrancó la corrida de este usuario.
     Raises:
         LabubotForbiddenError: Si el usuario bloqueó el bot.
     """
-    lines = []
+    found = []
+    empty = []
     for term in keywords:
         label = OTHER_PORTALS
         if term is not None:
-            label = term
+            label = escape(term)
         if term not in matches:
-            lines.append(SUMMARY_EMPTY.format(term=label))
+            empty.append(label)
             continue
         greens = yellows = 0
         for _offer, light in matches[term]:
@@ -315,22 +320,29 @@ def _send_summary(
             else:
                 yellows += 1
         counts = []
-        if greens == 1:
-            counts.append(SUMMARY_GREEN)
-        if greens > 1:
+        if greens:
             counts.append(SUMMARY_GREENS.format(count=greens))
-        if yellows == 1:
-            counts.append(SUMMARY_YELLOW)
-        if yellows > 1:
+        if yellows:
             counts.append(SUMMARY_YELLOWS.format(count=yellows))
-        lines.append(
+        found.append(
             SUMMARY_LINE.format(term=label, counts=SUMMARY_SEPARATOR.join(counts))
         )
 
     time.sleep(PAUSE)
     end = datetime.now()
-    lines.insert(0, SUMMARY_TITLE.format(start=f"{started:%H:%M}", end=f"{end:%H:%M}"))
-    telegram.send_message(chat_id, "\n".join(lines), silent=True)
+    title = SUMMARY_TITLE.format(start=f"{started:%H:%M}", end=f"{end:%H:%M}")
+    total = SUMMARY_TOTAL.format(
+        total=colors.total(),
+        greens=colors[TrafficLight.GREEN],
+        yellows=colors[TrafficLight.YELLOW],
+        reds=colors[TrafficLight.RED],
+    )
+    blocks = [f"{title}\n{total}"]
+    if found:
+        blocks.append("\n".join(found))
+    if empty:
+        blocks.append(SUMMARY_EMPTY.format(terms=", ".join(empty)))
+    telegram.send_message(chat_id, "\n\n".join(blocks), silent=True, html=True)
 
 
 def _save_results(verdicts: list[list], started: datetime, chat_id: int | None) -> None:

@@ -3,7 +3,9 @@
 import json
 import logging
 import time
+from html import escape
 from typing import Any
+from urllib.parse import urlsplit
 
 from src.config.settings import settings
 from src.driver.http import Driver
@@ -40,6 +42,7 @@ class Telegram:
         text: str,
         keyboard: dict | None = None,
         silent: bool = False,
+        html: bool = False,
     ) -> None:
         """
         Manda un texto, con botones si vienen y sin sonido si silent.
@@ -50,6 +53,8 @@ class Telegram:
             text: El texto, hasta MESSAGE_LIMIT unidades UTF-16.
             keyboard: Un inline keyboard, como los arma keyboards.py.
             silent: True = la notificación llega sin sonido.
+            html: True = el texto trae etiquetas HTML de Telegram (<b>, <a>) y lo
+                variable ya viene escapado.
         Raises:
             LabubotForbiddenError: Si el usuario bloqueó el bot.
             LabubotRateLimitError: Si Telegram contestó 429.
@@ -65,6 +70,8 @@ class Telegram:
             body["reply_markup"] = keyboard
         if silent:
             body["disable_notification"] = True
+        if html:
+            body["parse_mode"] = "HTML"
         self._call("sendMessage", body)
 
     def edit_message(
@@ -113,7 +120,7 @@ class Telegram:
 
     def send_offer(self, chat_id: int, offer: Offer, light: TrafficLight) -> None:
         """
-        Manda una oferta con su emoji, después de esperar PAUSE.
+        Manda una oferta, después de esperar PAUSE: emoji y título, y el sitio como link.
         Args:
             chat_id: El chat del usuario.
             offer: La oferta ya clasificada.
@@ -124,8 +131,14 @@ class Telegram:
             LabubotRequestError: Si el token no sirve o falla la red.
         """
         time.sleep(PAUSE)
-        text = OFFER.format(emoji=EMOJIS[light], title=offer["title"], url=offer["url"])
-        self.send_message(chat_id, text)
+        site = urlsplit(offer["url"]).netloc.removeprefix("www.")
+        text = OFFER.format(
+            emoji=EMOJIS[light],
+            title=escape(offer["title"]),
+            url=escape(offer["url"]),
+            site=site,
+        )
+        self.send_message(chat_id, text, html=True)
         logger.debug(f"Enviada a {chat_id}: {offer['title']}")
 
     def set_commands(self) -> None:

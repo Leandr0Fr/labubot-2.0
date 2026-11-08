@@ -6,9 +6,9 @@ recibía mensajes. Este cambio lo convierte en un bot con usuarios: cada uno pid
 admin lo aprueba y desde el chat carga su CV, sus palabras clave y sus palabras bloqueadas.
 Es un bot interno, de hasta 5 usuarios. La corrida va usuario por usuario, uno tras otro,
 reusando lo que ya se buscó en esa corrida; cada descripción se baja una sola vez y el LLM
-se llama una vez por usuario y oferta. Llega un bloque por palabra clave, con sus 🟢🟡 o
-con "No se encontraron coincidencias", y al final el resumen de la corrida con lo que
-encontró cada palabra. Corre en un VPS Linux
+se llama una vez por usuario y oferta. Llega un bloque por cada palabra clave que trajo
+🟢🟡, y al final el resumen de la corrida con lo que encontró cada palabra y las que no
+trajeron nada. Corre en un VPS Linux
 (proveedor a definir) con dos procesos, `api` (webhook) y `worker` (cada hora), que
 comparten `labubot.db`.
 
@@ -30,11 +30,11 @@ Están tomadas, pero el usuario puede revisarlas. El por qué de cada una está 
 | D4 | Una ejecución por usuario, uno tras otro y sin hilos, cada uno con sus palabras, sus bloqueadas y su perfil. Una caché en memoria de la corrida (`searches[(portal, palabra)]`) evita repetir búsquedas; cada descripción se baja una vez (`offers`) y el LLM se llama una vez por (usuario, oferta) | En paralelo serían hasta 5 búsquedas a la vez a LinkedIn desde la misma IP; en serie entra en la hora porque el primero paga el scraping y los demás salen casi enteros de la caché | Sí. Si la corrida deja de entrar en la hora, el riesgo y las salidas están en [`diseno.md` §11](diseno.md#11-riesgos-y-trade-offs) |
 | D5 | Sin Redis ni Celery: `api` y `worker` sobre SQLite en modo WAL. Huey con `SqliteHuey` queda para F5 | Una corrida por hora y pocos usuarios no justifican un broker | Sí. F5 entra solo si hace falta `/buscar` |
 | D6 | Telegram a mano: FastAPI solo recibe, y todo lo que sale va por `Driver.post_json()` / `get()` | `python-telegram-bot` y `aiogram` traen su propio httpx y romperían la regla del `Driver` | Sí, si el bot llega a usar mucho más de la Bot API |
-| D7 | Un bloque por palabra, en orden alfabético. Con 🟢🟡: `Búsqueda palabra "{term}":` y después un mensaje por oferta, `"{emoji} {title}\n{url}"`, verdes primero. Sin nada: `Búsqueda palabra "{term}":` + `No se encontraron coincidencias.` en un solo mensaje, sin sonido. "Otros portales" al final, solo si trajo algo. `PAUSE = 1` s antes de cada mensaje | Formato definido por el usuario (01/11/2026): cada búsqueda dice qué encontró, y cada oferta se sigue pudiendo reenviar sola, como hoy | Sí. Los links van sin vista previa (I4) |
+| D7 | Un bloque por cada palabra con 🟢🟡, en orden alfabético: `🔎 <b>{term}</b>` y después un mensaje por oferta, `{emoji} <b>{title}</b>` con el sitio de origen como link abajo (`parse_mode` HTML), verdes primero. Las palabras sin nada no mandan mensaje. "🌐 Otros portales" al final, solo si trajo algo. `PAUSE = 1` s antes de cada mensaje | Formato del usuario (01/11/2026), rehecho el 07/11/2026 para que se lea mejor: sin urls crudas ni ~15 mensajes de "No se encontraron coincidencias" por corrida. Cada oferta se sigue pudiendo reenviar sola | Sí. Los links van sin vista previa (I4) |
 | D8 | Un 403 al enviar lanza `LabubotForbiddenError`: el usuario pasa a `blocked` y la corrida sigue con los demás. Un `/start` lo vuelve a `active` | Quien bloqueó el bot no frena a los demás ni se le reintenta para siempre | Sí |
 | D9 | `migrate.py`, una sola vez: el admin con `perfil.md` y las listas de la versión de un chat, y `vistas.txt` cargado como `deliveries` con `light` NULL | El admin no pierde su perfil ni vuelve a pagar las 1.564 urls que ya vio | Hasta que se corra |
 | D10 | Solo chats privados (`chat.id == from.id`); los grupos se ignoran | `chat_id` es la clave del usuario, y en un grupo se mezclarían perfiles | Sí, pero cambia la clave de `users` |
-| D11 | Al final de la corrida de cada usuario, siempre, `Resumen corrida (inicio - fin):` con una línea por palabra: `python: 1 verde encontrado - 2 amarillos encontrados` o `developer: No encontramos coincidencias`. Va sin sonido, igual que los bloques vacíos | Saber que la corrida anduvo y qué rinde cada palabra. Con 22 palabras son ~23 mensajes por corrida aunque no haya nada: solo suenan las ofertas | Sí. Si molesta el volumen, los bloques vacíos pueden ir solo dentro del resumen |
+| D11 | Al final de la corrida de cada usuario, siempre y sin sonido: `📋 Resumen · inicio a fin`, el total de ofertas nuevas por color (`120 ofertas nuevas: 🟢 1 · 🟡 3 · 🔴 116`), una línea por palabra con 🟢🟡 (`python: 🟢 1 · 🟡 2`) y un último renglón con las que no trajeron nada (`Sin coincidencias: developer, fastapi`) | Saber que la corrida anduvo, cuánto se evaluó y qué rinde cada palabra, en un solo mensaje | Sí |
 | D12 | Indeed y Workable buscan palabra por palabra. La palabra de cada oferta es la primera del usuario cuya búsqueda la trajo; en los portales sin búsqueda, la primera contenida en el título, y si no hay, 🗂 Otros portales | Con el `OR` de todos los términos no se sabe qué palabra trajo cada oferta | Sí. Si dan 429, se vuelve al `OR` y se atribuye por título |
 
 ## Mapa de la documentación
@@ -75,10 +75,10 @@ Lucía es una usuaria ficticia. Las pantallas usan el tema oscuro de Android.
 | Le llega `APPROVED`. Con `/perfil` manda su CV como `.md` y el bot lo baja con `getFile`. | Un solo mensaje con los contadores y cuatro botones; al navegar se edita. | 🚫 Bloqueadas edita el panel para mostrar la lista, sembrada con la semilla por defecto. |
 | **06 · Agregar bloqueadas** | **07 · Términos de búsqueda** | **08a · Ofertas por palabra** |
 | ![](capturas/06-agregar-bloqueadas.png) | ![](capturas/07-terminos.png) | ![](capturas/08a-ofertas-por-palabra.png) |
-| ➕ Agregar pide las palabras: con «wordpress, laravel» pasa de 32 a 34. | 🔎 Términos muestra sus palabras, en orden alfabético: la corrida las busca de a una y cada oferta queda en la primera que la trajo. | Un bloque por palabra: `Búsqueda palabra "…":` con sus ofertas (verdes primero), o con "No se encontraron coincidencias." en un solo mensaje sin sonido. |
+| ➕ Agregar pide las palabras: con «wordpress, laravel» pasa de 32 a 34. | 🔎 Términos muestra sus palabras, en orden alfabético: la corrida las busca de a una y cada oferta queda en la primera que la trajo. | Un bloque por palabra con sus ofertas, verdes primero. La captura es del formato anterior al 07/11/2026; hoy el encabezado es `🔎 palabra`, cada oferta lleva el sitio como link en vez de la url, y las palabras sin nada no mandan mensaje (D7). |
 | **08b · Fin de la corrida** | **08c · Resumen de la corrida** | **09 · Pausar y reanudar** |
 | ![](capturas/08b-resumen.png) | ![](capturas/08c-resumen-final.png) | ![](capturas/09-pausa.png) |
-| Los últimos bloques, "Otros portales:" (solo porque trajo algo) y el comienzo de `Resumen corrida (11:19 - 11:24):`. | El resto del resumen: una línea por palabra, con "N verdes / amarillos encontrados" o "No encontramos coincidencias". Llega siempre y sin sonido. | `/pausa` la deja en `paused` y las corridas la saltean; `/reanudar` la vuelve a `active`. |
+| Los últimos bloques, "Otros portales" (solo porque trajo algo) y el comienzo del resumen (captura del formato anterior). | El resto del resumen. Hoy: el total por color, una línea por palabra con 🟢🟡 y un renglón "Sin coincidencias" con las demás (D11). Llega siempre y sin sonido. | `/pausa` la deja en `paused` y las corridas la saltean; `/reanudar` la vuelve a `active`. |
 | **10 · Menú de comandos** | **11 · Usuarios (admin)** | |
 | ![](capturas/10-menu-comandos.png) | ![](capturas/11-admin-usuarios.png) | |
 | Los comandos de `setMyCommands`. `/usuarios` aparece solo en el chat del admin. | `/usuarios` en el chat del admin: cada usuario con su @, su estado y su `chat_id`. | |

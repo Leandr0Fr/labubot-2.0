@@ -212,16 +212,14 @@ STATUS_LABELS = {
     UserStatus.BLOCKED: "🚫 bloqueó el bot",
 }
 
-OFFER = "{emoji} {title}\n{url}"
-KEYWORD_HEADER = 'Búsqueda palabra "{term}":'
-NO_MATCHES = "No se encontraron coincidencias."
-OTHER_PORTALS_HEADER = "Otros portales:"
+OFFER = '{emoji} <b>{title}</b>\n<a href="{url}">{site}</a>'
+KEYWORD_HEADER = "🔎 <b>{term}</b>"
+OTHER_PORTALS_HEADER = "🌐 <b>Otros portales</b>"
 OTHER_PORTALS = "Otros portales"
-SUMMARY_TITLE = "Resumen corrida ({start} - {end}):"
+SUMMARY_TITLE = "📋 <b>Resumen</b> · {start} a {end}"
+SUMMARY_TOTAL = "{total} ofertas nuevas: 🟢 {greens} · 🟡 {yellows} · 🔴 {reds}"
 SUMMARY_LINE = "{term}: {counts}"
-SUMMARY_SEPARATOR = " - "
-SUMMARY_GREEN = "1 verde encontrado"
-SUMMARY_GREENS = "{count} verdes encontrados"
-SUMMARY_YELLOW = "1 amarillo encontrado"
-SUMMARY_YELLOWS = "{count} amarillos encontrados"
-SUMMARY_EMPTY = "{term}: No encontramos coincidencias"
+SUMMARY_SEPARATOR = " · "
+SUMMARY_GREENS = "🟢 {count}"
+SUMMARY_YELLOWS = "🟡 {count}"
+SUMMARY_EMPTY = "Sin coincidencias: {terms}"
