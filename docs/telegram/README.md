@@ -4,12 +4,13 @@ Antes de este cambio, labubot buscaba cada hora en 11 portales (hoy son 12), eva
 las ofertas contra un único `perfil.md` y mandaba las 🟢 y 🟡 a un chat fijo. El bot no
 recibía mensajes. Este cambio lo convierte en un bot con usuarios: cada uno pide acceso con `/start`, el
 admin lo aprueba y desde el chat carga su CV, sus palabras clave y sus palabras bloqueadas.
-Es un bot interno, de hasta 5 usuarios. La corrida va usuario por usuario, uno tras otro,
-reusando lo que ya se buscó en esa corrida; cada descripción se baja una sola vez y el LLM
-se llama una vez por usuario y oferta. Llega un bloque por cada palabra clave que trajo
+Es un bot interno, de hasta 5 usuarios. Cada usuario corre su búsqueda en su propio hilo
+(I19); cada descripción se baja una sola vez y el LLM se llama una vez por usuario y
+oferta. Llega un bloque por cada palabra clave que trajo
 🟢🟡, y al final el resumen de la corrida con lo que encontró cada palabra y las que no
 trajeron nada. Corre en un VPS Linux
-(proveedor a definir) con dos procesos, `api` (webhook) y `worker` (cada hora), que
+(proveedor a definir) con dos procesos, `api` (webhook) y `worker` (al arrancar, cada hora
+y con cada `/start`), que
 comparten `labubot.db`.
 
 **Estado (07/11/2026):** implementado F1 a F3 (base, corrida por usuario y bot) y los
@@ -27,7 +28,7 @@ Están tomadas, pero el usuario puede revisarlas. El por qué de cada una está 
 | D1 | Un VPS Linux, de un proveedor todavía a definir, con dominio propio. Telegram llama por webhook a Caddy (HTTPS), que pasa a uvicorn en `127.0.0.1:8000`. En la PC, un túnel `cloudflared` | Contestar a toda hora sin un proceso de polling, con el mismo código en la PC y en el VPS | Sí. El proveedor se elige después de la prueba de IP (T0.3; el plan de [`vps.md`](vps.md) §7 vale para cualquiera). Si LinkedIn o Indeed fallan, F4 se hace en la PC con el túnel. Sin dominio todavía, el VPS usa un túnel ngrok con dominio fijo en lugar de Caddy (I2) |
 | D2 | Cada usuario tiene su perfil, sus términos y sus bloqueadas. ~~Al aprobarlo se le siembran `DEFAULT_TERMS` y `DEFAULT_BLOCKED_TITLE_WORDS`~~ Arranca con las listas vacías (I14) | El veredicto depende del CV, y qué buscar o descartar depende de cada uno | Es el núcleo del cambio. La semilla se puede cambiar y vale para los usuarios nuevos |
 | D3 | `/start` deja al usuario en `pending` y el admin (`ADMIN_CHAT_ID`) aprueba o rechaza con botones | Cada usuario cuesta ~50 llamadas al LLM por hora, y las paga la cuenta del admin | Sí, pero abrir el bot sin aprobación deja el gasto sin control |
-| D4 | Una ejecución por usuario, uno tras otro y sin hilos, cada uno con sus palabras, sus bloqueadas y su perfil. Una caché en memoria de la corrida (`searches[(portal, palabra)]`) evita repetir búsquedas; cada descripción se baja una vez (`offers`) y el LLM se llama una vez por (usuario, oferta) | En paralelo serían hasta 5 búsquedas a la vez a LinkedIn desde la misma IP; en serie entra en la hora porque el primero paga el scraping y los demás salen casi enteros de la caché | Sí. Si la corrida deja de entrar en la hora, el riesgo y las salidas están en [`diseno.md` §11](diseno.md#11-riesgos-y-trade-offs) |
+| D4 | **Reemplazada por I19.** Una ejecución por usuario, uno tras otro y sin hilos, cada uno con sus palabras, sus bloqueadas y su perfil. Una caché en memoria de la corrida (`searches[(portal, palabra)]`) evita repetir búsquedas; cada descripción se baja una vez (`offers`) y el LLM se llama una vez por (usuario, oferta) | En paralelo serían hasta 5 búsquedas a la vez a LinkedIn desde la misma IP; en serie entra en la hora porque el primero paga el scraping y los demás salen casi enteros de la caché | Sí. Si la corrida deja de entrar en la hora, el riesgo y las salidas están en [`diseno.md` §11](diseno.md#11-riesgos-y-trade-offs) |
 | D5 | Sin Redis ni Celery: `api` y `worker` sobre SQLite en modo WAL. Huey con `SqliteHuey` queda para F5 | Una corrida por hora y pocos usuarios no justifican un broker | Sí. F5 entra solo si hace falta `/buscar` |
 | D6 | Telegram a mano: FastAPI solo recibe, y todo lo que sale va por `Driver.post_json()` / `get()` | `python-telegram-bot` y `aiogram` traen su propio httpx y romperían la regla del `Driver` | Sí, si el bot llega a usar mucho más de la Bot API |
 | D7 | Un bloque por cada palabra con 🟢🟡, en orden alfabético: `🔎 <b>{term}</b>` y después un mensaje por oferta, `{emoji} <b>{title}</b>` con el sitio de origen como link abajo (`parse_mode` HTML), verdes primero. Las palabras sin nada no mandan mensaje. "🌐 Otros portales" al final, solo si trajo algo. `PAUSE = 1` s antes de cada mensaje | Formato del usuario (01/11/2026), rehecho el 07/11/2026 para que se lea mejor: sin urls crudas ni ~15 mensajes de "No se encontraron coincidencias" por corrida. Cada oferta se sigue pudiendo reenviar sola | Sí. Los links van sin vista previa (I4) |

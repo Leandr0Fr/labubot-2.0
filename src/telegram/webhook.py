@@ -5,6 +5,7 @@ import secrets
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Header, HTTPException
+
 from src.config.settings import settings
 from src.db.database import connect
 from src.driver.http import Driver

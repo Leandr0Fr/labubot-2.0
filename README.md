@@ -110,7 +110,7 @@ llegan ofertas.
 
 | Comando | Qué hace |
 |---|---|
-| `/start` | Pide acceso; si ya tiene acceso y CV, arranca una búsqueda para él (o lo reactiva si había bloqueado el bot) |
+| `/start` | Pide acceso; si está activo y tiene CV, arranca una búsqueda para él (si había bloqueado el bot, además lo reactiva). En pausa no busca: primero `/reanudar` |
 | `/settings` | Panel con sus palabras clave, sus bloqueadas, su perfil y la pausa |
 | `/perfil` | Muestra su CV actual y le pide uno nuevo para reemplazarlo |
 | `/permitido python, django` | Suma términos de búsqueda sin pasar por `/settings` |
