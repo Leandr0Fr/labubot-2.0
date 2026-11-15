@@ -52,6 +52,10 @@ exacto de los que muestra `/jobs/search` deslogueado. Misma búsqueda.
 | SuTrabajo | REST de su WordPress | sin búsqueda: lo reciente de Argentina y de remoto |
 | We Work Remotely | RSS de back-end y full-stack | sin búsqueda: todo lo reciente |
 
+**Talent y SuTrabajo están fuera de la corrida:** bloquean la IP del VPS (403).
+Su código sigue en `src/portals/`; para volver a sumarlos se anotan en `portals`
+de `main.py`, y SuTrabajo también en `WITHOUT_SEARCH`.
+
 Indeed y Workable buscaban con todos los términos juntos (`OR`). Pasan a buscar
 palabra por palabra para saber qué palabra trajo cada oferta. Si empiezan a
 contestar 429, se vuelve al `OR` y la palabra se saca del título.

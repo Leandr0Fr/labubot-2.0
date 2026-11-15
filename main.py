@@ -28,8 +28,6 @@ from src.portals.himalayas import Himalayas
 from src.portals.indeed import Indeed
 from src.portals.jobicy import Jobicy
 from src.portals.linkedin import LinkedIn
-from src.portals.sutrabajo import SuTrabajo
-from src.portals.talent import Talent
 from src.portals.weworkremotely import WeWorkRemotely
 from src.portals.workable import Workable
 from src.schemas.job import Found, Offer
@@ -82,13 +80,11 @@ def main(chat_id: int | None = None) -> None:
             "Computrabajo": Computrabajo(driver),
             "GetOnBoard": GetOnBoard(driver),
             "Himalayas": Himalayas(driver),
-            "Talent": Talent(driver),
             "Indeed": Indeed(driver),
             "Workable": Workable(driver),
             "Bumeran": Bumeran(driver),
             "EmpleosIT": EmpleosIT(driver),
             "Jobicy": Jobicy(driver),
-            "SuTrabajo": SuTrabajo(driver),
             "WeWorkRemotely": WeWorkRemotely(driver),
         }
         searches: dict[tuple[str, str], dict[str, str]] = {}

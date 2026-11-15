@@ -15,7 +15,7 @@ SEARCH_POLL_SECONDS: Cada cuántos segundos el worker mira si alguien pidió una
 from pathlib import Path
 
 RESULTS_DIR = Path("resultados")
-WITHOUT_SEARCH = ("Bumeran", "EmpleosIT", "Jobicy", "SuTrabajo", "WeWorkRemotely")
+WITHOUT_SEARCH = ("Bumeran", "EmpleosIT", "Jobicy", "WeWorkRemotely")
 HUB = "SuTrabajo"
 HUB_ORIGINS = {
     "ar.linkedin.com": "LinkedIn",
