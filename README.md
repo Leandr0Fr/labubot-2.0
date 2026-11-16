@@ -135,7 +135,8 @@ aprobación les pide cargarlas.
 en orden alfabético: un encabezado y después cada oferta en su propio mensaje
 (para poder reenviarla o borrarla sola), las verdes primero. Cada oferta muestra
 el título en negrita y, abajo, el sitio de origen como link, sin la url cruda. Al
-final, siempre, el resumen de la corrida:
+final, el resumen de la corrida. Si no hubo ninguna 🟢 ni 🟡, no llega nada,
+tampoco el resumen:
 
 ```
 🔎 python
@@ -187,8 +188,8 @@ por cada usuario activo:
 5. El `Classifier` le pone color a cada oferta contra **su** CV, y el resultado
    se guarda en el momento: si la corrida se corta, lo ya clasificado no se
    vuelve a pagar.
-6. Se manda un bloque por palabra (sus 🟢 y 🟡, o "No se encontraron
-   coincidencias") y después el resumen de la corrida.
+6. Se manda un bloque por cada palabra con 🟢 o 🟡 y después el resumen de la
+   corrida. Si no hubo ninguna, no se manda nada.
    Lo que no se pudo mandar se reintenta en la corrida siguiente.
 7. Las ofertas nuevas quedan en `resultados/AAAA-MM-DD_HHMM.json` y los colores
    de cada usuario en el `.csv` del mismo nombre.

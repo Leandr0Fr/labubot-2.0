@@ -111,6 +111,7 @@ def _run_user(
     Busca las palabras de un usuario, clasifica lo nuevo y le manda 🟢🟡 y el resumen.
 
     También manda las 🟢🟡 que quedaron sin enviar, aunque su palabra ya no esté.
+    Sin ninguna 🟢🟡 no manda nada, tampoco el resumen.
     El hub reescribe y pierde datos: una oferta suya se lee con el portal de su
     sitio de origen si está en HUB_ORIGINS, y si ese portal no la puede servir,
     con la reescritura (solo la de Argentina). Lo guardado del hub nunca se toma
@@ -194,7 +195,8 @@ def _run_user(
 
     try:
         sent = _send_by_keyword(telegram, deliveries, chat_id, keywords, matches)
-        _send_summary(telegram, chat_id, keywords, matches, colors, started)
+        if matches:
+            _send_summary(telegram, chat_id, keywords, matches, colors, started)
     except LabubotForbiddenError:
         logger.warning(f"El chat {chat_id} bloqueó el bot: pasa a blocked")
         users.set_status(chat_id, UserStatus.BLOCKED)
