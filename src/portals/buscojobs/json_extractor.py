@@ -33,16 +33,17 @@ def extract_description(raw: str) -> str:
         y la descripción en texto plano.
     """
     job = json.loads(raw)
+    # Ciudad y Departamento faltan en los avisos que no los informan.
     places = []
-    for place in (job["Ciudad"], job["Departamento"]):
-        if place:
-            places.append(place["Nombre"])
+    for key in ("Ciudad", "Departamento"):
+        if job.get(key):
+            places.append(job[key]["Nombre"])
     lines = []
     if places:
         lines.append(f"Ubicación: {', '.join(places)}")
-    if job["PermiteTeletrabajo"]:
+    if job.get("PermiteTeletrabajo"):
         lines.append(f"Modalidad: {REMOTE}")
-    elif job["PermiteTrabajoHibrido"]:
+    elif job.get("PermiteTrabajoHibrido"):
         lines.append(f"Modalidad: {HYBRID}")
     lines.append(job["Descripcion"])
     return "\n".join(lines)

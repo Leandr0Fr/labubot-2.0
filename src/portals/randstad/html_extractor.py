@@ -43,13 +43,21 @@ def extract_description(html: str) -> str:
     Args:
         html: Página devuelta por /trabajos/{título}_{ciudad}_{id}/.
     Returns:
-        str: Ubicación en la primera línea y descripción, en texto plano.
+        str: Ubicación en la primera línea, si el aviso la trae, y descripción,
+        en texto plano.
     """
     source = _route_data(html)["jobData"]["hits"]["hits"][0]["_source"]
-    location = source["JobLocation"]
+    # City y Region faltan en los avisos que no los informan.
+    places = []
+    for key in ("City", "Region"):
+        if source["JobLocation"].get(key):
+            places.append(source["JobLocation"][key])
+    lines = []
+    if places:
+        lines.append(f"Ubicación: {', '.join(places)}")
     description = BeautifulSoup(source["JobInformation"]["Description"], "html.parser")
-    text = description.get_text(separator="\n", strip=True)
-    return f"Ubicación: {location['City']}, {location['Region']}\n{text}"
+    lines.append(description.get_text(separator="\n", strip=True))
+    return "\n".join(lines)
 
 
 def _route_data(html: str) -> dict:
