@@ -25,7 +25,7 @@ class Computrabajo:
 
     def search(self, keywords: str) -> dict[str, str]:
         """
-        Trae url y título de las ofertas remotas o de AMBA del término, sin su detalle.
+        Trae url y título de las ofertas del término en todo el país, sin su detalle.
         Args:
             keywords: Término de búsqueda, tal como lo escribirías en el portal.
         Returns:

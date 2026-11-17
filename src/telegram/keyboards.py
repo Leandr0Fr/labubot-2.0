@@ -9,6 +9,8 @@ from src.telegram.constants import (
     BUTTON_BACK,
     BUTTON_BLOCKED,
     BUTTON_CANCEL,
+    BUTTON_IT_OFF,
+    BUTTON_IT_ON,
     BUTTON_PAUSE,
     BUTTON_PROFILE,
     BUTTON_REJECT,
@@ -22,15 +24,19 @@ from src.telegram.constants import (
 
 def settings_keyboard(user: User) -> dict:
     """
-    Los cuatro botones del panel /settings.
+    Los botones del panel /settings.
     Args:
-        user: El usuario; Pausar o Reanudar según su status.
+        user: El usuario; Pausar o Reanudar según su status, y sumar o quitar
+            los portales IT según los tenga.
     Returns:
         dict: El reply_markup.
     """
     toggle = {"text": BUTTON_PAUSE, "callback_data": Callback.PAUSE}
     if user["status"] == UserStatus.PAUSED:
         toggle = {"text": BUTTON_RESUME, "callback_data": Callback.RESUME}
+    it_toggle = {"text": BUTTON_IT_ON, "callback_data": Callback.IT_ON}
+    if user["it"]:
+        it_toggle = {"text": BUTTON_IT_OFF, "callback_data": Callback.IT_OFF}
     return {
         "inline_keyboard": [
             [
@@ -38,6 +44,7 @@ def settings_keyboard(user: User) -> dict:
                 {"text": BUTTON_BLOCKED, "callback_data": Callback.BLOCKED},
             ],
             [{"text": BUTTON_PROFILE, "callback_data": Callback.PROFILE}, toggle],
+            [it_toggle],
         ]
     }
 

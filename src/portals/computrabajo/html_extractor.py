@@ -3,21 +3,18 @@
 from bs4 import BeautifulSoup
 
 from src.portals.computrabajo.constants import (
-    AMBA_PROVINCES,
     BASE_URL,
     COMPANY_SEPARATOR,
     SEL_DESCRIPTION,
     SEL_DETAIL_LOCATION,
     SEL_JOB_CARD,
     SEL_JOB_LINK,
-    SEL_JOB_LOCATION,
-    SEL_JOB_REMOTE,
 )
 
 
 def extract_job_cards(html: str) -> dict[str, str] | None:
     """
-    Extrae url y título de las ofertas remotas o de AMBA de una página del listado.
+    Extrae url y título de las ofertas de una página del listado, de todo el país.
     Args:
         html: Página devuelta por /trabajo-de-{slug}.
     Returns:
@@ -30,10 +27,6 @@ def extract_job_cards(html: str) -> dict[str, str] | None:
 
     cards: dict[str, str] = {}
     for card in card_nodes:
-        location = card.select_one(SEL_JOB_LOCATION).get_text(strip=True)
-        remote = card.select_one(SEL_JOB_REMOTE)
-        if not remote and not location.endswith(AMBA_PROVINCES):
-            continue
         link_node = card.select_one(SEL_JOB_LINK)
         url = BASE_URL + link_node.get("href").split("#")[0]
         cards[url] = link_node.get_text(strip=True)

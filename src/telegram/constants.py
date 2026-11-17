@@ -32,6 +32,7 @@ COMMANDS = [
     {"command": Command.RESUME, "description": "Volver a recibir alertas"},
     {"command": Command.CLEAR, "description": "Borrar los mensajes del chat"},
     {"command": Command.HELP, "description": "Qué hace el bot y cómo usarlo"},
+    {"command": Command.INFO, "description": "De qué sitios salen las ofertas"},
 ]
 ADMIN_COMMANDS = [
     {"command": Command.USERS, "description": "Usuarios y su estado"},
@@ -45,6 +46,8 @@ BUTTON_BLOCKED = "🚫 Bloqueadas"
 BUTTON_PROFILE = "📄 Perfil"
 BUTTON_PAUSE = "⏸ Pausar"
 BUTTON_RESUME = "▶️ Reanudar"
+BUTTON_IT_ON = "💻 Sumar portales IT"
+BUTTON_IT_OFF = "💻 Quitar portales IT"
 BUTTON_ADD = "➕ Agregar"
 BUTTON_REMOVE = "➖ Quitar"
 BUTTON_BACK = "⬅ Volver"
@@ -54,7 +57,7 @@ BUTTON_APPROVE = "✅ Aprobar"
 BUTTON_REJECT = "❌ Rechazar"
 
 WELCOME_PENDING = (
-    "👋 Hola {first_name}. Soy labubot: busco ofertas en 12 portales y te mando "
+    "👋 Hola {first_name}. Soy labubot: busco ofertas en 13 portales y te mando "
     "las que encajan con tu perfil.\n"
     "Tu solicitud quedó pendiente: te aviso cuando la apruebe el admin."
 )
@@ -91,12 +94,14 @@ PROFILE_EXTENSIONS = (".md", ".txt")
 SETTINGS_PANEL = (
     "⚙️ Tu configuración\n"
     "Términos: {terms} · Bloqueadas: {blocked} · Perfil: {profile_mark} · "
-    "Alertas: {alerts}"
+    "Alertas: {alerts} · Portales IT: {it}"
 )
 PROFILE_LOADED = "✅"
 PROFILE_MISSING = "❌"
 ALERTS_ACTIVE = "activas"
 ALERTS_PAUSED = "pausadas"
+IT_ON = "sí"
+IT_OFF = "no"
 TERMS_LIST = "🔎 Términos ({count})\n{items}"
 BLOCKED_LIST = "🚫 Bloqueadas ({count})\n{items}"
 LIST_SEPARATOR = " · "
@@ -125,7 +130,7 @@ ALREADY_PAUSED = (
 ALREADY_ACTIVE = "▶️ Tus alertas ya están activas."
 UNKNOWN = "No entendí. Usá /settings para ver tu configuración o /ayuda."
 HELP = (
-    "🤖 labubot busca ofertas en 12 portales con tus términos, cada hora y cuando "
+    "🤖 labubot busca ofertas en 13 portales con tus términos, cada hora y cuando "
     "mandás /start. Las compara con tu CV y te manda las que sirven: "
     "🟢 encaja · 🟡 puede servir.\n"
     "Te llega un bloque por término y, al final, el resumen de la corrida. "
@@ -139,10 +144,30 @@ HELP = (
     "/pausa Pausar las alertas\n"
     "/reanudar Volver a recibir alertas\n"
     "/clear Borrar los mensajes del chat (últimas 48 h)\n"
+    "/info De qué sitios salen las ofertas\n"
     "/ayuda Este mensaje\n\n"
-    "El CV funciona mejor en Markdown y con: seniority, stack, idiomas (tu nivel "
+    "El CV funciona mejor en Markdown y con: seniority, herramientas, idiomas (tu nivel "
     "de inglés), modalidad (dónde aceptás presencial o híbrido) y lo que no querés: "
     "/template te da la plantilla."
+)
+INFO = (
+    "🌐 Busco en estos 13 portales.\n\n"
+    "Con cada uno de tus términos:\n"
+    "• LinkedIn — linkedin.com\n"
+    "• Computrabajo — ar.computrabajo.com\n"
+    "• Bumeran y ZonaJobs — bumeran.com.ar y zonajobs.com.ar (un mismo buscador)\n"
+    "• Indeed — ar.indeed.com\n"
+    "• Buscojobs — buscojobs.com.ar\n"
+    "• Randstad — randstad.com.ar\n"
+    "• Clarín Clasificados — clasificados.clarin.com\n"
+    "• Workable — jobs.workable.com\n"
+    "• Get on Board — getonbrd.com\n"
+    "• Himalayas — himalayas.app\n\n"
+    "Solo si sumás los portales IT en /settings, todo lo reciente de tecnología:\n"
+    "• Empleos IT — empleosit.com.ar\n"
+    "• Jobicy — jobicy.com\n"
+    "• We Work Remotely — weworkremotely.com\n\n"
+    "En cada oferta, debajo del título, figura el sitio del que salió."
 )
 TEMPLATE_INTRO = (
     "📝 Abajo va la plantilla. Copiala, completala con tus datos y mandámela con "
@@ -154,7 +179,7 @@ TEMPLATE_INTRO = (
     "pedile que la complete; después revisá que diga la verdad."
 )
 PROFILE_TEMPLATE = """\
-# Nombre Apellido — Rol que buscás (ej.: Desarrolladora Backend Python)
+# Nombre Apellido — Rol que buscás (ej.: Analista contable, Desarrollador backend)
 
 ## Resumen
 Dos o tres líneas: qué hacés, en qué sos fuerte y qué tipo de puesto buscás.
@@ -163,30 +188,31 @@ Dos o tres líneas: qué hacés, en qué sos fuerte y qué tipo de puesto buscá
 **Experiencia profesional: 2 años** (desde marzo de 2024).
 - Junior y Semi Senior: encajo.
 - Piden 3 años: me falta poco; amarillo.
-- Senior, Lead o 4+ años: no encajo.
+- Senior, jefatura o 4+ años: no encajo.
 
 ## Roles que me sirven
-- Backend con Python (APIs REST, integraciones).
-- Automatización y procesos de datos.
+- El puesto principal que buscás (ej.: analista contable; backend con Python).
+- Otros puestos que también aceptarías (ej.: administración, facturación).
 
 ## Experiencia
-### Puesto — Empresa · mes año – actualidad · remoto
-- Qué hiciste, con qué tecnologías y qué resultado tuvo.
+### Puesto — Empresa · mes año – actualidad · presencial, híbrido o remoto
+- Qué hiciste, con qué herramientas y qué resultado tuvo.
 - Otro logro concreto, con números si los tenés.
 
 ### Puesto anterior — Empresa · mes año – mes año
-- Lo mismo: tareas, stack y resultado.
+- Lo mismo: tareas, herramientas y resultado.
 
-## Stack
-**Uso diario, en producción:** Python, FastAPI, PostgreSQL, Docker, Git.
-**Conozco, sin producción:** Django, React.
-**Nivel inicial:** Node.js.
+## Herramientas y conocimientos
+**Uso diario:** las que manejás bien (ej.: Excel avanzado, Tango, SAP; o Python,
+PostgreSQL, Docker).
+**Conozco, sin experiencia laboral:** las que viste en cursos o proyectos propios.
+**Nivel inicial:** las que recién empezás.
 
 ## Formación
 Carrera o curso, institución y año (o "en curso").
 
 ## Idiomas
-**Inglés: B1 (intermedio).** Leo documentación técnica, pero no sostengo una
+**Inglés: B1 (intermedio).** Leo textos de trabajo, pero no sostengo una
 entrevista ni el día a día en inglés. Un aviso escrito en inglés, o que pida
 inglés avanzado, fluido o B2+, no me sirve.
 
@@ -196,9 +222,9 @@ Remoto desde cualquier lugar me sirve. Presencial o híbrido, solo en AMBA
 Relación de dependencia o contractor, en pesos o en USD.
 
 ## Lo que NO quiero
-- Roles mayormente frontend.
-- Soporte técnico, mesa de ayuda o QA manual.
+- Rubros o tareas que no te interesan (ej.: ventas, atención al público, call center).
 - Puestos de liderazgo o gestión de equipos.
+- Turnos rotativos, de noche o de fin de semana.
 """
 
 START_ONLY = (UserStatus.PENDING, UserStatus.REJECTED, UserStatus.BLOCKED)

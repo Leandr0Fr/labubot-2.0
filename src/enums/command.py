@@ -15,6 +15,7 @@ class Command(StrEnum):
     PAUSE / RESUME: Pausar o volver a recibir alertas.
     CLEAR: Borrar los mensajes del chat.
     HELP: Qué hace el bot.
+    INFO: De qué sitios salen las ofertas.
     USERS: Los usuarios y su estado; solo el admin.
     """
 
@@ -28,4 +29,5 @@ class Command(StrEnum):
     RESUME = "reanudar"
     CLEAR = "clear"
     HELP = "ayuda"
+    INFO = "info"
     USERS = "usuarios"

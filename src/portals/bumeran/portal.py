@@ -7,8 +7,6 @@ from src.config.settings import settings
 from src.driver.http import Driver
 from src.exceptions.exceptions import LabubotError
 from src.portals.bumeran.constants import (
-    AREA,
-    AREA_FILTER,
     DETAIL_URL,
     HEADERS,
     JOBS_PER_PAGE,
@@ -30,21 +28,20 @@ class Bumeran:
         """Recibe el driver con el que hace todos los pedidos."""
         self.driver = driver
 
-    def search(self) -> dict[str, str]:
+    def search(self, keywords: str) -> dict[str, str]:
         """
-        Trae url y título de lo remoto o de AMBA del área de sistemas, sin detalle.
-
-        Sin término: en sistemas publica pocas por día y sus términos se pisan
-        entre sí; el área entera entra en una página. Filtra el LLM.
+        Trae url y título de las ofertas del término en todo el país, sin su detalle.
+        Args:
+            keywords: Término de búsqueda, tal como lo escribirías en el portal.
         Returns:
-            dict[str, str]: url : título.
+            dict[str, str]: url : título, sin repetir dentro del término.
         """
-        filters = [{"id": AREA_FILTER, "value": AREA}]
+        filters = []
         for hours, value in RECENCY_BUCKETS.items():
             if hours >= settings.hours:
                 filters.append({"id": RECENCY_FILTER, "value": value})
                 break
-        body = {"filtros": filters, "internacional": False}
+        body = {"query": keywords, "filtros": filters, "internacional": False}
 
         jobs: dict[str, str] = {}
         for page in count():
@@ -57,7 +54,7 @@ class Bumeran:
                     HEADERS,
                 )
             except LabubotError as error:
-                logger.warning(f"Búsqueda cortada: {error}")
+                logger.warning(f"Búsqueda '{keywords}' cortada: {error}")
                 break
             page_jobs = extract_job_cards(raw)
             if page_jobs is None:

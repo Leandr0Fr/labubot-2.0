@@ -21,6 +21,8 @@ from src.enums.traffic_light import TrafficLight
 from src.enums.user_status import UserStatus
 from src.exceptions.exceptions import LabubotForbiddenError
 from src.portals.bumeran import Bumeran
+from src.portals.buscojobs import Buscojobs
+from src.portals.clarin import Clarin
 from src.portals.computrabajo import Computrabajo
 from src.portals.empleosit import EmpleosIT
 from src.portals.getonbrd import GetOnBoard
@@ -28,6 +30,7 @@ from src.portals.himalayas import Himalayas
 from src.portals.indeed import Indeed
 from src.portals.jobicy import Jobicy
 from src.portals.linkedin import LinkedIn
+from src.portals.randstad import Randstad
 from src.portals.weworkremotely import WeWorkRemotely
 from src.portals.workable import Workable
 from src.schemas.job import Found, Offer
@@ -83,6 +86,9 @@ def main(chat_id: int | None = None) -> None:
             "Indeed": Indeed(driver),
             "Workable": Workable(driver),
             "Bumeran": Bumeran(driver),
+            "Buscojobs": Buscojobs(driver),
+            "Randstad": Randstad(driver),
+            "Clarin": Clarin(driver),
             "EmpleosIT": EmpleosIT(driver),
             "Jobicy": Jobicy(driver),
             "WeWorkRemotely": WeWorkRemotely(driver),
@@ -133,7 +139,7 @@ def _run_user(
     chat_id = user["chat_id"]
     terms = users.terms(chat_id)
     blocked_words = users.blocked_words(chat_id)
-    listings = _search_terms(portals, searches, terms)
+    listings = _search_terms(portals, searches, terms, bool(user["it"]))
 
     matches: dict[str | None, list[tuple[Offer, TrafficLight]]] = {}
     for row in deliveries.pending(chat_id):
@@ -209,16 +215,19 @@ def _search_terms(
     portals: dict[str, Any],
     searches: dict[tuple[str, str], dict[str, str]],
     terms: list[str],
+    it: bool,
 ) -> dict[str, Found]:
     """
     Junta las ofertas de las palabras de un usuario, con la que trajo cada una.
 
-    Los portales sin búsqueda traen todo lo reciente y la palabra sale del título.
+    Los portales sin búsqueda son de tecnología: solo van para quien los sumó.
+    Traen todo lo reciente y la palabra sale del título.
     Args:
         portals: Los portales de la corrida, por nombre de clase.
         searches: Lo ya buscado en esta corrida, por (portal, palabra); lo que
             falta se pide acá y se agrega.
         terms: Las palabras del usuario, en orden alfabético.
+        it: Si el usuario sumó los portales de tecnología.
     Returns:
         dict[str, Found]: url : oferta, una sola vez, con la primera palabra
         que la trajo.
@@ -236,6 +245,8 @@ def _search_terms(
                 if url not in listings:
                     listings[url] = Found(title=title, term=term, portal=name)
 
+    if not it:
+        return listings
     for name in WITHOUT_SEARCH:
         key = (name, "")
         if key not in searches:

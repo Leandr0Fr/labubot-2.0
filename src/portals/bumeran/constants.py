@@ -10,10 +10,6 @@ JOB_URL = f"{_BASE}/empleos/{{job_id}}.html"
 ZONAJOBS_JOB_URL = "https://www.zonajobs.com.ar/empleos/{job_id}.html"
 ZONAJOBS_PORTAL = "zonajobs"
 
-REMOTE = "Remoto"
-# CABA es "Capital Federal, Buenos Aires"; el interior bonaerense lo descarta el LLM.
-AMBA_PROVINCE = "Buenos Aires"
-
 HEADERS = {
     "x-site-id": "BMAR",
     "Referer": f"{_BASE}/",
@@ -22,9 +18,6 @@ HEADERS = {
 JOBS_PER_PAGE = 100
 
 SORT = "RECIENTES"
-
-AREA_FILTER = "area"
-AREA = "tecnologia-sistemas-y-telecomunicaciones"
 
 RECENCY_FILTER = "dias_fecha_publicacion"
 

@@ -13,6 +13,7 @@ class User(TypedDict):
     profile: El CV; '' si todavía no lo cargó.
     state: Un ChatState: qué espera el bot del próximo mensaje.
     created_at: Alta, ISO 8601 en UTC.
+    it: 1 si también le llegan los portales de tecnología; 0 si no.
     """
 
     chat_id: int
@@ -22,3 +23,4 @@ class User(TypedDict):
     profile: str
     state: str
     created_at: str
+    it: int

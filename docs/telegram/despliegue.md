@@ -305,6 +305,15 @@ lo clasificado ya está en la base y lo no enviado sale en la próxima. Si cambi
 los comandos del bot o la URL, `.venv/bin/python set_webhook.py` de nuevo
 (descarta los updates que Telegram tenía en cola).
 
+**Columnas nuevas.** `schema.sql` solo crea las tablas que faltan: una columna
+que se suma después hay que agregarla a mano en una base ya creada, con los dos
+servicios parados y un backup hecho. La de los portales IT (17/11):
+
+```bash
+sqlite3 labubot.db "ALTER TABLE users ADD COLUMN it INTEGER NOT NULL DEFAULT 0"
+sqlite3 labubot.db "UPDATE users SET it = 1 WHERE chat_id = <chat_id de quien es de sistemas>"
+```
+
 **Restaurar un backup:** `sudo systemctl stop labubot-api labubot-worker`, copiar
 el backup como `labubot.db`, borrar `labubot.db-wal` y `labubot.db-shm` si
 quedaron, y volver a arrancar.

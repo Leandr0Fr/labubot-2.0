@@ -10,6 +10,7 @@ class Callback(StrEnum):
     TERMS_ADD / TERMS_REMOVE / BLOCKED_ADD / BLOCKED_REMOVE: Pedir qué agregar o quitar.
     PROFILE / PROFILE_REPLACE: Mostrar el CV o pedir el nuevo.
     PAUSE / RESUME: Pausar o reanudar las alertas.
+    IT_ON / IT_OFF: Sumar o quitar los portales de tecnología.
     MENU / CANCEL: Volver al panel.
     APPROVE / REJECT: Decidir una solicitud; van seguidos de ":" y el chat_id.
     """
@@ -24,6 +25,8 @@ class Callback(StrEnum):
     PROFILE_REPLACE = "profile:replace"
     PAUSE = "pause"
     RESUME = "resume"
+    IT_ON = "it:on"
+    IT_OFF = "it:off"
     MENU = "menu"
     CANCEL = "cancel"
     APPROVE = "approve"

@@ -1,6 +1,6 @@
 # LABUBOT
 
-Buscás como buscarías a mano, en 12 portales a la vez. Con Decisions de OpenAI analiza cada oferta
+Buscás como buscarías a mano, en 13 portales a la vez. Con Decisions de OpenAI analiza cada oferta
 contra tu CV, la pinta de 🟢 🟡 🔴 y te manda por Telegram las que valen la pena.
 
 Es un bot interno, para hasta 5 personas. Cada una tiene su CV, sus palabras clave y sus palabras
@@ -46,7 +46,10 @@ exacto de los que muestra `/jobs/search` deslogueado. Misma búsqueda.
 | Talent | HTML de ar.talent.com | una palabra clave por vez |
 | Indeed | API GraphQL de su app | una palabra clave por vez |
 | Workable | API de jobs.workable.com | una palabra clave por vez |
-| Bumeran | API JSON de su front | sin búsqueda: el área de sistemas |
+| Bumeran y ZonaJobs | API JSON de su front, que mezcla los dos sitios | una palabra clave por vez |
+| Buscojobs | API JSON pública | una palabra clave por vez |
+| Randstad | HTML con los avisos en un JSON embebido | una palabra clave por vez |
+| Clarín Clasificados | API JSON de su front, rubro Empleos | una palabra clave por vez |
 | Empleos IT | HTML de su buscador | sin búsqueda: todo lo reciente |
 | Jobicy | API pública | sin búsqueda: todo lo reciente |
 | SuTrabajo | REST de su WordPress | sin búsqueda: lo reciente de Argentina y de remoto |
@@ -61,8 +64,19 @@ palabra por palabra para saber qué palabra trajo cada oferta. Si empiezan a
 contestar 429, se vuelve al `OR` y la palabra se saca del título.
 
 Los que van sin búsqueda traen todo lo publicado en la ventana y el filtro lo
-hace el LLM. Bumeran y Empleos IT sí buscan, pero publican tan poco de sistemas
-que por término traían de 1 a 3 ofertas por corrida.
+hace el LLM. Los tres son de tecnología, así que solo se le piden a quien sumó
+los "portales IT" en su `/settings` (la columna `it` de `users`); un usuario
+nuevo arranca sin ellos. Empleos IT sí busca, pero publica tan poco que por
+término traía de 1 a 3 ofertas por corrida.
+
+Bumeran traía solo el área de sistemas, sin término. Pasa a buscar con las
+palabras de cada usuario en todas las áreas, para que sirva a quien no es de
+sistemas: quien quiera lo que antes llegaba solo tiene que sumar esos términos.
+Clarín Clasificados son avisos de una a tres líneas, sobre todo de oficios,
+comercio y empleados; no tienen título, así que el título son sus primeros
+caracteres. Buscojobs es un agregador general con avisos propios: trae mucho
+volumen y repite avisos con distinto id. Randstad es una consultora de personal
+de todos los rubros; su listado viene por relevancia y se recorre entero.
 
 SuTrabajo es un hub: republica avisos de LinkedIn, Computrabajo, Jooble, Talent y
 otros sitios, con el título y la descripción reescritos en español. Se guarda la
@@ -83,18 +97,16 @@ de clasificar se verifica (`HUB_ORIGINS` en `src/constants/run.py`):
 
 ### Ubicación
 
-Se busca en todo el país: el remoto vale desde cualquier provincia, y lo
-presencial o híbrido solo en AMBA. Ningún portal sabe pedir "remoto o AMBA" en
-un solo request, así que se resuelve después de buscar:
+Se busca en todo el país y la zona la pone cada usuario en su CV, en la sección
+"Modalidad y contratación": dónde acepta presencial o híbrido y si le sirve el
+remoto. Ningún portal filtra por provincia en el código: decide el LLM con esa
+regla del perfil, así que el bot sirve igual para alguien de AMBA que de Córdoba.
 
-- **Bumeran y Computrabajo** traen modalidad y provincia en el listado: lo
-  presencial o híbrido de otra provincia se descarta ahí, antes de bajar el
-  detalle. La provincia de Buenos Aires pasa entera; el interior bonaerense lo
-  descarta el LLM.
-- **LinkedIn, Indeed, Talent y Computrabajo** dan la ubicación pero no la
-  modalidad (el listado guest de LinkedIn ignora `f_WT`). La anteponen a la
-  descripción como `Ubicación: …` y decide el LLM con la regla del perfil:
-  una ciudad del interior puede ser un remoto.
+- **Bumeran** antepone a la descripción `Ubicación: …` y `Modalidad: …`, que
+  vienen en el detalle del aviso.
+- **LinkedIn, Indeed, Talent y Computrabajo** dan la ubicación pero no siempre
+  la modalidad (el listado guest de LinkedIn ignora `f_WT`). La anteponen a la
+  descripción como `Ubicación: …`: una ciudad del interior puede ser un remoto.
 - **SuTrabajo** se pide por sección, `/argentina/` y `/remoto/`; la ubicación
   sale del aviso original o, si no se puede leer, de su reescritura de
   `/argentina/`.
@@ -123,11 +135,12 @@ llegan ofertas.
 | `/pausa` · `/reanudar` | Deja de recibir ofertas, o vuelve a recibirlas |
 | `/clear` | Borra los mensajes del chat de las últimas 48 h (Telegram no deja borrar los más viejos) |
 | `/ayuda` | Qué hace el bot y cómo usarlo |
+| `/info` | De qué sitios salen las ofertas |
 | `/usuarios` | Solo el admin: todos los usuarios, con su estado y su `chat_id` |
 
 **El panel `/settings`** es un solo mensaje con botones, que se edita al navegar
-en vez de mandar mensajes nuevos: 🔎 Términos, 🚫 Bloqueadas, 📄 Perfil y
-⏸ Pausar. En cada lista, ➕ Agregar y ➖ Quitar piden las palabras separadas por
+en vez de mandar mensajes nuevos: 🔎 Términos, 🚫 Bloqueadas, 📄 Perfil,
+⏸ Pausar y 💻 Sumar o quitar los portales IT. En cada lista, ➕ Agregar y ➖ Quitar piden las palabras separadas por
 coma. Los usuarios nuevos arrancan con las dos listas vacías: el mensaje de
 aprobación les pide cargarlas.
 
@@ -262,8 +275,9 @@ src/
       portal.py             LinkedIn(driver): search() y description()
       html_extractor.py     ← lo único que sabe del DOM de LinkedIn
       constants.py          URLs, paginación, pausa y reintentos
-    bumeran/ computrabajo/ empleosit/ getonbrd/ himalayas/
-    indeed/ jobicy/ sutrabajo/ talent/ weworkremotely/ workable/
+    bumeran/ buscojobs/ clarin/ computrabajo/ empleosit/ getonbrd/
+    himalayas/ indeed/ jobicy/ randstad/ sutrabajo/ talent/
+    weworkremotely/ workable/
   classifier/
     openai.py               Classifier(cv): classify()
   telegram/                 todo lo del bot
@@ -318,7 +332,8 @@ que parsear ni veredictos a medias.
 
 Las instructions (`constants/prompt.py`) fijan las reglas: usar solo el CV y el
 texto del aviso, no inventar requisitos, separar excluyente de deseable y
-descartar por excluyentes duros (idioma, seniority, stack sin Python).
+descartar por excluyentes duros (idioma, seniority, herramientas ajenas al
+perfil). No nombran ningún rubro ni tecnología: lo específico sale del CV.
 
 Sin créditos OpenAI contesta 429 (`insufficient_quota`), y ese no se arregla
 esperando. Los límites de tu cuenta están en

@@ -7,7 +7,12 @@ from itertools import count
 from src.config.settings import settings
 from src.driver.http import Driver
 from src.exceptions.exceptions import LabubotError
-from src.portals.getonbrd.constants import JOBS_PER_PAGE, LOCATIONS, SEARCH_URL
+from src.portals.getonbrd.constants import (
+    JOBS_PER_PAGE,
+    LOCATIONS,
+    PAUSE,
+    SEARCH_URL,
+)
 from src.portals.getonbrd.json_extractor import extract_offers
 
 
@@ -34,6 +39,7 @@ class GetOnBoard:
         jobs: dict[str, str] = {}
         for location in LOCATIONS:
             for page in count(1):
+                time.sleep(PAUSE)
                 try:
                     raw = self.driver.get(
                         SEARCH_URL,

@@ -75,6 +75,16 @@ class Users:
         )
         self.conn.commit()
 
+    def set_it(self, chat_id: int, it: bool) -> None:
+        """
+        Prende o apaga los portales de tecnología para un usuario.
+        Args:
+            chat_id: Su chat privado con el bot.
+            it: True si le tienen que llegar.
+        """
+        self.conn.execute("UPDATE users SET it = ? WHERE chat_id = ?", (it, chat_id))
+        self.conn.commit()
+
     def set_state(self, chat_id: int, state: ChatState) -> None:
         """
         Anota qué espera el bot del próximo mensaje.

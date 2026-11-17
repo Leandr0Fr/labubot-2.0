@@ -36,7 +36,10 @@ from src.telegram.constants import (
     DELETE_BATCH,
     EMPTY_LIST,
     HELP,
+    INFO,
     INPUT_SEPARATOR,
+    IT_OFF,
+    IT_ON,
     LIST_SEPARATOR,
     MESSAGE_LIMIT,
     NO_USERNAME,
@@ -140,7 +143,7 @@ def on_callback(
     conn: sqlite3.Connection, telegram: Telegram, callback: CallbackQuery
 ) -> None:
     """
-    Atiende un botón: el panel, pedir una lista, pausa, o aprobar/rechazar.
+    Atiende un botón: el panel, una lista, pausa, portales IT, o aprobar/rechazar.
 
     Los botones de quien no tiene acceso se ignoran.
     Args:
@@ -195,6 +198,9 @@ def on_callback(
             if callback_data == Callback.RESUME:
                 status = UserStatus.ACTIVE
             users.set_status(chat_id, status)
+            _edit_panel(users, telegram, chat_id, message_id)
+        case Callback.IT_ON | Callback.IT_OFF:
+            users.set_it(chat_id, callback_data == Callback.IT_ON)
             _edit_panel(users, telegram, chat_id, message_id)
         case Callback.MENU | Callback.CANCEL:
             users.set_state(chat_id, ChatState.IDLE)
@@ -301,6 +307,8 @@ def _handle_command(
             telegram.send_message(chat_id, RESUMED)
         case Command.HELP:
             telegram.send_message(chat_id, HELP)
+        case Command.INFO:
+            telegram.send_message(chat_id, INFO)
         case Command.CLEAR:
             _clear_chat(telegram, chat_id, message_id)
             telegram.send_message(chat_id, CHAT_CLEARED)
@@ -421,11 +429,15 @@ def _panel(users: Users, user: User) -> tuple[str, dict]:
     alerts = ALERTS_ACTIVE
     if user["status"] == UserStatus.PAUSED:
         alerts = ALERTS_PAUSED
+    it = IT_OFF
+    if user["it"]:
+        it = IT_ON
     text = SETTINGS_PANEL.format(
         terms=len(users.terms(chat_id)),
         blocked=len(users.blocked_words(chat_id)),
         profile_mark=profile_mark,
         alerts=alerts,
+        it=it,
     )
     return text, settings_keyboard(user)
 
