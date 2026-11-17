@@ -1,11 +1,14 @@
 """
 Constantes de transporte HTTP.
 HTTP_TIMEOUT: Segundos de espera por request antes de darlo por fallado.
+CONNECT_RETRIES: Reintentos si falla la conexión: el primer pedido tras horas sin
+    actividad puede encontrarla cortada.
 ACCEPT_LANGUAGE: Los idiomas que se piden, castellano primero.
 USER_AGENT: El de un Chrome de escritorio, para no presentarse como python-httpx.
 """
 
 HTTP_TIMEOUT = 25.0
+CONNECT_RETRIES = 1
 
 ACCEPT_LANGUAGE = "es-AR,es;q=0.9,en;q=0.8"
 

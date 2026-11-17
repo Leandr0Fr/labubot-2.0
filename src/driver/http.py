@@ -6,6 +6,7 @@ import httpx
 
 from src.constants.http import (
     ACCEPT_LANGUAGE,
+    CONNECT_RETRIES,
     HTTP_TIMEOUT,
     USER_AGENT,
 )
@@ -26,6 +27,7 @@ class Driver:
     def __init__(self) -> None:
         """Abre el cliente httpx: sigue redirects y se presenta como un navegador."""
         self.http = httpx.Client(
+            transport=httpx.HTTPTransport(retries=CONNECT_RETRIES),
             timeout=HTTP_TIMEOUT,
             headers={
                 "Accept-Language": ACCEPT_LANGUAGE,

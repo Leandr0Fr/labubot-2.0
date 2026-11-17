@@ -227,19 +227,14 @@ def _handle_start(
     if user is None:
         first_name = sender["first_name"]
         telegram.send_message(chat_id, WELCOME_PENDING.format(first_name=first_name))
-        request = ADMIN_REQUEST.format(
-            first_name=first_name,
-            username=sender.get("username", NO_USERNAME),
-            chat_id=chat_id,
-        )
-        telegram.send_message(
-            settings.admin_chat_id, request, approval_keyboard(chat_id)
-        )
+        _request_approval(telegram, message)
         return
 
     match user["status"]:
         case UserStatus.PENDING:
             telegram.send_message(chat_id, STILL_PENDING)
+            # Si el primer aviso al admin se perdió, este se lo vuelve a mostrar.
+            _request_approval(telegram, message)
         case UserStatus.REJECTED:
             telegram.send_message(chat_id, REJECTED)
         case UserStatus.PAUSED:
@@ -337,6 +332,23 @@ def _save_profile(users: Users, telegram: Telegram, message: Message) -> None:
     users.set_profile(chat_id, profile)
     users.set_state(chat_id, ChatState.IDLE)
     telegram.send_message(chat_id, PROFILE_SAVED)
+
+
+def _request_approval(telegram: Telegram, message: Message) -> None:
+    """
+    Le manda al admin la solicitud de quien escribió, con los botones para decidir.
+    Args:
+        telegram: El cliente de la Bot API.
+        message: El /start del solicitante; de ahí salen nombre, @ y chat.
+    """
+    sender = message["from"]
+    chat_id = message["chat"]["id"]
+    request = ADMIN_REQUEST.format(
+        first_name=sender["first_name"],
+        username=sender.get("username", NO_USERNAME),
+        chat_id=chat_id,
+    )
+    telegram.send_message(settings.admin_chat_id, request, approval_keyboard(chat_id))
 
 
 def _approve_or_reject(
