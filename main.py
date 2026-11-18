@@ -30,6 +30,7 @@ from src.portals.indeed import Indeed
 from src.portals.jobicy import Jobicy
 from src.portals.linkedin import LinkedIn
 from src.portals.randstad import Randstad
+from src.portals.telegramchannels import TelegramChannels
 from src.portals.weworkremotely import WeWorkRemotely
 from src.portals.workable import Workable
 from src.schemas.job import Found, Offer
@@ -87,6 +88,7 @@ def main(chat_id: int | None = None) -> None:
             "Bumeran": Bumeran(driver),
             "Randstad": Randstad(driver),
             "Clarin": Clarin(driver),
+            "TelegramChannels": TelegramChannels(driver),
             "EmpleosIT": EmpleosIT(driver),
             "Jobicy": Jobicy(driver),
             "WeWorkRemotely": WeWorkRemotely(driver),

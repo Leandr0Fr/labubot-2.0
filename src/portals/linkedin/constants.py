@@ -17,3 +17,7 @@ SEL_JOB_LINK = ".base-card__full-link"
 # El primero es la ubicación; el segundo, la cantidad de postulantes.
 SEL_DETAIL_LOCATION = ".topcard__flavor--bullet"
 SEL_DESCRIPTION = "div.show-more-less-html__markup"
+
+# La página pública de una publicación (/posts/...) trae su texto en un JSON-LD.
+SEL_JSON_LD = 'script[type="application/ld+json"]'
+POST_TYPE = "SocialMediaPosting"

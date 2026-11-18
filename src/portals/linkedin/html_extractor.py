@@ -1,13 +1,17 @@
-"""Parsea el HTML que devuelve el endpoint jobs-guest de LinkedIn."""
+"""Parsea el HTML de LinkedIn: el endpoint jobs-guest y la página de una publicación."""
+
+import json
 
 from bs4 import BeautifulSoup
 
 from src.portals.linkedin.constants import (
+    POST_TYPE,
     SEL_DESCRIPTION,
     SEL_DETAIL_LOCATION,
     SEL_JOB_CARD,
     SEL_JOB_TITLE,
     SEL_JOB_LINK,
+    SEL_JSON_LD,
 )
 
 
@@ -45,3 +49,20 @@ def extract_description(html: str) -> str:
     description_container = soup.select_one(SEL_DESCRIPTION)
     description = description_container.get_text(separator="\n", strip=True)
     return f"Ubicación: {location}\n{description}"
+
+
+def extract_post(html: str) -> str:
+    """
+    Extrae el autor y el texto de la página pública de una publicación.
+    Args:
+        html: Página de la publicación (/posts/...).
+    Returns:
+        str: Autor en la primera línea y el texto, en texto plano. Vacío si
+        LinkedIn mandó al registro o la publicación no tiene texto.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    for node in soup.select(SEL_JSON_LD):
+        data = json.loads(node.string)
+        if data["@type"] == POST_TYPE and data.get("articleBody"):
+            return f"Publicado por: {data['author']['name']}\n{data['articleBody']}"
+    return ""

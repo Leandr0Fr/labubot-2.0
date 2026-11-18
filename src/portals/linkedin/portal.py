@@ -13,7 +13,11 @@ from src.portals.linkedin.constants import (
     RETRIES,
     SEARCH_URL,
 )
-from src.portals.linkedin.html_extractor import extract_job_cards, extract_description
+from src.portals.linkedin.html_extractor import (
+    extract_description,
+    extract_job_cards,
+    extract_post,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -73,6 +77,22 @@ class LinkedIn:
         if not offer_html:
             return ""
         return extract_description(offer_html)
+
+    def post(self, url: str) -> str:
+        """
+        Trae el texto de una publicación pública, como las de un recruiter.
+        Args:
+            url: URL de la publicación o su link corto (lnkd.in/p/...).
+        Returns:
+            str: Autor y texto, en texto plano. Vacío si no es pública, no
+            tiene texto o LinkedIn no la pudo servir.
+        """
+        try:
+            post_html = self._get(url, "la publicación")
+        except LabubotError as error:
+            logger.warning(f"Sin texto de {url}: {error}")
+            return ""
+        return extract_post(post_html)
 
     def _get(self, url: str, subject: str, params: dict[str, str] | None = None) -> str:
         """

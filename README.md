@@ -1,6 +1,6 @@
 # LABUBOT
 
-Buscás como buscarías a mano, en 12 portales a la vez. Con Decisions de OpenAI analiza cada oferta
+Buscás como buscarías a mano, en 13 portales a la vez. Con Decisions de OpenAI analiza cada oferta
 contra tu CV, la pinta de 🟢 🟡 🔴 y te manda por Telegram las que valen la pena.
 
 Es un bot interno, para hasta 5 personas. Cada una tiene su CV, sus palabras clave y sus palabras
@@ -49,6 +49,7 @@ exacto de los que muestra `/jobs/search` deslogueado. Misma búsqueda.
 | Bumeran y ZonaJobs | API JSON de su front, que mezcla los dos sitios | una palabra clave por vez |
 | Randstad | HTML con los avisos en un JSON embebido | una palabra clave por vez |
 | Clarín Clasificados | API JSON de su front, rubro Empleos | una palabra clave por vez |
+| Canales de Telegram | HTML de su vista web (`t.me/s`) y la página pública de cada publicación de LinkedIn | la palabra se busca en la tarjeta del link |
 | Empleos IT | HTML de su buscador | sin búsqueda: todo lo reciente |
 | Jobicy | API pública | sin búsqueda: todo lo reciente |
 | SuTrabajo | REST de su WordPress | sin búsqueda: lo reciente de Argentina y de remoto |
@@ -79,6 +80,16 @@ Clarín Clasificados son avisos de una a tres líneas, sobre todo de oficios,
 comercio y empleados; no tienen título, así que el título son sus primeros
 caracteres. Randstad es una consultora de personal de todos los rubros; su
 listado viene por relevancia y se recorre entero.
+
+Los canales de Telegram de empleo (`CHANNELS` en
+`src/portals/telegramchannels/constants.py`, hoy `@LaburoArgento`) publican
+links pelados. Se leen por su vista web, que solo existe para canales públicos:
+un grupo no se puede leer. De cada mensaje se toma el link a una publicación de
+LinkedIn (`lnkd.in/p/...`), la de un recruiter o una empresa en su muro; los
+links a Clarín, Computrabajo o ZonaJobs se saltean porque esos portales ya se
+buscan. El término se busca en la tarjeta que Telegram arma del link y el texto
+completo sale de la página pública de la publicación, que `LinkedIn.post()` lee
+sin login: 145 de 155 lo dieron; el resto no es público o es solo una imagen.
 
 SuTrabajo es un hub: republica avisos de LinkedIn, Computrabajo, Jooble, Talent y
 otros sitios, con el título y la descripción reescritos en español. Se guarda la
@@ -279,7 +290,7 @@ src/
       constants.py          URLs, paginación, pausa y reintentos
     bumeran/ clarin/ computrabajo/ empleosit/ getonbrd/
     himalayas/ indeed/ jobicy/ randstad/ sutrabajo/ talent/
-    weworkremotely/ workable/
+    telegramchannels/ weworkremotely/ workable/
   classifier/
     openai.py               Classifier(cv): classify()
   telegram/                 todo lo del bot
