@@ -57,7 +57,7 @@ BUTTON_APPROVE = "✅ Aprobar"
 BUTTON_REJECT = "❌ Rechazar"
 
 WELCOME_PENDING = (
-    "👋 Hola {first_name}. Soy labubot: busco ofertas en 13 portales y te mando "
+    "👋 Hola {first_name}. Soy labubot: busco ofertas en 12 portales y te mando "
     "las que encajan con tu perfil.\n"
     "Tu solicitud quedó pendiente: te aviso cuando la apruebe el admin."
 )
@@ -130,7 +130,7 @@ ALREADY_PAUSED = (
 ALREADY_ACTIVE = "▶️ Tus alertas ya están activas."
 UNKNOWN = "No entendí. Usá /settings para ver tu configuración o /ayuda."
 HELP = (
-    "🤖 labubot busca ofertas en 13 portales con tus términos, cada hora y cuando "
+    "🤖 labubot busca ofertas en 12 portales con tus términos, cada hora y cuando "
     "mandás /start. Las compara con tu CV y te manda las que sirven: "
     "🟢 encaja · 🟡 puede servir.\n"
     "Te llega un bloque por término y, al final, el resumen de la corrida. "
@@ -151,13 +151,12 @@ HELP = (
     "/template te da la plantilla."
 )
 INFO = (
-    "🌐 Busco en estos 13 portales.\n\n"
+    "🌐 Busco en estos 12 portales.\n\n"
     "Con cada uno de tus términos:\n"
     "• LinkedIn — linkedin.com\n"
     "• Computrabajo — ar.computrabajo.com\n"
     "• Bumeran y ZonaJobs — bumeran.com.ar y zonajobs.com.ar (un mismo buscador)\n"
     "• Indeed — ar.indeed.com\n"
-    "• Buscojobs — buscojobs.com.ar\n"
     "• Randstad — randstad.com.ar\n"
     "• Clarín Clasificados — clasificados.clarin.com\n"
     "• Workable — jobs.workable.com\n"

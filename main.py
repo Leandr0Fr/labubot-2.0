@@ -21,7 +21,6 @@ from src.enums.traffic_light import TrafficLight
 from src.enums.user_status import UserStatus
 from src.exceptions.exceptions import LabubotForbiddenError
 from src.portals.bumeran import Bumeran
-from src.portals.buscojobs import Buscojobs
 from src.portals.clarin import Clarin
 from src.portals.computrabajo import Computrabajo
 from src.portals.empleosit import EmpleosIT
@@ -86,7 +85,6 @@ def main(chat_id: int | None = None) -> None:
             "Indeed": Indeed(driver),
             "Workable": Workable(driver),
             "Bumeran": Bumeran(driver),
-            "Buscojobs": Buscojobs(driver),
             "Randstad": Randstad(driver),
             "Clarin": Clarin(driver),
             "EmpleosIT": EmpleosIT(driver),

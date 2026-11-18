@@ -1,6 +1,6 @@
 # LABUBOT
 
-Buscás como buscarías a mano, en 13 portales a la vez. Con Decisions de OpenAI analiza cada oferta
+Buscás como buscarías a mano, en 12 portales a la vez. Con Decisions de OpenAI analiza cada oferta
 contra tu CV, la pinta de 🟢 🟡 🔴 y te manda por Telegram las que valen la pena.
 
 Es un bot interno, para hasta 5 personas. Cada una tiene su CV, sus palabras clave y sus palabras
@@ -47,7 +47,6 @@ exacto de los que muestra `/jobs/search` deslogueado. Misma búsqueda.
 | Indeed | API GraphQL de su app | una palabra clave por vez |
 | Workable | API de jobs.workable.com | una palabra clave por vez |
 | Bumeran y ZonaJobs | API JSON de su front, que mezcla los dos sitios | una palabra clave por vez |
-| Buscojobs | API JSON pública | una palabra clave por vez |
 | Randstad | HTML con los avisos en un JSON embebido | una palabra clave por vez |
 | Clarín Clasificados | API JSON de su front, rubro Empleos | una palabra clave por vez |
 | Empleos IT | HTML de su buscador | sin búsqueda: todo lo reciente |
@@ -58,6 +57,10 @@ exacto de los que muestra `/jobs/search` deslogueado. Misma búsqueda.
 **Talent y SuTrabajo están fuera de la corrida:** bloquean la IP del VPS (403).
 Su código sigue en `src/portals/`; para volver a sumarlos se anotan en `portals`
 de `main.py`, y SuTrabajo también en `WITHOUT_SEARCH`.
+
+**Buscojobs se eliminó:** no tiene avisos propios. Redistribuye los de WhatJobs,
+Jobleads y Jooble como resúmenes de unas líneas, con títulos y ubicaciones que
+no son los del aviso, y su link termina en un muro de registro.
 
 Indeed y Workable buscaban con todos los términos juntos (`OR`). Pasan a buscar
 palabra por palabra para saber qué palabra trajo cada oferta. Si empiezan a
@@ -74,9 +77,8 @@ palabras de cada usuario en todas las áreas, para que sirva a quien no es de
 sistemas: quien quiera lo que antes llegaba solo tiene que sumar esos términos.
 Clarín Clasificados son avisos de una a tres líneas, sobre todo de oficios,
 comercio y empleados; no tienen título, así que el título son sus primeros
-caracteres. Buscojobs es un agregador general con avisos propios: trae mucho
-volumen y repite avisos con distinto id. Randstad es una consultora de personal
-de todos los rubros; su listado viene por relevancia y se recorre entero.
+caracteres. Randstad es una consultora de personal de todos los rubros; su
+listado viene por relevancia y se recorre entero.
 
 SuTrabajo es un hub: republica avisos de LinkedIn, Computrabajo, Jooble, Talent y
 otros sitios, con el título y la descripción reescritos en español. Se guarda la
@@ -275,7 +277,7 @@ src/
       portal.py             LinkedIn(driver): search() y description()
       html_extractor.py     ← lo único que sabe del DOM de LinkedIn
       constants.py          URLs, paginación, pausa y reintentos
-    bumeran/ buscojobs/ clarin/ computrabajo/ empleosit/ getonbrd/
+    bumeran/ clarin/ computrabajo/ empleosit/ getonbrd/
     himalayas/ indeed/ jobicy/ randstad/ sutrabajo/ talent/
     weworkremotely/ workable/
   classifier/
