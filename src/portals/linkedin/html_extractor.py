@@ -29,6 +29,9 @@ def extract_job_cards(html: str) -> dict[str, str]:
     for card in soup.select(SEL_JOB_CARD):
         title_node = card.select_one(SEL_JOB_TITLE)
         link_node = card.select_one(SEL_JOB_LINK)
+        # Si la empresa no tiene página en LinkedIn, la tarjeta entera es el link.
+        if card.name == "a":
+            link_node = card
         if title_node and link_node:
             title = title_node.get_text(strip=True)
             url = link_node.get("href").split("?")[0]
