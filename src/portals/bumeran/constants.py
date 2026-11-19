@@ -18,16 +18,3 @@ HEADERS = {
 JOBS_PER_PAGE = 100
 
 SORT = "RECIENTES"
-
-RECENCY_FILTER = "dias_fecha_publicacion"
-
-RECENCY_BUCKETS = {
-    21: "publicacion-menor-a-2-dias",
-    69: "publicacion-menor-a-3-dias",
-    93: "publicacion-menor-a-4-dias",
-    117: "publicacion-menor-a-5-dias",
-    141: "publicacion-menor-a-6-dias",
-    165: "publicacion-menor-a-7-dias",
-    357: "publicacion-menor-a-15-dias",
-    741: "publicacion-menor-a-1-mes",
-}

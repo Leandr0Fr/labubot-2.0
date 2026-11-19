@@ -3,15 +3,12 @@
 import logging
 from itertools import count
 
-from src.config.settings import settings
 from src.driver.http import Driver
 from src.exceptions.exceptions import LabubotError
 from src.portals.bumeran.constants import (
     DETAIL_URL,
     HEADERS,
     JOBS_PER_PAGE,
-    RECENCY_BUCKETS,
-    RECENCY_FILTER,
     SEARCH_URL,
     SORT,
 )
@@ -30,18 +27,16 @@ class Bumeran:
 
     def search(self, keywords: str) -> dict[str, str]:
         """
-        Trae url y título de las ofertas del término en todo el país, sin su detalle.
+        Trae url y título de las ofertas activas del término en todo el país, sin su detalle.
+
+        Sin filtro de fecha: un aviso dura hasta dos meses y la empresa lo
+        reactiva sin cambiarle la fecha de publicación.
         Args:
             keywords: Término de búsqueda, tal como lo escribirías en el portal.
         Returns:
             dict[str, str]: url : título, sin repetir dentro del término.
         """
-        filters = []
-        for hours, value in RECENCY_BUCKETS.items():
-            if hours >= settings.hours:
-                filters.append({"id": RECENCY_FILTER, "value": value})
-                break
-        body = {"query": keywords, "filtros": filters, "internacional": False}
+        body = {"query": keywords, "filtros": [], "internacional": False}
 
         jobs: dict[str, str] = {}
         for page in count():
